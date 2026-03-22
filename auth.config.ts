@@ -1,4 +1,3 @@
-import Google from "next-auth/providers/google";
 import type { NextAuthConfig } from "next-auth";
 
 const hasGoogleCredentials =
@@ -8,10 +7,29 @@ export default {
   trustHost: true,
   providers: hasGoogleCredentials
     ? [
-        Google({
+        {
+          id: "google",
+          name: "Google",
+          type: "oauth",
           clientId: process.env.AUTH_GOOGLE_ID,
           clientSecret: process.env.AUTH_GOOGLE_SECRET,
-        }),
+          authorization: {
+            url: "https://accounts.google.com/o/oauth2/v2/auth",
+            params: {
+              scope: "openid email profile",
+            },
+          },
+          token: "https://oauth2.googleapis.com/token",
+          userinfo: "https://openidconnect.googleapis.com/v1/userinfo",
+          profile(profile) {
+            return {
+              id: profile.sub,
+              name: profile.name,
+              email: profile.email,
+              image: profile.picture,
+            };
+          },
+        },
       ]
     : [],
   pages: {

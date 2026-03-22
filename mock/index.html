@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>東京リーグ UIモック</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Tokyo League Renewal Mock</p>
+          <img
+            class="hero-logo"
+            src="https://tokyo-league.jp/wp-content/themes/tokyo-league/assets/img/common/logo_head.svg"
+            alt="東京リーグ ロゴ"
+          />
+          <h1>東京リーグ UIモック</h1>
+          <p class="hero-text">
+            公開サイトと管理画面の方向性を同時に確認するためのモックです。ニュース更新と試合結果更新を中心に、情報の見せ方と運用のしやすさを整理しています。
+          </p>
+        </div>
+        <div class="hero-meta">
+          <div class="meta-card">
+            <span class="meta-label">公開側</span>
+            <strong>トップ / 大会詳細 / リーグ結果 / ニュース</strong>
+          </div>
+          <div class="meta-card">
+            <span class="meta-label">管理側</span>
+            <strong>ダッシュボード / 試合結果入力</strong>
+          </div>
+        </div>
+      </header>
+
+      <main class="mock-grid">
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <p class="panel-kicker">Public</p>
+              <h2>トップページ</h2>
+            </div>
+            <span class="chip">Desktop</span>
+          </div>
+          <div class="browser-frame">
+            <div class="browser-bar">
+              <span></span><span></span><span></span>
+            </div>
+            <div class="site-top">
+              <nav class="site-nav">
+                <div class="brand">TOKYO LEAGUE</div>
+                <div class="site-nav-links">
+                  <span>東京リーグについて</span>
+                  <span>試合情報</span>
+                  <span>ニュース</span>
+                  <span>参加チーム</span>
+                </div>
+              </nav>
+              <section class="top-hero-card">
+                <div>
+                  <p class="section-label">2026 SEASON</p>
+                  <h3>試合結果と最新情報を、最短距離で。</h3>
+                  <p>
+                    直近の試合結果とリーグ情報を上部に集約し、更新された情報がすぐ伝わる構成に変更。
+                  </p>
+                  <div class="cta-row">
+                    <button>試合結果を見る</button>
+                    <button class="ghost">ニュース一覧</button>
+                  </div>
+                </div>
+                <img
+                  class="hero-visual"
+                  src="https://tokyo-league.jp/wp-content/uploads/2022/10/A%E3%83%AA%E3%83%BC%E3%82%B0-3.jpg"
+                  alt="東京リーグ 試合結果画像"
+                />
+              </section>
+              <section class="content-two-column">
+                <div class="content-card">
+                  <div class="section-head">
+                    <h4>最新ニュース</h4>
+                    <span>一覧へ</span>
+                  </div>
+                  <ul class="news-list">
+                    <li><span>2026.03.21</span><strong>春季大会の要項を公開しました</strong></li>
+                    <li><span>2026.03.18</span><strong>第103回東京リーグの組み合わせを掲載</strong></li>
+                    <li><span>2026.03.10</span><strong>新規参加チーム募集のお知らせ</strong></li>
+                  </ul>
+                </div>
+                <div class="content-card accent">
+                  <div class="section-head">
+                    <h4>参加チーム紹介</h4>
+                    <span>大会詳細へ</span>
+                  </div>
+                  <div class="team-feature">
+                    <img
+                      src="https://tokyo-league.jp/wp-content/uploads/2019/09/17%E4%B8%8A%E6%AE%B5_%E6%97%AD%E3%83%95%E3%83%83%E3%83%88%E3%83%9C%E3%83%BC%E3%83%AB%E3%82%AF%E3%83%A9%E3%83%96.jpg"
+                      alt="旭フットボールクラブ"
+                    />
+                    <div class="team-copy">
+                      <strong>旭フットボールクラブ</strong>
+                      <p>現サイトのチーム写真を活かしつつ、一覧性を高めるカード構成を想定。</p>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <p class="panel-kicker">Public</p>
+              <h2>大会詳細</h2>
+            </div>
+            <span class="chip">Desktop</span>
+          </div>
+          <div class="browser-frame">
+            <div class="competition-view">
+              <section class="competition-hero">
+                <div>
+                  <p class="section-label">Competition</p>
+                  <h3>第103回 東京リーグ</h3>
+                  <p>2026年度 / 2026.04 - 2026.09</p>
+                </div>
+                <img
+                  class="hero-visual"
+                  src="https://tokyo-league.jp/wp-content/uploads/2024/10/%E6%B1%A02%E5%85%A8%E4%BD%93.jpg"
+                  alt="池2フットボールクラブ"
+                />
+              </section>
+              <div class="file-box compact">
+                <span>要項PDF</span>
+                <span>組み合わせ表</span>
+                <span>注意事項</span>
+              </div>
+              <section class="division-card-grid">
+                <article class="division-card">
+                  <h4>Aリーグ</h4>
+                  <p>参加 8チーム</p>
+                  <span>最終更新 03.22</span>
+                </article>
+                <article class="division-card">
+                  <h4>Bリーグ</h4>
+                  <p>参加 8チーム</p>
+                  <span>最終更新 03.20</span>
+                </article>
+                <article class="division-card">
+                  <h4>Cリーグ</h4>
+                  <p>参加 7チーム</p>
+                  <span>最終更新 03.18</span>
+                </article>
+                <article class="division-card muted">
+                  <h4>関連ニュース</h4>
+                  <p>大会に紐づくお知らせを表示</p>
+                  <span>要項公開 / 組み合わせ更新</span>
+                </article>
+              </section>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <p class="panel-kicker">Public</p>
+              <h2>リーグ結果詳細</h2>
+            </div>
+            <span class="chip">Desktop</span>
+          </div>
+          <div class="browser-frame">
+            <div class="results-view">
+              <div class="results-header">
+                <div>
+                  <p class="section-label">Division Results</p>
+                  <h3>Aリーグ</h3>
+                </div>
+                <strong>最終更新 2026.03.22</strong>
+              </div>
+              <div class="results-columns">
+                <div class="table-card">
+                  <div class="section-head">
+                    <h4>順位表</h4>
+                    <span>手入力 / 将来自動集計</span>
+                  </div>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>順位</th>
+                        <th>チーム</th>
+                        <th>試</th>
+                        <th>勝点</th>
+                        <th>得失点</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr><td>1</td><td>FC EAST</td><td>5</td><td>13</td><td>+8</td></tr>
+                      <tr><td>2</td><td>CITY CLUB</td><td>5</td><td>10</td><td>+3</td></tr>
+                      <tr><td>3</td><td>MINATO SC</td><td>5</td><td>8</td><td>+1</td></tr>
+                      <tr><td>4</td><td>SETAGAYA</td><td>5</td><td>6</td><td>-2</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="table-card">
+                  <div class="section-head">
+                    <h4>試合結果</h4>
+                    <span>現行画像も補助表示</span>
+                  </div>
+                  <img
+                    class="results-image"
+                    src="https://tokyo-league.jp/wp-content/uploads/2022/10/A%E3%83%AA%E3%83%BC%E3%82%B0-3.jpg"
+                    alt="Aリーグ結果"
+                  />
+                  <ul class="match-list">
+                    <li><span>03.22</span><strong>FC EAST 2 - 1 CITY CLUB</strong><em>江東競技場</em></li>
+                    <li><span>03.21</span><strong>MINATO SC 1 - 1 SETAGAYA</strong><em>大井ふ頭</em></li>
+                    <li><span>03.15</span><strong>FC EAST 3 - 0 SETAGAYA</strong><em>世田谷公園</em></li>
+                    <li><span>03.14</span><strong>CITY CLUB 2 - 2 MINATO SC</strong><em>夢の島</em></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <p class="panel-kicker">Public</p>
+              <h2>ニュース一覧</h2>
+            </div>
+            <span class="chip">Mobile</span>
+          </div>
+          <div class="phone-frame">
+            <div class="phone-screen">
+              <div class="mobile-header">
+                <strong>ニュース</strong>
+                <span>2026年度</span>
+              </div>
+              <div class="filter-row">
+                <span class="filter-pill active">すべて</span>
+                <span class="filter-pill">大会</span>
+                <span class="filter-pill">お知らせ</span>
+              </div>
+              <article class="news-card">
+                <span>2026.03.21</span>
+                <h4>春季大会の要項を公開しました</h4>
+                <p>資料ダウンロードより最新版の要項PDFを確認できます。</p>
+              </article>
+              <article class="news-card">
+                <span>2026.03.18</span>
+                <h4>第103回東京リーグの組み合わせを掲載</h4>
+                <p>大会詳細ページにリーグ別の導線を追加しました。</p>
+              </article>
+              <article class="news-card">
+                <span>2026.03.10</span>
+                <h4>新規参加チーム募集のお知らせ</h4>
+                <p>問い合わせ窓口と募集条件を更新しています。</p>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel admin-panel">
+          <div class="panel-header">
+            <div>
+              <p class="panel-kicker">Admin</p>
+              <h2>ダッシュボード</h2>
+            </div>
+            <span class="chip">Operations</span>
+          </div>
+          <div class="admin-frame">
+            <aside class="admin-sidebar">
+              <div class="brand admin-brand">TL Admin</div>
+              <nav>
+                <span class="active">ダッシュボード</span>
+                <span>ニュース</span>
+                <span>大会</span>
+                <span>リーグ</span>
+                <span>試合結果</span>
+                <span>順位表</span>
+                <span>チーム</span>
+                <span>資料</span>
+              </nav>
+            </aside>
+            <div class="admin-content">
+              <div class="stats-grid">
+                <div class="stat-card">
+                  <span>下書きニュース</span>
+                  <strong>3</strong>
+                </div>
+                <div class="stat-card">
+                  <span>公開中大会</span>
+                  <strong>2</strong>
+                </div>
+                <div class="stat-card">
+                  <span>未更新リーグ</span>
+                  <strong>4</strong>
+                </div>
+              </div>
+              <div class="admin-columns">
+                <section class="admin-card">
+                  <div class="section-head">
+                    <h4>最近の更新</h4>
+                    <span>03.22 JST</span>
+                  </div>
+                  <ul class="admin-list">
+                    <li><strong>Aリーグ順位表</strong><span>中村</span></li>
+                    <li><strong>春季大会要項</strong><span>中村</span></li>
+                    <li><strong>ニュース下書き保存</strong><span>事務局</span></li>
+                  </ul>
+                </section>
+                <section class="admin-card">
+                  <div class="section-head">
+                    <h4>クイック操作</h4>
+                    <span>よく使う操作</span>
+                  </div>
+                  <div class="quick-actions">
+                    <button>ニュース作成</button>
+                    <button>試合結果追加</button>
+                    <button class="ghost">順位表編集</button>
+                  </div>
+                </section>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel admin-panel">
+          <div class="panel-header">
+            <div>
+              <p class="panel-kicker">Admin</p>
+              <h2>試合結果入力</h2>
+            </div>
+            <span class="chip">Operations</span>
+          </div>
+          <div class="admin-form-frame">
+            <div class="admin-form-header">
+              <h3>試合結果を追加</h3>
+              <span>第103回東京リーグ / Aリーグ</span>
+            </div>
+            <div class="form-grid">
+              <label>
+                <span>試合日</span>
+                <div class="input">2026-03-22</div>
+              </label>
+              <label>
+                <span>会場</span>
+                <div class="input">江東競技場</div>
+              </label>
+              <label>
+                <span>ホーム</span>
+                <div class="input">FC EAST</div>
+              </label>
+              <label>
+                <span>アウェイ</span>
+                <div class="input">CITY CLUB</div>
+              </label>
+              <label>
+                <span>ホーム得点</span>
+                <div class="input score">2</div>
+              </label>
+              <label>
+                <span>アウェイ得点</span>
+                <div class="input score">1</div>
+              </label>
+              <label class="full">
+                <span>備考</span>
+                <div class="input multiline">警告1件 / 雨天のため20分遅延</div>
+              </label>
+            </div>
+            <div class="cta-row end">
+              <button class="ghost">下書き保存</button>
+              <button>公開して順位表を更新</button>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

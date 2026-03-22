@@ -1,0 +1,361 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AdminRole {
+  OWNER
+  EDITOR
+}
+
+enum PublishStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum CompetitionStatus {
+  DRAFT
+  PUBLISHED
+  CLOSED
+}
+
+enum CompetitionType {
+  LEAGUE
+  CUP
+  OTHER
+}
+
+enum MatchStatus {
+  SCHEDULED
+  PLAYED
+  CANCELLED
+  POSTPONED
+}
+
+enum AssetKind {
+  IMAGE
+  PDF
+  FILE
+}
+
+enum DownloadCategory {
+  REGULATION
+  GUIDELINE
+  DOCUMENT
+  OTHER
+}
+
+model Admin {
+  id             String     @id @default(uuid()) @db.Uuid
+  email          String     @unique
+  name           String
+  role           AdminRole
+  image          String?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  createdNews    NewsPost[] @relation("NewsCreatedBy")
+  updatedNews    NewsPost[] @relation("NewsUpdatedBy")
+  createdAssets  Asset[]
+  createdComp    Competition[] @relation("CompetitionCreatedBy")
+  updatedComp    Competition[] @relation("CompetitionUpdatedBy")
+  createdMatches Match[]    @relation("MatchCreatedBy")
+  updatedMatches Match[]    @relation("MatchUpdatedBy")
+  createdDocs    Download[] @relation("DownloadCreatedBy")
+  updatedDocs    Download[] @relation("DownloadUpdatedBy")
+  updatedPages   Page[]
+  updatedContact ContactSetting[]
+  accounts       Account[]
+  sessions       Session[]
+}
+
+model Page {
+  id          String        @id @default(uuid()) @db.Uuid
+  slug        String        @unique
+  title       String
+  body        String
+  status      PublishStatus
+  publishedAt DateTime?
+  updatedById String        @db.Uuid
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  updatedBy   Admin         @relation(fields: [updatedById], references: [id])
+}
+
+model NewsCategory {
+  id        String     @id @default(uuid()) @db.Uuid
+  name      String
+  slug      String     @unique
+  sortOrder Int        @default(0)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  posts     NewsPost[]
+}
+
+model NewsPost {
+  id                   String         @id @default(uuid()) @db.Uuid
+  slug                 String         @unique
+  title                String
+  excerpt              String?
+  body                 String
+  eyecatchAssetId      String?        @db.Uuid
+  categoryId           String?        @db.Uuid
+  relatedCompetitionId String?        @db.Uuid
+  status               PublishStatus
+  publishedAt          DateTime?
+  createdById          String         @db.Uuid
+  updatedById          String         @db.Uuid
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+  eyecatchAsset        Asset?         @relation(fields: [eyecatchAssetId], references: [id])
+  category             NewsCategory?  @relation(fields: [categoryId], references: [id])
+  relatedCompetition   Competition?   @relation(fields: [relatedCompetitionId], references: [id])
+  createdBy            Admin          @relation("NewsCreatedBy", fields: [createdById], references: [id])
+  updatedBy            Admin          @relation("NewsUpdatedBy", fields: [updatedById], references: [id])
+}
+
+model Asset {
+  id               String        @id @default(uuid()) @db.Uuid
+  kind             AssetKind
+  title            String
+  storageKey       String
+  originalFilename String
+  mimeType         String
+  fileSize         BigInt
+  createdById      String?       @db.Uuid
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  createdBy        Admin?        @relation(fields: [createdById], references: [id])
+  newsEyecatches   NewsPost[]
+  competitionFiles CompetitionFile[]
+  teamLogos        Team[]
+  downloads        Download[]
+}
+
+model Season {
+  id          String        @id @default(uuid()) @db.Uuid
+  year        Int           @unique
+  label       String
+  isCurrent   Boolean       @default(false)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  competitions Competition[]
+}
+
+model Competition {
+  id            String            @id @default(uuid()) @db.Uuid
+  seasonId      String            @db.Uuid
+  name          String
+  slug          String            @unique
+  competitionType CompetitionType
+  edition       Int?
+  summary       String?
+  startDate     DateTime?         @db.Date
+  endDate       DateTime?         @db.Date
+  status        CompetitionStatus
+  publishedAt   DateTime?
+  sortOrder     Int               @default(0)
+  createdById   String            @db.Uuid
+  updatedById   String            @db.Uuid
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  season        Season            @relation(fields: [seasonId], references: [id])
+  createdBy     Admin             @relation("CompetitionCreatedBy", fields: [createdById], references: [id])
+  updatedBy     Admin             @relation("CompetitionUpdatedBy", fields: [updatedById], references: [id])
+  files         CompetitionFile[]
+  divisions     Division[]
+  newsPosts     NewsPost[]
+}
+
+model CompetitionFile {
+  id            String      @id @default(uuid()) @db.Uuid
+  competitionId String      @db.Uuid
+  assetId       String      @db.Uuid
+  label         String
+  sortOrder     Int         @default(0)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  competition   Competition @relation(fields: [competitionId], references: [id])
+  asset         Asset       @relation(fields: [assetId], references: [id])
+}
+
+model Division {
+  id            String         @id @default(uuid()) @db.Uuid
+  competitionId String         @db.Uuid
+  name          String
+  slug          String
+  description   String?
+  sortOrder     Int            @default(0)
+  status        PublishStatus
+  lastUpdatedAt DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  competition   Competition    @relation(fields: [competitionId], references: [id])
+  teams         DivisionTeam[]
+  matches       Match[]
+  standings     Standing[]
+
+  @@unique([competitionId, slug])
+}
+
+model Team {
+  id                 String         @id @default(uuid()) @db.Uuid
+  name               String         @unique
+  slug               String         @unique
+  shortName          String?
+  profile            String?
+  region             String?
+  representativeName String?
+  headCoachName      String?
+  websiteUrl         String?
+  instagramUrl       String?
+  logoAssetId        String?        @db.Uuid
+  status             PublishStatus
+  sortOrder          Int            @default(0)
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  logoAsset          Asset?         @relation(fields: [logoAssetId], references: [id])
+  divisions          DivisionTeam[]
+  homeMatches        Match[]        @relation("HomeTeam")
+  awayMatches        Match[]        @relation("AwayTeam")
+  standings          Standing[]
+}
+
+model DivisionTeam {
+  id         String    @id @default(uuid()) @db.Uuid
+  divisionId String    @db.Uuid
+  teamId     String    @db.Uuid
+  sortOrder  Int       @default(0)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  division   Division  @relation(fields: [divisionId], references: [id])
+  team       Team      @relation(fields: [teamId], references: [id])
+
+  @@unique([divisionId, teamId])
+}
+
+model Venue {
+  id        String    @id @default(uuid()) @db.Uuid
+  name      String    @unique
+  address   String?
+  note      String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  matches   Match[]
+}
+
+model Match {
+  id          String       @id @default(uuid()) @db.Uuid
+  divisionId  String       @db.Uuid
+  matchDate   DateTime     @db.Date
+  kickoffTime DateTime?    @db.Time(0)
+  venueId     String?      @db.Uuid
+  homeTeamId  String       @db.Uuid
+  awayTeamId  String       @db.Uuid
+  homeScore   Int?
+  awayScore   Int?
+  status      MatchStatus
+  note        String?
+  sortOrder   Int          @default(0)
+  createdById String       @db.Uuid
+  updatedById String       @db.Uuid
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  division    Division     @relation(fields: [divisionId], references: [id])
+  venue       Venue?       @relation(fields: [venueId], references: [id])
+  homeTeam    Team         @relation("HomeTeam", fields: [homeTeamId], references: [id])
+  awayTeam    Team         @relation("AwayTeam", fields: [awayTeamId], references: [id])
+  createdBy   Admin        @relation("MatchCreatedBy", fields: [createdById], references: [id])
+  updatedBy   Admin        @relation("MatchUpdatedBy", fields: [updatedById], references: [id])
+
+  @@index([divisionId, matchDate])
+}
+
+model Standing {
+  id             String    @id @default(uuid()) @db.Uuid
+  divisionId     String    @db.Uuid
+  teamId         String    @db.Uuid
+  rank           Int
+  played         Int       @default(0)
+  won            Int       @default(0)
+  drawn          Int       @default(0)
+  lost           Int       @default(0)
+  goalsFor       Int       @default(0)
+  goalsAgainst   Int       @default(0)
+  goalDifference Int       @default(0)
+  points         Int       @default(0)
+  note           String?
+  updatedAt      DateTime  @updatedAt
+  division       Division  @relation(fields: [divisionId], references: [id])
+  team           Team      @relation(fields: [teamId], references: [id])
+
+  @@unique([divisionId, teamId])
+  @@unique([divisionId, rank])
+}
+
+model Download {
+  id          String           @id @default(uuid()) @db.Uuid
+  title       String
+  slug        String           @unique
+  category    DownloadCategory
+  description String?
+  assetId     String           @db.Uuid
+  publishedAt DateTime?
+  status      PublishStatus
+  sortOrder   Int              @default(0)
+  createdById String           @db.Uuid
+  updatedById String           @db.Uuid
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  asset       Asset            @relation(fields: [assetId], references: [id])
+  createdBy   Admin            @relation("DownloadCreatedBy", fields: [createdById], references: [id])
+  updatedBy   Admin            @relation("DownloadUpdatedBy", fields: [updatedById], references: [id])
+}
+
+model ContactSetting {
+  id          String    @id @default(uuid()) @db.Uuid
+  email       String?
+  body        String?
+  updatedById String    @db.Uuid
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  updatedBy   Admin     @relation(fields: [updatedById], references: [id])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String  @db.Uuid
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              Admin   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String   @db.Uuid
+  expires      DateTime
+  user         Admin    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+}

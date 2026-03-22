@@ -1,0 +1,30 @@
+{
+  "name": "tokyo-league",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "prisma:generate": "prisma generate",
+    "prisma:validate": "prisma validate",
+    "prisma:migrate": "node ./scripts/run-with-env.mjs prisma migrate dev --name init",
+    "prisma:seed-admin": "node ./scripts/run-with-env.mjs node ./scripts/seed-admin.mjs"
+  },
+  "dependencies": {
+    "@auth/prisma-adapter": "2.8.0",
+    "@prisma/client": "^6.6.0",
+    "next": "15.2.8",
+    "next-auth": "^5.0.0-beta.25",
+    "prisma": "^6.6.0",
+    "react": "19.0.0",
+    "react-dom": "19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "22.13.14",
+    "@types/react": "19.0.10",
+    "@types/react-dom": "19.0.4",
+    "typescript": "5.8.2"
+  }
+}

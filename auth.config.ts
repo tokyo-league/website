@@ -10,9 +10,11 @@ export default {
         {
           id: "google",
           name: "Google",
-          type: "oauth",
+          type: "oidc",
           clientId: process.env.AUTH_GOOGLE_ID,
           clientSecret: process.env.AUTH_GOOGLE_SECRET,
+          issuer: "https://accounts.google.com",
+          wellKnown: "https://accounts.google.com/.well-known/openid-configuration",
           authorization: {
             url: "https://accounts.google.com/o/oauth2/v2/auth",
             params: {

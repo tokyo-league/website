@@ -11,7 +11,7 @@
 ## ローカルセットアップ
 
 1. `.env.example` を `.env.local` か `.env.dev` に反映
-2. `DATABASE_URL`, `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET` を設定
+2. `DATABASE_URL`, `DIRECT_URL`, `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET` を設定
 3. `npm install`
 4. `npm run prisma:generate`
 5. `npm run prisma:validate`
@@ -36,3 +36,4 @@
 - Googleログインのみ実装対象
 - `admins` テーブルに存在しないメールアドレスはログイン不可
 - `npm run prisma:seed-admin` 実行時は `SEED_ADMIN_EMAIL` が必要
+- Neon を使う場合、`DATABASE_URL` は pooled 接続、`DIRECT_URL` は direct 接続を使う

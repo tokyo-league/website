@@ -16,7 +16,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         return false;
       }
 
-      const admin = await prisma.admin.findUnique({
+      const admin = await prisma.user.findUnique({
         where: { email: user.email },
       });
 
@@ -25,7 +25,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
 
       if (user.name || user.image) {
-        await prisma.admin.update({
+        await prisma.user.update({
           where: { id: admin.id },
           data: {
             name: user.name ?? admin.name,

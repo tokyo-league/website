@@ -51,7 +51,7 @@ enum DownloadCategory {
   OTHER
 }
 
-model Admin {
+model User {
   id             String     @id @default(uuid()) @db.Uuid
   email          String     @unique
   name           String
@@ -72,6 +72,8 @@ model Admin {
   updatedContact ContactSetting[]
   accounts       Account[]
   sessions       Session[]
+
+  @@map("admins")
 }
 
 model Page {
@@ -84,7 +86,7 @@ model Page {
   updatedById String        @db.Uuid
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
-  updatedBy   Admin         @relation(fields: [updatedById], references: [id])
+  updatedBy   User          @relation(fields: [updatedById], references: [id])
 }
 
 model NewsCategory {
@@ -115,8 +117,8 @@ model NewsPost {
   eyecatchAsset        Asset?         @relation(fields: [eyecatchAssetId], references: [id])
   category             NewsCategory?  @relation(fields: [categoryId], references: [id])
   relatedCompetition   Competition?   @relation(fields: [relatedCompetitionId], references: [id])
-  createdBy            Admin          @relation("NewsCreatedBy", fields: [createdById], references: [id])
-  updatedBy            Admin          @relation("NewsUpdatedBy", fields: [updatedById], references: [id])
+  createdBy            User           @relation("NewsCreatedBy", fields: [createdById], references: [id])
+  updatedBy            User           @relation("NewsUpdatedBy", fields: [updatedById], references: [id])
 }
 
 model Asset {
@@ -130,7 +132,7 @@ model Asset {
   createdById      String?       @db.Uuid
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @updatedAt
-  createdBy        Admin?        @relation(fields: [createdById], references: [id])
+  createdBy        User?         @relation(fields: [createdById], references: [id])
   newsEyecatches   NewsPost[]
   competitionFiles CompetitionFile[]
   teamLogos        Team[]
@@ -165,8 +167,8 @@ model Competition {
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
   season        Season            @relation(fields: [seasonId], references: [id])
-  createdBy     Admin             @relation("CompetitionCreatedBy", fields: [createdById], references: [id])
-  updatedBy     Admin             @relation("CompetitionUpdatedBy", fields: [updatedById], references: [id])
+  createdBy     User              @relation("CompetitionCreatedBy", fields: [createdById], references: [id])
+  updatedBy     User              @relation("CompetitionUpdatedBy", fields: [updatedById], references: [id])
   files         CompetitionFile[]
   divisions     Division[]
   newsPosts     NewsPost[]
@@ -270,8 +272,8 @@ model Match {
   venue       Venue?       @relation(fields: [venueId], references: [id])
   homeTeam    Team         @relation("HomeTeam", fields: [homeTeamId], references: [id])
   awayTeam    Team         @relation("AwayTeam", fields: [awayTeamId], references: [id])
-  createdBy   Admin        @relation("MatchCreatedBy", fields: [createdById], references: [id])
-  updatedBy   Admin        @relation("MatchUpdatedBy", fields: [updatedById], references: [id])
+  createdBy   User         @relation("MatchCreatedBy", fields: [createdById], references: [id])
+  updatedBy   User         @relation("MatchUpdatedBy", fields: [updatedById], references: [id])
 
   @@index([divisionId, matchDate])
 }
@@ -313,8 +315,8 @@ model Download {
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
   asset       Asset            @relation(fields: [assetId], references: [id])
-  createdBy   Admin            @relation("DownloadCreatedBy", fields: [createdById], references: [id])
-  updatedBy   Admin            @relation("DownloadUpdatedBy", fields: [updatedById], references: [id])
+  createdBy   User             @relation("DownloadCreatedBy", fields: [createdById], references: [id])
+  updatedBy   User             @relation("DownloadUpdatedBy", fields: [updatedById], references: [id])
 }
 
 model ContactSetting {
@@ -324,7 +326,7 @@ model ContactSetting {
   updatedById String    @db.Uuid
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-  updatedBy   Admin     @relation(fields: [updatedById], references: [id])
+  updatedBy   User      @relation(fields: [updatedById], references: [id])
 }
 
 model Account {
@@ -340,7 +342,7 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
-  user              Admin   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -350,7 +352,7 @@ model Session {
   sessionToken String   @unique
   userId       String   @db.Uuid
   expires      DateTime
-  user         Admin    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model VerificationToken {

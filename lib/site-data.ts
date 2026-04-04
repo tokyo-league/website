@@ -11,6 +11,7 @@ export const siteAssets = {
   logo: "/site-assets/common/logo_head.svg",
   heroResult: "/site-assets/results/Aリーグ-3.jpg",
   competitionHero: "/site-assets/teams/photos/池2全体.jpg",
+  teamsHero: "/site-assets/mv/mv_team.jpg",
   featuredTeamPhoto: "/site-assets/teams/photos/17上段_旭フットボールクラブ.jpg",
   featuredTeamLogo: "/site-assets/teams/logos/17上段_旭フットボールクラブロゴ.png",
 };

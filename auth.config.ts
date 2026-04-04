@@ -11,6 +11,7 @@ export default {
           id: "google",
           name: "Google",
           type: "oidc",
+          allowDangerousEmailAccountLinking: true,
           clientId: process.env.AUTH_GOOGLE_ID,
           clientSecret: process.env.AUTH_GOOGLE_SECRET,
           issuer: "https://accounts.google.com",

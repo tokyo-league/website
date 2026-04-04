@@ -1,4 +1,4 @@
-import { writeFile, unlink } from "node:fs/promises";
+import { mkdir, writeFile, unlink } from "node:fs/promises";
 import path from "node:path";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
@@ -75,6 +75,7 @@ for (const division of divisions) {
 }
 
 const jobFile = path.resolve(".swift-module-cache", `ocr-jobs-${Date.now()}.json`);
+await mkdir(path.dirname(jobFile), { recursive: true });
 await writeFile(jobFile, JSON.stringify(jobs, null, 2), "utf8");
 
 const { stdout, stderr } = await execFileAsync("python3", ["./scripts/ocr_result_tables.py", jobFile], {

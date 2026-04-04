@@ -222,6 +222,11 @@ button {
   object-fit: cover;
 }
 
+.page-intro__visual--teams img,
+.page-intro__visual--feature img {
+  object-position: left center;
+}
+
 .page-intro__visual--teams {
   min-height: 360px;
 }

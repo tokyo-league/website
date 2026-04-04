@@ -611,7 +611,7 @@ button {
   margin-top: 28px;
 }
 
-.admin-sidebar__nav span {
+.admin-sidebar__nav a {
   padding: 12px 14px;
   border-radius: 16px;
   color: rgba(255, 255, 255, 0.76);
@@ -691,6 +691,37 @@ button {
   margin: 8px 0 0;
 }
 
+.admin-shortcuts {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+.admin-table {
+  display: grid;
+  margin-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.admin-table__row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.admin-table__row--head {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.admin-table__row strong {
+  font-size: 15px;
+}
+
 .login-shell {
   display: grid;
   place-items: center;
@@ -747,7 +778,8 @@ button {
   .news-layout,
   .team-feature,
   .admin-columns,
-  .admin-form-preview__grid {
+  .admin-form-preview__grid,
+  .admin-table__row {
     grid-template-columns: 1fr;
   }
 

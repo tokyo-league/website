@@ -20,6 +20,7 @@
 - competitions
 - competition_files
 - divisions
+- division_editor_assignments
 - teams
 - division_teams
 - venues
@@ -182,6 +183,25 @@
 推奨制約:
 
 - unique `(competition_id, slug)`
+
+### division_editor_assignments
+
+リーグ単位の入稿担当者割り当て
+
+| column | type | notes |
+| --- | --- | --- |
+| id | uuid pk | |
+| user_id | uuid fk admins.id | |
+| division_id | uuid fk divisions.id | |
+| permission | text | `results_editor`, `standings_editor`, `division_manager` |
+| created_at | timestamptz | |
+| updated_at | timestamptz | |
+
+推奨制約:
+
+- unique `(user_id, division_id, permission)`
+- index `(user_id)`
+- index `(division_id)`
 
 ### teams
 
@@ -562,6 +582,21 @@
 - `editor`
   - コンテンツ編集可能
   - 管理者設定は不可
+
+リーグ担当権限:
+
+- `results_editor`
+  - 担当リーグの試合結果を更新可能
+- `standings_editor`
+  - 担当リーグの順位表を更新可能
+- `division_manager`
+  - 担当リーグの所属チーム、試合結果、順位表を更新可能
+
+運用方針:
+
+- `owner` は全リーグ横断で編集可能
+- `editor` は `division_editor_assignments` に紐づくリーグのみ更新可能
+- ニュース、固定ページ、資料のようなリーグ非依存コンテンツは、当面 `owner` または全体編集担当のみ更新可能にする
 
 ## 入力バリデーション方針
 

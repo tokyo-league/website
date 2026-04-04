@@ -13,6 +13,12 @@ enum AdminRole {
   EDITOR
 }
 
+enum DivisionPermission {
+  RESULTS_EDITOR
+  STANDINGS_EDITOR
+  DIVISION_MANAGER
+}
+
 enum PublishStatus {
   DRAFT
   PUBLISHED
@@ -72,6 +78,7 @@ model User {
   updatedContact ContactSetting[]
   accounts       Account[]
   sessions       Session[]
+  divisionPermissions DivisionEditorAssignment[]
 
   @@map("admins")
 }
@@ -201,8 +208,24 @@ model Division {
   teams         DivisionTeam[]
   matches       Match[]
   standings     Standing[]
+  editorAssignments DivisionEditorAssignment[]
 
   @@unique([competitionId, slug])
+}
+
+model DivisionEditorAssignment {
+  id          String             @id @default(uuid()) @db.Uuid
+  userId      String             @db.Uuid
+  divisionId  String             @db.Uuid
+  permission  DivisionPermission
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  user        User               @relation(fields: [userId], references: [id])
+  division    Division           @relation(fields: [divisionId], references: [id])
+
+  @@unique([userId, divisionId, permission])
+  @@index([userId])
+  @@index([divisionId])
 }
 
 model Team {

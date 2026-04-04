@@ -775,6 +775,16 @@ button {
   font: inherit;
 }
 
+.admin-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-check span {
+  color: var(--text);
+}
+
 .admin-table {
   display: grid;
   margin-top: 18px;

@@ -1,8 +1,32 @@
 import { AdminLayoutShell } from "@/components/admin-layout-shell";
+import { AdminCompetitionForms } from "@/components/admin-competition-forms";
 import { getAdminScope } from "@/lib/admin-access";
+import { prisma } from "@/lib/prisma";
 
 export default async function AdminCompetitionsPage() {
   const scope = await getAdminScope();
+  const [seasons, competitions, divisions] = await Promise.all([
+    prisma.season.findMany({
+      orderBy: [{ year: "desc" }],
+    }),
+    prisma.competition.findMany({
+      include: {
+        season: true,
+        divisions: true,
+      },
+      orderBy: [{ season: { year: "desc" } }, { sortOrder: "asc" }, { createdAt: "asc" }],
+    }),
+    prisma.division.findMany({
+      include: {
+        competition: {
+          include: {
+            season: true,
+          },
+        },
+      },
+      orderBy: [{ competition: { season: { year: "desc" } } }, { competition: { sortOrder: "asc" } }, { sortOrder: "asc" }],
+    }),
+  ]);
 
   return (
     <AdminLayoutShell
@@ -11,6 +35,23 @@ export default async function AdminCompetitionsPage() {
       kicker="Competition"
       scope={scope}
     >
+      {scope.admin.role === "OWNER" ? (
+        <AdminCompetitionForms
+          seasons={seasons.map((season) => ({
+            id: season.id,
+            year: season.year,
+            label: season.label,
+            isCurrent: season.isCurrent,
+          }))}
+          competitions={competitions.map((competition) => ({
+            id: competition.id,
+            name: competition.name,
+            seasonLabel: competition.season.label,
+            competitionType: competition.competitionType,
+          }))}
+        />
+      ) : null}
+
       <div className="admin-columns">
         <article className="admin-card">
           <div className="card__header">
@@ -42,29 +83,107 @@ export default async function AdminCompetitionsPage() {
         </article>
 
         <article className="admin-card">
-          <h3>作業メモ</h3>
-          <div className="admin-form-preview">
-            <div className="admin-form-preview__grid">
-              <div>
-                <span>ログイン権限</span>
-                <p>{scope.admin.role === "OWNER" ? "全体管理" : "リーグ担当編集"}</p>
-              </div>
-              <div>
-                <span>担当数</span>
-                <p>{scope.admin.role === "OWNER" ? "全リーグ" : `${scope.accessibleDivisions.length}リーグ`}</p>
-              </div>
-              <div>
-                <span>試合結果</span>
-                <p>担当リーグのみ入力可能にする予定</p>
-              </div>
-              <div>
-                <span>順位表</span>
-                <p>担当権限に応じて編集可否を制御</p>
-              </div>
-            </div>
-          </div>
+          <h3>大会運用メモ</h3>
+          <ul className="admin-list">
+            <li>
+              <strong>東京リーグ</strong>
+              <span>年度ごとに大会を作成し、その配下へ A〜F リーグを追加</span>
+            </li>
+            <li>
+              <strong>5年生FES 山藤杯</strong>
+              <span>1大会として管理し、結果は PDF 掲載中心</span>
+            </li>
+            <li>
+              <strong>試合結果</strong>
+              <span>東京リーグは画像中心、補助でスコア入力と勝敗表生成に対応予定</span>
+            </li>
+          </ul>
         </article>
       </div>
+
+      <article className="admin-card">
+        <div className="card__header">
+          <div>
+            <p className="section-kicker">Master</p>
+            <h3>登録済み大会一覧</h3>
+          </div>
+        </div>
+        <div className="admin-table">
+          <div className="admin-table__row admin-table__row--head admin-table__row--five">
+            <span>年度</span>
+            <span>大会名</span>
+            <span>種別</span>
+            <span>状態</span>
+            <span>リーグ数</span>
+          </div>
+          {competitions.length > 0 ? (
+            competitions.map((competition) => (
+              <div key={competition.id} className="admin-table__row admin-table__row--five">
+                <strong>{competition.season.label}</strong>
+                <span>{competition.name}</span>
+                <span>{competitionTypeLabel[competition.competitionType]}</span>
+                <span>{competitionStatusLabel[competition.status]}</span>
+                <span>{competition.divisions.length}件</span>
+              </div>
+            ))
+          ) : (
+            <div className="admin-empty-state">
+              <p>まだ大会は登録されていません。</p>
+            </div>
+          )}
+        </div>
+      </article>
+
+      <article className="admin-card">
+        <div className="card__header">
+          <div>
+            <p className="section-kicker">Divisions</p>
+            <h3>登録済みリーグ一覧</h3>
+          </div>
+        </div>
+        <div className="admin-table">
+          <div className="admin-table__row admin-table__row--head admin-table__row--five">
+            <span>年度</span>
+            <span>大会</span>
+            <span>リーグ</span>
+            <span>状態</span>
+            <span>表示順</span>
+          </div>
+          {divisions.length > 0 ? (
+            divisions.map((division) => (
+              <div key={division.id} className="admin-table__row admin-table__row--five">
+                <strong>{division.competition.season.label}</strong>
+                <span>{division.competition.name}</span>
+                <span>{division.name}</span>
+                <span>{publishStatusLabel[division.status]}</span>
+                <span>{division.sortOrder}</span>
+              </div>
+            ))
+          ) : (
+            <div className="admin-empty-state">
+              <p>まだリーグは登録されていません。</p>
+            </div>
+          )}
+        </div>
+      </article>
     </AdminLayoutShell>
   );
 }
+
+const competitionTypeLabel = {
+  LEAGUE: "東京リーグ向け",
+  CUP: "5年生FES 山藤杯向け",
+  OTHER: "その他",
+} as const;
+
+const competitionStatusLabel = {
+  DRAFT: "下書き",
+  PUBLISHED: "公開",
+  CLOSED: "終了",
+} as const;
+
+const publishStatusLabel = {
+  DRAFT: "下書き",
+  PUBLISHED: "公開",
+  ARCHIVED: "非公開",
+} as const;

@@ -128,3 +128,95 @@ export async function deleteDivisionAssignment(
     message: "担当リーグの割当を解除しました。",
   };
 }
+
+export async function deleteAdminUser(
+  _prevState: AssignmentActionState,
+  formData: FormData,
+): Promise<AssignmentActionState> {
+  const scope = await requireOwner();
+
+  const userId = sanitizePlainText(String(formData.get("userId") ?? ""), 64);
+
+  if (!userId || !isValidUuid(userId)) {
+    return {
+      status: "error",
+      message: "削除対象の担当者が見つかりませんでした。",
+    };
+  }
+
+  if (userId === scope.admin.id) {
+    return {
+      status: "error",
+      message: "ログイン中の Owner は削除できません。",
+    };
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: {
+      _count: {
+        select: {
+          createdNews: true,
+          updatedNews: true,
+          createdAssets: true,
+          createdComp: true,
+          updatedComp: true,
+          createdMatches: true,
+          updatedMatches: true,
+          createdDocs: true,
+          updatedDocs: true,
+          updatedPages: true,
+          updatedContact: true,
+        },
+      },
+    },
+  });
+
+  if (!user) {
+    return {
+      status: "error",
+      message: "削除対象の担当者が見つかりませんでした。",
+    };
+  }
+
+  if (user.role === "OWNER") {
+    return {
+      status: "error",
+      message: "Owner は管理画面から削除できません。",
+    };
+  }
+
+  const hasManagedContent =
+    Object.values(user._count).reduce((sum, count) => sum + count, 0) > 0;
+
+  if (hasManagedContent) {
+    return {
+      status: "error",
+      message: "この担当者は更新履歴に紐づくため削除できません。",
+    };
+  }
+
+  await prisma.$transaction([
+    prisma.divisionEditorAssignment.deleteMany({
+      where: { userId },
+    }),
+    prisma.account.deleteMany({
+      where: { userId },
+    }),
+    prisma.session.deleteMany({
+      where: { userId },
+    }),
+    prisma.user.delete({
+      where: { id: userId },
+    }),
+  ]);
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/competitions");
+  revalidatePath("/admin/assignments");
+
+  return {
+    status: "success",
+    message: `${user.name} を削除しました。`,
+  };
+}

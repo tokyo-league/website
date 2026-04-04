@@ -4,6 +4,7 @@ import { useActionState, useEffect, useState } from "react";
 import {
   createAdminUser,
   createDivisionAssignment,
+  deleteAdminUser,
   deleteDivisionAssignment,
   initialAssignmentActionState,
   type AssignmentActionState,
@@ -35,12 +36,14 @@ type AdminAssignmentFormsProps = {
   users: UserOption[];
   divisions: DivisionOption[];
   assignments: AssignmentRow[];
+  currentUserId: string;
 };
 
 export function AdminAssignmentForms({
   users,
   divisions,
   assignments,
+  currentUserId,
 }: AdminAssignmentFormsProps) {
   const [createUserState, createUserAction, createUserPending] = useActionState(
     createAdminUser,
@@ -178,6 +181,39 @@ export function AdminAssignmentForms({
           )}
         </div>
       </article>
+
+      <article className="admin-card">
+        <div className="card__header">
+          <div>
+            <p className="section-kicker">Users</p>
+            <h3>登録済み担当者</h3>
+          </div>
+        </div>
+        <div className="admin-table">
+          <div className="admin-table__row admin-table__row--head admin-table__row--five">
+            <span>表示名</span>
+            <span>メール</span>
+            <span>ロール</span>
+            <span>担当リーグ数</span>
+            <span>操作</span>
+          </div>
+          {users.length > 0 ? (
+            users.map((user) => (
+              <AdminDeleteRow
+                key={user.id}
+                user={user}
+                assignmentCount={assignments.filter((assignment) => assignment.userEmail === user.email).length}
+                isCurrentUser={user.id === currentUserId}
+                onDone={setToast}
+              />
+            ))
+          ) : (
+            <div className="admin-empty-state">
+              <p>まだ担当者は登録されていません。</p>
+            </div>
+          )}
+        </div>
+      </article>
     </>
   );
 }
@@ -211,6 +247,47 @@ function AssignmentDeleteRow({
           {pending ? "解除中..." : "解除"}
         </button>
       </form>
+    </div>
+  );
+}
+
+function AdminDeleteRow({
+  user,
+  assignmentCount,
+  isCurrentUser,
+  onDone,
+}: {
+  user: UserOption;
+  assignmentCount: number;
+  isCurrentUser: boolean;
+  onDone: (state: AssignmentActionState) => void;
+}) {
+  const [state, formAction, pending] = useActionState(deleteAdminUser, initialAssignmentActionState);
+
+  useEffect(() => {
+    if (state.status !== "idle") {
+      onDone(state);
+    }
+  }, [onDone, state]);
+
+  const deletable = user.role !== "OWNER" && !isCurrentUser;
+
+  return (
+    <div className="admin-table__row admin-table__row--five">
+      <strong>{user.name}</strong>
+      <span>{user.email}</span>
+      <span>{user.role === "OWNER" ? "Owner" : "Editor"}</span>
+      <span>{assignmentCount}件</span>
+      {deletable ? (
+        <form action={formAction}>
+          <input type="hidden" name="userId" value={user.id} />
+          <button type="submit" className="button button--ghost" disabled={pending}>
+            {pending ? "削除中..." : "削除"}
+          </button>
+        </form>
+      ) : (
+        <span>{isCurrentUser ? "ログイン中" : "削除不可"}</span>
+      )}
     </div>
   );
 }

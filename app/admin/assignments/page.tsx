@@ -56,6 +56,7 @@ export default async function AdminAssignmentsPage() {
           competitionName: assignment.division.competition.name,
           permissionLabel: permissionLabel[assignment.permission],
         }))}
+        currentUserId={scope.admin.id}
       />
 
       <article className="admin-card">

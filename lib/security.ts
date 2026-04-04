@@ -35,6 +35,16 @@ export function isValidSlug(value: string) {
   return SLUG_PATTERN.test(value);
 }
 
+export function ensureSlug(value: string, fallbackPrefix: string, maxLength = 80) {
+  const normalized = normalizeSlug(value, maxLength);
+
+  if (normalized) {
+    return normalized;
+  }
+
+  return `${fallbackPrefix}-${randomUUID().slice(0, 8)}`;
+}
+
 export function parseInteger(value: string) {
   if (!/^-?\d+$/.test(value)) {
     return null;
@@ -42,3 +52,4 @@ export function parseInteger(value: string) {
 
   return Number.parseInt(value, 10);
 }
+import { randomUUID } from "node:crypto";

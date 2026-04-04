@@ -775,6 +775,17 @@ button {
   font: inherit;
 }
 
+.admin-field textarea {
+  min-height: 140px;
+  padding: 12px 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 14px;
+  background: white;
+  color: var(--text);
+  font: inherit;
+  resize: vertical;
+}
+
 .admin-check {
   display: flex;
   align-items: center;
@@ -820,6 +831,18 @@ button {
 
 .admin-empty-state p {
   margin: 0;
+}
+
+.admin-inline-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.admin-inline-message {
+  color: var(--muted);
+  font-size: 12px;
 }
 
 .admin-toast {

@@ -234,12 +234,15 @@ model Team {
   slug               String         @unique
   shortName          String?
   profile            String?
+  founded            String?
   region             String?
   representativeName String?
   headCoachName      String?
   websiteUrl         String?
   instagramUrl       String?
   logoAssetId        String?        @db.Uuid
+  logoPath           String?
+  photoPath          String?
   status             PublishStatus
   sortOrder          Int            @default(0)
   createdAt          DateTime       @default(now())

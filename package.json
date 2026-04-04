@@ -9,6 +9,7 @@
     "lint": "next lint",
     "assets:download": "node ./scripts/download-site-images.mjs",
     "assets:organize": "node ./scripts/organize-site-images.mjs",
+    "import:history": "node ./scripts/run-with-env.mjs node ./scripts/import-history-from-site.mjs",
     "prisma:generate": "prisma generate",
     "prisma:validate": "prisma validate",
     "prisma:migrate": "node ./scripts/run-with-env.mjs prisma migrate dev --name init",

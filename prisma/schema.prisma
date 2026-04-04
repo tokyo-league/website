@@ -164,6 +164,8 @@ model Competition {
   competitionType CompetitionType
   edition       Int?
   summary       String?
+  sourceUrl     String?
+  resultFilePath String?
   startDate     DateTime?         @db.Date
   endDate       DateTime?         @db.Date
   status        CompetitionStatus
@@ -199,6 +201,8 @@ model Division {
   name          String
   slug          String
   description   String?
+  sourceUrl     String?
+  resultImagePath String?
   sortOrder     Int            @default(0)
   status        PublishStatus
   lastUpdatedAt DateTime?

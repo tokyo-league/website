@@ -770,6 +770,10 @@ button {
   grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
+.admin-form-preview__grid--compact {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
 .admin-asset-preview {
   display: grid;
   gap: 10px;
@@ -795,6 +799,26 @@ button {
 
 .admin-asset-preview__frame--wide {
   min-height: 220px;
+}
+
+.admin-item-list {
+  display: grid;
+  gap: 16px;
+}
+
+.admin-item-card {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 20px;
+  background: #fbfcfe;
+}
+
+.admin-item-card__actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
 }
 
 .admin-form-preview__grid div {

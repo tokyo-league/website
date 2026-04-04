@@ -27,8 +27,20 @@ export default async function AdminResultsPage() {
         },
         orderBy: { sortOrder: "asc" },
       },
-      matches: true,
-      standings: true,
+      matches: {
+        include: {
+          venue: true,
+          homeTeam: true,
+          awayTeam: true,
+        },
+        orderBy: [{ matchDate: "desc" }, { createdAt: "desc" }],
+      },
+      standings: {
+        include: {
+          team: true,
+        },
+        orderBy: [{ rank: "asc" }, { team: { sortOrder: "asc" } }],
+      },
     },
     orderBy: [
       { competition: { season: { year: "desc" } } },
@@ -63,6 +75,29 @@ export default async function AdminResultsPage() {
           teams: division.teams.map((assignment) => ({
             id: assignment.team.id,
             name: assignment.team.name,
+          })),
+          matches: division.matches.map((match) => ({
+            id: match.id,
+            matchDate: match.matchDate.toISOString().slice(0, 10),
+            homeTeamId: match.homeTeamId,
+            awayTeamId: match.awayTeamId,
+            homeScore: match.homeScore,
+            awayScore: match.awayScore,
+            venueName: match.venue?.name ?? "",
+            note: match.note ?? "",
+          })),
+          standings: division.standings.map((standing) => ({
+            id: standing.id,
+            teamId: standing.teamId,
+            teamName: standing.team.name,
+            rank: standing.rank,
+            played: standing.played,
+            won: standing.won,
+            drawn: standing.drawn,
+            lost: standing.lost,
+            goalsFor: standing.goalsFor,
+            goalsAgainst: standing.goalsAgainst,
+            points: standing.points,
           })),
         }))}
       />

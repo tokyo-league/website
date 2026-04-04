@@ -91,17 +91,7 @@ export async function createMatch(
     return { status: "error", message: "試合日を確認してください。" };
   }
 
-  let venueId = null;
-
-  if (venueName) {
-    const venue = await prisma.venue.upsert({
-      where: { name: venueName },
-      update: {},
-      create: { name: venueName },
-      select: { id: true },
-    });
-    venueId = venue.id;
-  }
+  const venueId = await resolveVenueId(venueName);
 
   await prisma.match.create({
     data: {
@@ -124,6 +114,92 @@ export async function createMatch(
   return {
     status: "success",
     message: "試合結果を追加しました。",
+  };
+}
+
+export async function updateMatch(
+  _prevState: ResultActionState,
+  formData: FormData,
+): Promise<ResultActionState> {
+  const scope = await getAdminScope();
+  const matchId = sanitizePlainText(String(formData.get("matchId") ?? ""), 64);
+  const divisionId = sanitizePlainText(String(formData.get("divisionId") ?? ""), 64);
+  const homeTeamId = sanitizePlainText(String(formData.get("homeTeamId") ?? ""), 64);
+  const awayTeamId = sanitizePlainText(String(formData.get("awayTeamId") ?? ""), 64);
+  const matchDateText = sanitizePlainText(String(formData.get("matchDate") ?? ""), 20);
+  const venueName = sanitizePlainText(String(formData.get("venueName") ?? ""), 80);
+  const homeScore = parseInteger(String(formData.get("homeScore") ?? ""));
+  const awayScore = parseInteger(String(formData.get("awayScore") ?? ""));
+  const note = sanitizePlainText(String(formData.get("note") ?? ""), 240);
+
+  if (!isValidUuid(matchId) || !isValidUuid(divisionId) || !isValidUuid(homeTeamId) || !isValidUuid(awayTeamId)) {
+    return { status: "error", message: "試合情報の入力内容を確認してください。" };
+  }
+
+  if (homeTeamId === awayTeamId) {
+    return { status: "error", message: "同じチーム同士では登録できません。" };
+  }
+
+  if (!canEditDivision(scope, divisionId)) {
+    return { status: "error", message: "このリーグを編集する権限がありません。" };
+  }
+
+  const matchDate = new Date(matchDateText);
+
+  if (Number.isNaN(matchDate.getTime())) {
+    return { status: "error", message: "試合日を確認してください。" };
+  }
+
+  const venueId = await resolveVenueId(venueName);
+
+  await prisma.match.update({
+    where: { id: matchId },
+    data: {
+      matchDate,
+      venueId,
+      homeTeamId,
+      awayTeamId,
+      homeScore: homeScore ?? null,
+      awayScore: awayScore ?? null,
+      status: homeScore !== null && awayScore !== null ? MatchStatus.PLAYED : MatchStatus.SCHEDULED,
+      note: note || null,
+      updatedById: scope.admin.id,
+    },
+  });
+
+  revalidatePath("/admin/results");
+
+  return {
+    status: "success",
+    message: "試合結果を更新しました。",
+  };
+}
+
+export async function deleteMatch(
+  _prevState: ResultActionState,
+  formData: FormData,
+): Promise<ResultActionState> {
+  const scope = await getAdminScope();
+  const matchId = sanitizePlainText(String(formData.get("matchId") ?? ""), 64);
+  const divisionId = sanitizePlainText(String(formData.get("divisionId") ?? ""), 64);
+
+  if (!isValidUuid(matchId) || !isValidUuid(divisionId)) {
+    return { status: "error", message: "削除対象の試合が見つかりませんでした。" };
+  }
+
+  if (!canEditDivision(scope, divisionId)) {
+    return { status: "error", message: "このリーグを編集する権限がありません。" };
+  }
+
+  await prisma.match.delete({
+    where: { id: matchId },
+  });
+
+  revalidatePath("/admin/results");
+
+  return {
+    status: "success",
+    message: "試合結果を削除しました。",
   };
 }
 
@@ -192,6 +268,167 @@ export async function upsertStanding(
   };
 }
 
+export async function deleteStanding(
+  _prevState: ResultActionState,
+  formData: FormData,
+): Promise<ResultActionState> {
+  const scope = await getAdminScope();
+  const standingId = sanitizePlainText(String(formData.get("standingId") ?? ""), 64);
+  const divisionId = sanitizePlainText(String(formData.get("divisionId") ?? ""), 64);
+
+  if (!isValidUuid(standingId) || !isValidUuid(divisionId)) {
+    return { status: "error", message: "削除対象の順位表行が見つかりませんでした。" };
+  }
+
+  if (!canEditDivision(scope, divisionId)) {
+    return { status: "error", message: "このリーグを編集する権限がありません。" };
+  }
+
+  await prisma.standing.delete({
+    where: { id: standingId },
+  });
+
+  revalidatePath("/admin/results");
+
+  return {
+    status: "success",
+    message: "順位表の行を削除しました。",
+  };
+}
+
+export async function regenerateStandingsFromMatches(
+  _prevState: ResultActionState,
+  formData: FormData,
+): Promise<ResultActionState> {
+  const scope = await getAdminScope();
+  const divisionId = sanitizePlainText(String(formData.get("divisionId") ?? ""), 64);
+
+  if (!isValidUuid(divisionId)) {
+    return { status: "error", message: "対象リーグが見つかりませんでした。" };
+  }
+
+  if (!canEditDivision(scope, divisionId)) {
+    return { status: "error", message: "このリーグを編集する権限がありません。" };
+  }
+
+  const division = await prisma.division.findUnique({
+    where: { id: divisionId },
+    include: {
+      teams: {
+        include: { team: true },
+      },
+      matches: {
+        where: {
+          status: MatchStatus.PLAYED,
+          homeScore: { not: null },
+          awayScore: { not: null },
+        },
+        orderBy: [{ matchDate: "asc" }, { createdAt: "asc" }],
+      },
+    },
+  });
+
+  if (!division) {
+    return { status: "error", message: "対象リーグが見つかりませんでした。" };
+  }
+
+  const table = new Map(
+    division.teams.map((assignment) => [
+      assignment.teamId,
+      {
+        teamId: assignment.teamId,
+        played: 0,
+        won: 0,
+        drawn: 0,
+        lost: 0,
+        goalsFor: 0,
+        goalsAgainst: 0,
+        goalDifference: 0,
+        points: 0,
+      },
+    ]),
+  );
+
+  for (const match of division.matches) {
+    const home = table.get(match.homeTeamId);
+    const away = table.get(match.awayTeamId);
+
+    if (!home || !away || match.homeScore === null || match.awayScore === null) {
+      continue;
+    }
+
+    home.played += 1;
+    away.played += 1;
+    home.goalsFor += match.homeScore;
+    home.goalsAgainst += match.awayScore;
+    away.goalsFor += match.awayScore;
+    away.goalsAgainst += match.homeScore;
+
+    if (match.homeScore > match.awayScore) {
+      home.won += 1;
+      away.lost += 1;
+      home.points += 3;
+    } else if (match.homeScore < match.awayScore) {
+      away.won += 1;
+      home.lost += 1;
+      away.points += 3;
+    } else {
+      home.drawn += 1;
+      away.drawn += 1;
+      home.points += 1;
+      away.points += 1;
+    }
+  }
+
+  const rows = Array.from(table.values())
+    .map((row) => ({
+      ...row,
+      goalDifference: row.goalsFor - row.goalsAgainst,
+    }))
+    .sort((a, b) => {
+      if (b.points !== a.points) return b.points - a.points;
+      if (b.goalDifference !== a.goalDifference) return b.goalDifference - a.goalDifference;
+      if (b.goalsFor !== a.goalsFor) return b.goalsFor - a.goalsFor;
+      const aName = division.teams.find((team) => team.teamId === a.teamId)?.team.name ?? "";
+      const bName = division.teams.find((team) => team.teamId === b.teamId)?.team.name ?? "";
+      return aName.localeCompare(bName, "ja");
+    })
+    .map((row, index) => ({
+      ...row,
+      rank: index + 1,
+    }));
+
+  await prisma.$transaction([
+    prisma.standing.deleteMany({
+      where: { divisionId },
+    }),
+    ...rows.map((row) =>
+      prisma.standing.create({
+        data: {
+          divisionId,
+          teamId: row.teamId,
+          rank: row.rank,
+          played: row.played,
+          won: row.won,
+          drawn: row.drawn,
+          lost: row.lost,
+          goalsFor: row.goalsFor,
+          goalsAgainst: row.goalsAgainst,
+          goalDifference: row.goalDifference,
+          points: row.points,
+        },
+      }),
+    ),
+  ]);
+
+  revalidatePath("/admin/results");
+
+  return {
+    status: "success",
+    message: "試合結果から順位表を再計算しました。",
+  };
+}
+
 function canEditDivision(
   scope: Awaited<ReturnType<typeof getAdminScope>>,
   divisionId: string,
@@ -219,4 +456,19 @@ async function uploadResultImage(fileValue: FormDataEntryValue | null) {
   });
 
   return blob.url;
+}
+
+async function resolveVenueId(venueName: string) {
+  if (!venueName) {
+    return null;
+  }
+
+  const venue = await prisma.venue.upsert({
+    where: { name: venueName },
+    update: {},
+    create: { name: venueName },
+    select: { id: true },
+  });
+
+  return venue.id;
 }

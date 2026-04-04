@@ -2,9 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useId, useState } from "react";
 import { createTeam, type TeamActionState, updateTeam } from "@/app/admin/teams/actions";
-import type { TeamAssetOption } from "@/lib/team-assets";
 
 const initialTeamActionState: TeamActionState = {
   status: "idle",
@@ -30,21 +29,19 @@ type TeamFormValues = {
 export function AdminTeamForm({
   mode,
   initialValues,
-  logoOptions,
-  photoOptions,
 }: {
   mode: "create" | "edit";
   initialValues: TeamFormValues;
-  logoOptions: TeamAssetOption[];
-  photoOptions: TeamAssetOption[];
 }) {
   const action = mode === "create" ? createTeam : updateTeam;
   const [state, formAction, pending] = useActionState(action, initialTeamActionState);
   const [toast, setToast] = useState<TeamActionState>(initialTeamActionState);
-  const [selectedLogo, setSelectedLogo] = useState(initialValues.logoPath);
-  const [selectedPhoto, setSelectedPhoto] = useState(initialValues.photoPath);
   const [uploadedLogoPreview, setUploadedLogoPreview] = useState<string | null>(null);
   const [uploadedPhotoPreview, setUploadedPhotoPreview] = useState<string | null>(null);
+  const [logoFileName, setLogoFileName] = useState("");
+  const [photoFileName, setPhotoFileName] = useState("");
+  const logoInputId = useId();
+  const photoInputId = useId();
 
   useEffect(() => {
     if (state.status !== "idle") {
@@ -64,8 +61,8 @@ export function AdminTeamForm({
     };
   }, [uploadedLogoPreview, uploadedPhotoPreview]);
 
-  const logoPreview = uploadedLogoPreview ?? selectedLogo;
-  const photoPreview = uploadedPhotoPreview ?? selectedPhoto;
+  const logoPreview = uploadedLogoPreview ?? initialValues.logoPath;
+  const photoPreview = uploadedPhotoPreview ?? initialValues.photoPath;
 
   return (
     <>
@@ -90,6 +87,8 @@ export function AdminTeamForm({
         </div>
         <form action={formAction} className="admin-form-stack" encType="multipart/form-data">
           {mode === "edit" && initialValues.id ? <input type="hidden" name="teamId" value={initialValues.id} /> : null}
+          {initialValues.logoPath ? <input type="hidden" name="logoPath" value={initialValues.logoPath} /> : null}
+          {initialValues.photoPath ? <input type="hidden" name="photoPath" value={initialValues.photoPath} /> : null}
           <label className="admin-field">
             <span>チーム名</span>
             <input type="text" name="name" defaultValue={initialValues.name} required />
@@ -104,65 +103,59 @@ export function AdminTeamForm({
           </label>
           <label className="admin-field">
             <span>ロゴ画像</span>
-            <select name="logoPath" defaultValue={initialValues.logoPath} onChange={(event) => setSelectedLogo(event.target.value)}>
-              <option value="">未選択</option>
-              {logoOptions.map((option) => (
-                <option key={option.path} value={option.path}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="admin-field">
-            <span>ロゴ画像をアップロード</span>
-            <input
-              type="file"
+            <UploadField
+              inputId={logoInputId}
               name="logoFile"
-              accept="image/*"
-              onChange={(event) => {
+              fileName={logoFileName}
+              label="ロゴ画像を選択"
+              hint={mode === "edit" ? "アップロードすると現在のロゴ画像を置き換えます。" : "PNG / JPG / WebP などの画像をアップロードできます。"}
+              onFileChange={(file) => {
                 if (uploadedLogoPreview) {
                   URL.revokeObjectURL(uploadedLogoPreview);
                 }
 
-                const file = event.target.files?.[0];
+                setLogoFileName(file?.name ?? "");
                 setUploadedLogoPreview(file ? URL.createObjectURL(file) : null);
               }}
             />
-            <small className="admin-field__help">新規アップロードした画像が、選択済みのロゴより優先されます。</small>
           </label>
           {logoPreview ? (
-            <AssetPreview src={logoPreview} alt="選択中のロゴ" width={120} height={120} wide={false} />
+            <AssetPreview
+              src={logoPreview}
+              alt="選択中のロゴ"
+              width={120}
+              height={120}
+              wide={false}
+              caption={uploadedLogoPreview ? "アップロード予定のロゴ画像" : mode === "edit" ? "現在のロゴ画像" : "選択中のロゴ画像"}
+            />
           ) : null}
           <label className="admin-field">
             <span>チーム画像</span>
-            <select name="photoPath" defaultValue={initialValues.photoPath} onChange={(event) => setSelectedPhoto(event.target.value)}>
-              <option value="">未選択</option>
-              {photoOptions.map((option) => (
-                <option key={option.path} value={option.path}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="admin-field">
-            <span>チーム画像をアップロード</span>
-            <input
-              type="file"
+            <UploadField
+              inputId={photoInputId}
               name="photoFile"
-              accept="image/*"
-              onChange={(event) => {
+              fileName={photoFileName}
+              label="チーム画像を選択"
+              hint={mode === "edit" ? "アップロードすると現在のチーム画像を置き換えます。" : "横長の画像だと一覧で見やすく表示されます。"}
+              onFileChange={(file) => {
                 if (uploadedPhotoPreview) {
                   URL.revokeObjectURL(uploadedPhotoPreview);
                 }
 
-                const file = event.target.files?.[0];
+                setPhotoFileName(file?.name ?? "");
                 setUploadedPhotoPreview(file ? URL.createObjectURL(file) : null);
               }}
             />
-            <small className="admin-field__help">新規アップロードした画像が、選択済みのチーム画像より優先されます。</small>
           </label>
           {photoPreview ? (
-            <AssetPreview src={photoPreview} alt="選択中のチーム画像" width={320} height={180} wide />
+            <AssetPreview
+              src={photoPreview}
+              alt="選択中のチーム画像"
+              width={320}
+              height={180}
+              wide
+              caption={uploadedPhotoPreview ? "アップロード予定のチーム画像" : mode === "edit" ? "現在のチーム画像" : "選択中のチーム画像"}
+            />
           ) : null}
           <label className="admin-field">
             <span>結成</span>
@@ -205,32 +198,70 @@ export function AdminTeamForm({
   );
 }
 
+function UploadField({
+  inputId,
+  name,
+  fileName,
+  label,
+  hint,
+  onFileChange,
+}: {
+  inputId: string;
+  name: string;
+  fileName: string;
+  label: string;
+  hint: string;
+  onFileChange: (file: File | null) => void;
+}) {
+  return (
+    <div className="upload-field">
+      <input
+        id={inputId}
+        type="file"
+        name={name}
+        accept="image/*"
+        className="upload-field__input"
+        onChange={(event) => onFileChange(event.target.files?.[0] ?? null)}
+      />
+      <label htmlFor={inputId} className="upload-field__label">
+        <span className="upload-field__button">{label}</span>
+        <span className="upload-field__meta">{fileName || "未選択"}</span>
+      </label>
+      <small className="admin-field__help">{hint}</small>
+    </div>
+  );
+}
+
 function AssetPreview({
   src,
   alt,
   width,
   height,
   wide,
+  caption,
 }: {
   src: string;
   alt: string;
   width: number;
   height: number;
   wide: boolean;
+  caption: string;
 }) {
   const className = wide ? "admin-asset-preview admin-asset-preview--wide" : "admin-asset-preview";
 
   if (src.startsWith("blob:")) {
     return (
-      <div className={className}>
+      <figure className={className}>
         <img src={src} alt={alt} width={width} height={height} />
-      </div>
+        <figcaption>{caption}</figcaption>
+      </figure>
     );
   }
 
   return (
-    <div className={className}>
+    <figure className={className}>
       <Image src={src} alt={alt} width={width} height={height} />
-    </div>
+      <figcaption>{caption}</figcaption>
+    </figure>
   );
 }

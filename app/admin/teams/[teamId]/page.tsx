@@ -3,7 +3,6 @@ import { AdminLayoutShell } from "@/components/admin-layout-shell";
 import { AdminTeamForm } from "@/components/admin-team-form";
 import { requireOwner } from "@/lib/admin-access";
 import { prisma } from "@/lib/prisma";
-import { getTeamAssetOptions } from "@/lib/team-assets";
 
 export default async function AdminTeamEditPage({
   params,
@@ -12,7 +11,6 @@ export default async function AdminTeamEditPage({
 }) {
   const scope = await requireOwner();
   const { teamId } = await params;
-  const { logos, photos } = await getTeamAssetOptions();
 
   const team = await prisma.team.findUnique({
     where: { id: teamId },
@@ -41,8 +39,6 @@ export default async function AdminTeamEditPage({
           status: team.status,
           sortOrder: team.sortOrder,
         }}
-        logoOptions={logos}
-        photoOptions={photos}
       />
     </AdminLayoutShell>
   );

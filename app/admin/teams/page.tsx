@@ -1,9 +1,9 @@
 import { AdminLayoutShell } from "@/components/admin-layout-shell";
-import { getAdminScope } from "@/lib/admin-access";
+import { requireOwner } from "@/lib/admin-access";
 import { teams } from "@/lib/site-data";
 
 export default async function AdminTeamsPage() {
-  const scope = await getAdminScope();
+  const scope = await requireOwner();
 
   return (
     <AdminLayoutShell currentPath="/admin/teams" title="チーム管理" kicker="Teams" scope={scope}>

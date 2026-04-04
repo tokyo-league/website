@@ -21,10 +21,14 @@ export async function AdminLayoutShell({
   const session = await auth();
   const adminNav = [
     { href: "/admin", label: "ダッシュボード" },
-    { href: "/admin/news", label: "ニュース" },
     { href: "/admin/competitions", label: "大会" },
-    { href: "/admin/teams", label: "チーム" },
-    { href: "/admin/downloads", label: "資料" },
+    ...(scope?.canManageGlobalContent
+      ? [
+          { href: "/admin/news", label: "ニュース" },
+          { href: "/admin/teams", label: "チーム" },
+          { href: "/admin/downloads", label: "資料" },
+        ]
+      : []),
     ...(scope?.canManageAssignments ? [{ href: "/admin/assignments", label: "担当割当" }] : []),
   ];
 

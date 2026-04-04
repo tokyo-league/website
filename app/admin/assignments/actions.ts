@@ -1,17 +1,44 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { AdminRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireOwner } from "@/lib/admin-access";
+
+export async function createAdminUser(formData: FormData) {
+  await requireOwner();
+
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  const name = String(formData.get("name") ?? "").trim();
+  const role = String(formData.get("role") ?? "EDITOR") as AdminRole;
+
+  if (!email || !name || !["OWNER", "EDITOR"].includes(role)) {
+    return;
+  }
+
+  await prisma.user.upsert({
+    where: { email },
+    update: {
+      name,
+      role,
+    },
+    create: {
+      email,
+      name,
+      role,
+    },
+  });
+
+  revalidatePath("/admin/assignments");
+}
 
 export async function createDivisionAssignment(formData: FormData) {
   await requireOwner();
 
   const userId = String(formData.get("userId") ?? "");
   const divisionId = String(formData.get("divisionId") ?? "");
-  const permission = String(formData.get("permission") ?? "");
 
-  if (!userId || !divisionId || !permission) {
+  if (!userId || !divisionId) {
     return;
   }
 
@@ -19,7 +46,7 @@ export async function createDivisionAssignment(formData: FormData) {
     where: {
       userId,
       divisionId,
-      permission: permission as "RESULTS_EDITOR" | "STANDINGS_EDITOR" | "DIVISION_MANAGER",
+      permission: "DIVISION_MANAGER",
     },
   });
 
@@ -28,7 +55,7 @@ export async function createDivisionAssignment(formData: FormData) {
       data: {
         userId,
         divisionId,
-        permission: permission as "RESULTS_EDITOR" | "STANDINGS_EDITOR" | "DIVISION_MANAGER",
+        permission: "DIVISION_MANAGER",
       },
     });
   }

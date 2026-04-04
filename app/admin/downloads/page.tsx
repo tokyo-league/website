@@ -1,9 +1,9 @@
 import { AdminLayoutShell } from "@/components/admin-layout-shell";
-import { getAdminScope } from "@/lib/admin-access";
+import { requireOwner } from "@/lib/admin-access";
 import { downloadItems } from "@/lib/site-data";
 
 export default async function AdminDownloadsPage() {
-  const scope = await getAdminScope();
+  const scope = await requireOwner();
 
   return (
     <AdminLayoutShell currentPath="/admin/downloads" title="資料管理" kicker="Downloads" scope={scope}>

@@ -18,6 +18,7 @@ export type AdminScope = {
     permissions: string[];
   }>;
   canManageAssignments: boolean;
+  canManageGlobalContent: boolean;
 };
 
 export async function getAdminScope(): Promise<AdminScope> {
@@ -66,9 +67,10 @@ export async function getAdminScope(): Promise<AdminScope> {
         id: division.id,
         name: division.name,
         competitionName: division.competition.name,
-        permissions: ["DIVISION_MANAGER"],
+        permissions: ["担当リーグ編集"],
       })),
       canManageAssignments: true,
+      canManageGlobalContent: true,
     };
   }
 
@@ -78,7 +80,7 @@ export async function getAdminScope(): Promise<AdminScope> {
     competitionName: assignment.division.competition.name,
     permissions: admin.divisionPermissions
       .filter((item) => item.divisionId === assignment.divisionId)
-      .map((item) => item.permission),
+      .map(() => "担当リーグ編集"),
   }));
 
   const uniqueDivisions = accessibleDivisions.filter(
@@ -94,6 +96,7 @@ export async function getAdminScope(): Promise<AdminScope> {
     },
     accessibleDivisions: uniqueDivisions,
     canManageAssignments: false,
+    canManageGlobalContent: false,
   };
 }
 

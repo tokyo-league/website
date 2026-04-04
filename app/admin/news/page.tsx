@@ -1,9 +1,9 @@
 import { AdminLayoutShell } from "@/components/admin-layout-shell";
-import { getAdminScope } from "@/lib/admin-access";
+import { requireOwner } from "@/lib/admin-access";
 import { newsItems } from "@/lib/site-data";
 
 export default async function AdminNewsPage() {
-  const scope = await getAdminScope();
+  const scope = await requireOwner();
 
   return (
     <AdminLayoutShell currentPath="/admin/news" title="ニュース管理" kicker="News" scope={scope}>

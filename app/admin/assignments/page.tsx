@@ -1,7 +1,7 @@
 import { AdminLayoutShell } from "@/components/admin-layout-shell";
 import { prisma } from "@/lib/prisma";
 import { requireOwner } from "@/lib/admin-access";
-import { createDivisionAssignment, deleteDivisionAssignment } from "./actions";
+import { createAdminUser, createDivisionAssignment, deleteDivisionAssignment } from "./actions";
 
 export default async function AdminAssignmentsPage() {
   const scope = await requireOwner();
@@ -40,8 +40,37 @@ export default async function AdminAssignmentsPage() {
         <article className="admin-card">
           <div className="card__header">
             <div>
+              <p className="section-kicker">Users</p>
+              <h3>担当者を追加</h3>
+            </div>
+          </div>
+          <form action={createAdminUser} className="admin-form-stack">
+            <label className="admin-field">
+              <span>Googleメールアドレス</span>
+              <input type="email" name="email" placeholder="user@example.com" required />
+            </label>
+            <label className="admin-field">
+              <span>表示名</span>
+              <input type="text" name="name" placeholder="担当者名" required />
+            </label>
+            <label className="admin-field">
+              <span>ロール</span>
+              <select name="role" defaultValue="EDITOR">
+                <option value="EDITOR">Editor</option>
+                <option value="OWNER">Owner</option>
+              </select>
+            </label>
+            <button type="submit" className="button">
+              担当者を保存
+            </button>
+          </form>
+        </article>
+
+        <article className="admin-card">
+          <div className="card__header">
+            <div>
               <p className="section-kicker">Assign</p>
-              <h3>入稿担当を追加</h3>
+              <h3>担当リーグを割り当て</h3>
             </div>
           </div>
           <form action={createDivisionAssignment} className="admin-form-stack">
@@ -51,11 +80,13 @@ export default async function AdminAssignmentsPage() {
                 <option value="" disabled>
                   担当者を選択
                 </option>
-                {users.map((user) => (
-                  <option key={user.id} value={user.id}>
-                    {user.name} / {user.email}
-                  </option>
-                ))}
+                {users
+                  .filter((user) => user.role === "EDITOR")
+                  .map((user) => (
+                    <option key={user.id} value={user.id}>
+                      {user.name} / {user.email}
+                    </option>
+                  ))}
               </select>
             </label>
             <label className="admin-field">
@@ -73,41 +104,37 @@ export default async function AdminAssignmentsPage() {
             </label>
             <label className="admin-field">
               <span>権限</span>
-              <select name="permission" defaultValue="RESULTS_EDITOR">
-                <option value="RESULTS_EDITOR">試合結果編集</option>
-                <option value="STANDINGS_EDITOR">順位表編集</option>
-                <option value="DIVISION_MANAGER">リーグ管理</option>
-              </select>
+              <input type="text" value="担当リーグ編集" readOnly />
             </label>
             <button type="submit" className="button">
               割当を追加
             </button>
           </form>
         </article>
-
-        <article className="admin-card">
-          <div className="card__header">
-            <div>
-              <p className="section-kicker">Policy</p>
-              <h3>運用メモ</h3>
-            </div>
-          </div>
-          <ul className="admin-list">
-            <li>
-              <strong>Owner</strong>
-              <span>全リーグを横断して編集可能</span>
-            </li>
-            <li>
-              <strong>Editor</strong>
-              <span>割当済みリーグのみ編集対象に表示</span>
-            </li>
-            <li>
-              <strong>権限単位</strong>
-              <span>試合結果 / 順位表 / リーグ管理</span>
-            </li>
-          </ul>
-        </article>
       </div>
+
+      <article className="admin-card">
+        <div className="card__header">
+          <div>
+            <p className="section-kicker">Policy</p>
+            <h3>運用メモ</h3>
+          </div>
+        </div>
+        <ul className="admin-list">
+          <li>
+            <strong>Owner</strong>
+            <span>全リーグ、ニュース、チーム、資料を編集可能</span>
+          </li>
+          <li>
+            <strong>Editor</strong>
+            <span>割当済みリーグのみ編集対象に表示</span>
+          </li>
+          <li>
+            <strong>担当リーグ権限</strong>
+            <span>試合結果、順位表、リーグ管理をまとめて編集可能</span>
+          </li>
+        </ul>
+      </article>
 
       <article className="admin-card">
         <div className="card__header">
@@ -153,7 +180,7 @@ export default async function AdminAssignmentsPage() {
 }
 
 const permissionLabel = {
-  RESULTS_EDITOR: "試合結果編集",
-  STANDINGS_EDITOR: "順位表編集",
-  DIVISION_MANAGER: "リーグ管理",
+  RESULTS_EDITOR: "担当リーグ編集",
+  STANDINGS_EDITOR: "担当リーグ編集",
+  DIVISION_MANAGER: "担当リーグ編集",
 } as const;

@@ -35,10 +35,12 @@ export async function createTeam(
     await prisma.team.create({
       data: payload,
     });
-  } catch {
+  } catch (error) {
+    console.error("createTeam failed", error);
+
     return {
       status: "error",
-      message: "同名のチームまたは同じ内部識別子のチームが既に存在する可能性があります。",
+      message: "チーム保存に失敗しました。入力内容またはサーバーログを確認してください。",
     };
   }
 
@@ -94,7 +96,9 @@ export async function updateTeam(
         slug: currentTeam.slug,
       },
     });
-  } catch {
+  } catch (error) {
+    console.error("updateTeam failed", error);
+
     return {
       status: "error",
       message: "チーム情報の更新に失敗しました。",
@@ -155,9 +159,18 @@ export async function deleteTeam(
     };
   }
 
-  await prisma.team.delete({
-    where: { id: teamId },
-  });
+  try {
+    await prisma.team.delete({
+      where: { id: teamId },
+    });
+  } catch (error) {
+    console.error("deleteTeam failed", error);
+
+    return {
+      status: "error",
+      message: "チーム削除に失敗しました。",
+    };
+  }
 
   revalidatePath("/admin/teams");
 

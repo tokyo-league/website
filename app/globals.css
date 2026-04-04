@@ -845,6 +845,29 @@ button {
   font-size: 12px;
 }
 
+.admin-asset-preview {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 140px;
+  min-height: 140px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: white;
+}
+
+.admin-asset-preview img {
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.admin-asset-preview--wide {
+  width: min(100%, 360px);
+}
+
 .admin-toast {
   position: sticky;
   top: 20px;

@@ -1,9 +1,11 @@
 import { AdminLayoutShell } from "@/components/admin-layout-shell";
 import { AdminTeamForm } from "@/components/admin-team-form";
 import { requireOwner } from "@/lib/admin-access";
+import { getTeamAssetOptions } from "@/lib/team-assets";
 
 export default async function AdminTeamNewPage() {
   const scope = await requireOwner();
+  const { logos, photos } = await getTeamAssetOptions();
 
   return (
     <AdminLayoutShell currentPath="/admin/teams" title="チーム管理" kicker="Teams" scope={scope}>
@@ -23,6 +25,8 @@ export default async function AdminTeamNewPage() {
           status: "PUBLISHED",
           sortOrder: 0,
         }}
+        logoOptions={logos}
+        photoOptions={photos}
       />
     </AdminLayoutShell>
   );

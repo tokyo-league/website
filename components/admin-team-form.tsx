@@ -1,8 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useActionState, useEffect, useState } from "react";
 import { createTeam, initialTeamActionState, type TeamActionState, updateTeam } from "@/app/admin/teams/actions";
+import type { TeamAssetOption } from "@/lib/team-assets";
 
 type TeamFormValues = {
   id?: string;
@@ -23,13 +25,19 @@ type TeamFormValues = {
 export function AdminTeamForm({
   mode,
   initialValues,
+  logoOptions,
+  photoOptions,
 }: {
   mode: "create" | "edit";
   initialValues: TeamFormValues;
+  logoOptions: TeamAssetOption[];
+  photoOptions: TeamAssetOption[];
 }) {
   const action = mode === "create" ? createTeam : updateTeam;
   const [state, formAction, pending] = useActionState(action, initialTeamActionState);
   const [toast, setToast] = useState<TeamActionState>(initialTeamActionState);
+  const [selectedLogo, setSelectedLogo] = useState(initialValues.logoPath);
+  const [selectedPhoto, setSelectedPhoto] = useState(initialValues.photoPath);
 
   useEffect(() => {
     if (state.status !== "idle") {
@@ -73,13 +81,37 @@ export function AdminTeamForm({
             <textarea name="profile" rows={5} defaultValue={initialValues.profile} />
           </label>
           <label className="admin-field">
-            <span>ロゴ画像パス</span>
-            <input type="text" name="logoPath" defaultValue={initialValues.logoPath} />
+            <span>ロゴ画像</span>
+            <select name="logoPath" defaultValue={initialValues.logoPath} onChange={(event) => setSelectedLogo(event.target.value)}>
+              <option value="">未選択</option>
+              {logoOptions.map((option) => (
+                <option key={option.path} value={option.path}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
           </label>
+          {selectedLogo ? (
+            <div className="admin-asset-preview">
+              <Image src={selectedLogo} alt="選択中のロゴ" width={120} height={120} />
+            </div>
+          ) : null}
           <label className="admin-field">
-            <span>チーム画像パス</span>
-            <input type="text" name="photoPath" defaultValue={initialValues.photoPath} />
+            <span>チーム画像</span>
+            <select name="photoPath" defaultValue={initialValues.photoPath} onChange={(event) => setSelectedPhoto(event.target.value)}>
+              <option value="">未選択</option>
+              {photoOptions.map((option) => (
+                <option key={option.path} value={option.path}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
           </label>
+          {selectedPhoto ? (
+            <div className="admin-asset-preview admin-asset-preview--wide">
+              <Image src={selectedPhoto} alt="選択中のチーム画像" width={320} height={180} />
+            </div>
+          ) : null}
           <label className="admin-field">
             <span>結成</span>
             <input type="text" name="founded" defaultValue={initialValues.founded} />

@@ -1,4 +1,5 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { randomUUID } from "node:crypto";
 import path from "node:path";
 import process from "node:process";
 import { PrismaClient, CompetitionStatus, CompetitionType, PublishStatus } from "@prisma/client";
@@ -42,6 +43,23 @@ const teamAliases = new Map([
   ["日本橋fcソレイユ", "日本橋FCソレイユ"],
   ["日本橋fcソレイユjr", "日本橋FCソレイユ"],
   ["東加平キッカーズ", "東加平キッカーズ"],
+  ["スポーカル", "スポーカル六本木SC"],
+  ["スポーカル六本木", "スポーカル六本木SC"],
+  ["スポーカル六本木sc", "スポーカル六本木SC"],
+  ["boa", "BOA SPORTS CLUB"],
+  ["boasports", "BOA SPORTS CLUB"],
+  ["boasportsclub", "BOA SPORTS CLUB"],
+  ["boaスポーツ", "BOA SPORTS CLUB"],
+  ["boaスポーツclub", "BOA SPORTS CLUB"],
+  ["暁星", "暁星アストラ・ジュニア"],
+  ["暁星アストラjr", "暁星アストラ・ジュニア"],
+  ["暁星アストラジュニア", "暁星アストラ・ジュニア"],
+  ["ksc加平", "KSC加平SSS"],
+  ["ksc加平sc", "KSC加平SSS"],
+  ["ksc加平sss", "KSC加平SSS"],
+  ["ジュニアコスモス城北fc", "ジュニアコスモス城北"],
+  ["ジュニアコスモス城北jcu", "ジュニアコスモス城北"],
+  ["東加平sss", "東加平キッカーズ"],
 ]);
 
 const owner = await prisma.user.findFirst({
@@ -126,7 +144,7 @@ async function importNews() {
 async function importLeagueHistory(categories) {
   let competitionCount = 0;
   let divisionCount = 0;
-  const unmatchedTeams = [];
+  const createdPlaceholderTeams = new Set();
 
   for (const category of categories) {
     const edition = parseEdition(category.name);
@@ -211,14 +229,9 @@ async function importLeagueHistory(categories) {
         const matchedTeams = [];
 
         for (const [teamIndexPosition, teamName] of parsed.teams.entries()) {
-          const matchedTeam = findTeam(teamName);
+          const matchedTeam = await findOrCreateTeam(teamName, createdPlaceholderTeams);
 
           if (!matchedTeam) {
-            unmatchedTeams.push({
-              competition: competition.name,
-              division: division.name,
-              teamName,
-            });
             continue;
           }
 
@@ -246,7 +259,7 @@ async function importLeagueHistory(categories) {
   return {
     importedCompetitions: competitionCount,
     importedDivisions: divisionCount,
-    unmatchedTeams,
+    createdPlaceholderTeams: Array.from(createdPlaceholderTeams),
   };
 }
 
@@ -426,7 +439,7 @@ function normalizeTeamName(value) {
     .replace(/クラブ/g, "club");
 }
 
-function findTeam(name) {
+async function findOrCreateTeam(name, createdPlaceholderTeams) {
   const normalized = normalizeTeamName(name);
   const aliasedName = teamAliases.get(normalized);
 
@@ -434,7 +447,94 @@ function findTeam(name) {
     return existingTeams.find((team) => team.name === aliasedName) ?? null;
   }
 
-  return teamIndex.get(normalized) ?? null;
+  const exact = teamIndex.get(normalized);
+
+  if (exact) {
+    return exact;
+  }
+
+  const containsMatch = existingTeams.find((team) => {
+    const target = normalizeTeamName(team.name);
+
+    return (
+      (normalized.length >= 4 && target.includes(normalized)) ||
+      (target.length >= 4 && normalized.includes(target))
+    );
+  });
+
+  if (containsMatch) {
+    return containsMatch;
+  }
+
+  const scoredMatches = existingTeams
+    .map((team) => ({
+      team,
+      score: similarity(normalized, normalizeTeamName(team.name)),
+    }))
+    .sort((a, b) => b.score - a.score);
+
+  if (scoredMatches[0]?.score >= 0.55) {
+    return scoredMatches[0].team;
+  }
+
+  const sanitizedName = sanitizeText(name);
+
+  if (!sanitizedName) {
+    return null;
+  }
+
+  const created = await prisma.team.upsert({
+    where: { name: sanitizedName },
+    update: {},
+    create: {
+      name: sanitizedName,
+      slug: slugify(`${sanitizedName}-${randomUUID().slice(0, 8)}`),
+      status: PublishStatus.ARCHIVED,
+      sortOrder: 9999,
+      profile: "過去大会OCR取り込み用の仮登録チームです。",
+    },
+    select: {
+      id: true,
+      name: true,
+    },
+  });
+
+  existingTeams.push(created);
+  teamIndex.set(normalized, created);
+  createdPlaceholderTeams.add(created.name);
+
+  return created;
+}
+
+function similarity(left, right) {
+  if (!left || !right) {
+    return 0;
+  }
+
+  if (left === right) {
+    return 1;
+  }
+
+  const leftBigrams = makeBigrams(left);
+  const rightBigrams = makeBigrams(right);
+  const rightSet = new Set(rightBigrams);
+  let overlap = 0;
+
+  for (const gram of leftBigrams) {
+    if (rightSet.has(gram)) {
+      overlap += 1;
+    }
+  }
+
+  return (2 * overlap) / (leftBigrams.length + rightBigrams.length || 1);
+}
+
+function makeBigrams(value) {
+  if (value.length < 2) {
+    return [value];
+  }
+
+  return Array.from({ length: value.length - 1 }, (_, index) => value.slice(index, index + 2));
 }
 
 async function fetchPaginatedJson(baseUrl) {

@@ -7,3 +7,5 @@ node_modules
 coverage
 *.log
 website/
+*.tsbuildinfo
+.swift-module-cache/

@@ -1,4 +1,5 @@
 import { readFile } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
 
 type ManifestFile = {
   group: string;
@@ -22,7 +23,7 @@ async function readManifest() {
   }
 
   const manifest = JSON.parse(
-    await readFile(new URL("../public/site-assets/manifest.json", import.meta.url), "utf8"),
+    await readFile(fileURLToPath(new URL("../public/site-assets/manifest.json", import.meta.url)), "utf8"),
   ) as Manifest;
 
   cachedManifest = manifest;

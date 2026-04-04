@@ -104,12 +104,17 @@ button {
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  min-height: 84px;
+  min-height: 72px;
 }
 
 .site-header__logo {
   display: inline-flex;
   align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .site-header__nav {
@@ -121,34 +126,52 @@ button {
   font-size: 14px;
 }
 
-.home-hero,
+.site-header__nav a {
+  white-space: nowrap;
+}
+
+.home-intro,
 .page-intro {
-  padding: 48px 0 24px;
+  padding: 28px 0 12px;
 }
 
-.home-hero__inner,
+.home-intro__panel,
 .page-intro__inner {
-  display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: var(--shadow);
+}
+
+.home-intro__panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 24px;
-  align-items: stretch;
+  padding: 28px;
 }
 
-.home-hero__copy,
+.home-intro__links {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.home-intro h1,
 .page-intro__inner > div:first-child {
-  padding: 24px 0;
+  margin: 0;
 }
 
-.home-hero h1,
+.home-intro h1,
 .page-intro h1,
 .admin-sidebar h1 {
-  margin: 0;
-  font-size: clamp(34px, 5vw, 60px);
-  line-height: 1.03;
+  font-size: clamp(32px, 4.4vw, 52px);
+  line-height: 1.06;
   letter-spacing: -0.04em;
 }
 
-.home-hero p,
+.home-intro p,
 .page-intro p {
   max-width: 56ch;
   margin: 16px 0 0;
@@ -156,9 +179,9 @@ button {
   line-height: 1.9;
 }
 
-.home-hero__visual,
 .page-intro__visual,
-.team-feature__image {
+.team-feature__image,
+.result-feature__image {
   position: relative;
   min-height: 320px;
   overflow: hidden;
@@ -168,18 +191,14 @@ button {
   box-shadow: var(--shadow);
 }
 
-.home-hero__visual img,
 .page-intro__visual img,
-.team-feature__image img {
+.team-feature__image img,
+.result-feature__image img {
   object-fit: cover;
 }
 
 .section-block {
   padding: 24px 0 40px;
-}
-
-.section-block--muted {
-  padding-bottom: 72px;
 }
 
 .home-grid,
@@ -242,6 +261,44 @@ button {
   display: grid;
 }
 
+.result-feature {
+  display: grid;
+  gap: 18px;
+}
+
+.result-feature__copy h3 {
+  margin: 0;
+  font-size: clamp(24px, 2.8vw, 34px);
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+}
+
+.result-feature__copy p {
+  margin: 10px 0 0;
+  color: var(--muted);
+  line-height: 1.8;
+}
+
+.mini-meta {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+.mini-meta span,
+.download-shortcuts span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: white;
+  font-size: 13px;
+  color: var(--muted);
+}
+
 .list-row {
   padding: 18px 0;
   border-top: 1px solid var(--line);
@@ -282,6 +339,16 @@ button {
   margin: 12px 0 0;
   color: var(--muted);
   line-height: 1.8;
+}
+
+.card--download {
+  align-content: start;
+}
+
+.download-shortcuts {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .section-heading {
@@ -622,7 +689,7 @@ button {
     align-items: flex-start;
   }
 
-  .home-hero__inner,
+  .home-intro__panel,
   .page-intro__inner,
   .home-grid,
   .team-feature,
@@ -635,6 +702,31 @@ button {
   .admin-stats,
   .team-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .site-header__inner {
+    gap: 14px;
+  }
+
+  .site-header__logo {
+    width: 100%;
+  }
+
+  .site-header__nav {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 10px;
+  }
+
+  .site-header__nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 36px;
+    padding: 0 12px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.92);
+    font-size: 13px;
   }
 
   .admin-shell {
@@ -652,11 +744,24 @@ button {
     padding: 16px 0;
   }
 
-  .site-header__nav {
-    gap: 12px;
+  .site-header__logo {
+    gap: 10px;
+    font-size: 12px;
+    letter-spacing: 0.06em;
   }
 
-  .home-hero,
+  .site-header__logo img {
+    width: 44px;
+    height: 44px;
+  }
+
+  .site-header__nav {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .home-intro,
   .page-intro,
   .section-block {
     padding-top: 24px;

@@ -10,10 +10,11 @@ export function SiteHeader() {
           <Image
             src={siteAssets.logo}
             alt="TOKYO Junior Soccer League"
-            width={182}
-            height={53}
+            width={52}
+            height={52}
             priority
           />
+          <span>TOKYO Junior Soccer League</span>
         </Link>
         <nav className="site-header__nav" aria-label="グローバルナビゲーション">
           {siteNav.map((item) => (

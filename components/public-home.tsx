@@ -5,36 +5,62 @@ import { divisionCards, newsItems, siteAssets } from "@/lib/site-data";
 export function PublicHome() {
   return (
     <main>
-      <section className="home-hero">
-        <div className="container home-hero__inner">
-          <div className="home-hero__copy">
-            <p className="section-kicker">2026 Season</p>
-            <h1>試合結果と最新情報を、最短距離で。</h1>
-            <p>
-              現行サイトのミニマルなテイストは残しつつ、ニュースと試合結果を上部に集約した公開トップを想定しています。
-            </p>
-            <div className="button-row">
+      <section className="home-intro">
+        <div className="container">
+          <div className="home-intro__panel">
+            <div>
+              <p className="section-kicker">2026 Season</p>
+              <h1>第103回 東京リーグ</h1>
+              <p>試合情報、ニュース、参加チーム、資料を既存サイトの雰囲気に寄せて整理したトップページです。</p>
+            </div>
+            <div className="home-intro__links">
               <Link href="/competitions" className="button">
-                試合結果を見る
+                試合情報
               </Link>
               <Link href="/news" className="button button--ghost">
-                ニュース一覧
+                ニュース
+              </Link>
+              <Link href="/teams" className="button button--ghost">
+                参加チーム
               </Link>
             </div>
-          </div>
-          <div className="home-hero__visual">
-            <Image
-              src={siteAssets.heroResult}
-              alt="東京リーグの試合結果画像"
-              fill
-              sizes="(max-width: 960px) 100vw, 42vw"
-            />
           </div>
         </div>
       </section>
 
       <section className="section-block">
         <div className="container home-grid">
+          <article className="card">
+            <div className="card__header">
+              <div>
+                <p className="section-kicker">Competition</p>
+                <h2>試合情報</h2>
+              </div>
+              <Link href="/competitions">大会詳細へ</Link>
+            </div>
+            <div className="result-feature">
+              <div className="result-feature__image">
+                <Image
+                  src={siteAssets.heroResult}
+                  alt="東京リーグの試合結果画像"
+                  fill
+                  sizes="(max-width: 960px) 100vw, 42vw"
+                />
+              </div>
+              <div className="result-feature__copy">
+                <h3>第103回 東京リーグ Aリーグ</h3>
+                <p>現行の結果画像を活かしつつ、リーグ別ページへ遷移できる導線を整理します。</p>
+                <div className="mini-meta">
+                  {divisionCards.map((division) => (
+                    <span key={division.name}>
+                      {division.name} / 最終更新 {division.updatedAt}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </article>
+
           <article className="card">
             <div className="card__header">
               <div>
@@ -56,7 +82,11 @@ export function PublicHome() {
               ))}
             </div>
           </article>
+        </div>
+      </section>
 
+      <section className="section-block">
+        <div className="container home-grid">
           <article className="card">
             <div className="card__header">
               <div>
@@ -76,33 +106,26 @@ export function PublicHome() {
               </div>
               <div className="team-feature__copy">
                 <h3>旭フットボールクラブ</h3>
-                <p>
-                  現サイトのチーム写真を活かしながら、一覧性の高いカード表示に再構成します。
-                </p>
+                <p>現サイトのチーム写真とロゴを使い、紹介一覧を見やすく整理します。</p>
               </div>
             </div>
           </article>
-        </div>
-      </section>
 
-      <section className="section-block section-block--muted">
-        <div className="container">
-          <div className="section-heading">
-            <div>
-              <p className="section-kicker">Competition</p>
-              <h2>第103回 東京リーグ</h2>
+          <article className="card card--download">
+            <div className="card__header">
+              <div>
+                <p className="section-kicker">Download</p>
+                <h2>資料ダウンロード</h2>
+              </div>
+              <Link href="/downloads">一覧へ</Link>
             </div>
-            <Link href="/competitions">大会詳細へ</Link>
-          </div>
-          <div className="division-grid">
-            {divisionCards.map((division) => (
-              <article key={division.name} className="division-card">
-                <h3>{division.name}</h3>
-                <p>参加 {division.teams}</p>
-                <span>最終更新 {division.updatedAt}</span>
-              </article>
-            ))}
-          </div>
+            <div className="download-shortcuts">
+              <span>リーグ戦要項</span>
+              <span>規約</span>
+              <span>規約細則</span>
+              <span>注意事項</span>
+            </div>
+          </article>
         </div>
       </section>
     </main>

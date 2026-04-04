@@ -1,12 +1,13 @@
 import NextAuth from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
+import type { AdminRole } from "@prisma/client";
 import authConfig from "@/auth.config";
 import { prisma } from "@/lib/prisma";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
   session: {
-    strategy: "database",
+    strategy: "jwt",
   },
   ...authConfig,
   callbacks: {
@@ -38,10 +39,31 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
       return true;
     },
-    async session({ session, user }) {
+    async jwt({ token, user }) {
+      if (user) {
+        token.sub = user.id;
+        token.role = user.role;
+
+        return token;
+      }
+
+      if (token.email && !token.role) {
+        const admin = await prisma.user.findUnique({
+          where: { email: token.email },
+        });
+
+        if (admin) {
+          token.sub = admin.id;
+          token.role = admin.role;
+        }
+      }
+
+      return token;
+    },
+    async session({ session, token }) {
       if (session.user) {
-        session.user.id = user.id;
-        session.user.role = user.role;
+        session.user.id = token.sub ?? "";
+        session.user.role = token.role as AdminRole | undefined;
       }
 
       return session;

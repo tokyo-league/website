@@ -34,7 +34,7 @@
 ## 備考
 
 - Googleログインのみ実装対象
-- `admins` テーブルに存在しないメールアドレスはログイン不可
-- `admins` への初期登録は現状 `npm run prisma:seed-admin` か DB 直接投入のみで、管理画面UIはまだない
+- 管理者テーブルに存在しないメールアドレスはログイン不可
+- 管理者への初期登録は現状 `npm run prisma:seed-admin` か DB 直接投入のみで、管理画面UIはまだない
 - `npm run prisma:seed-admin` 実行時は `SEED_ADMIN_EMAIL` が必要
 - Neon を使う場合、`DATABASE_URL` は pooled 接続、`DIRECT_URL` は direct 接続を使う

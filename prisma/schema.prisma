@@ -80,7 +80,7 @@ model User {
   sessions       Session[]
   divisionPermissions DivisionEditorAssignment[]
 
-  @@map("admins")
+  @@map("Admin")
 }
 
 model Page {

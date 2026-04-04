@@ -165,6 +165,14 @@ button {
   margin-top: 24px;
 }
 
+.page-intro__inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+  gap: 28px;
+  align-items: center;
+  padding: 28px;
+}
+
 .home-intro h1,
 .page-intro__inner > div:first-child {
   margin: 0;

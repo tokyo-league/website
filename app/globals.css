@@ -237,6 +237,16 @@ button {
   gap: 20px;
 }
 
+.competition-card-grid,
+.archive-stack {
+  display: grid;
+  gap: 20px;
+}
+
+.competition-card-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .news-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 320px;
@@ -324,6 +334,10 @@ button {
   margin: 10px 0 0;
   color: var(--muted);
   line-height: 1.8;
+}
+
+.result-feature__image--large {
+  min-height: 520px;
 }
 
 .subtle-label {
@@ -1055,6 +1069,7 @@ button {
   .page-intro__inner,
   .home-grid,
   .competition-layout,
+  .competition-card-grid,
   .news-layout,
   .team-feature,
   .admin-columns,

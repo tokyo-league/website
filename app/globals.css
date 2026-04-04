@@ -158,6 +158,13 @@ button {
   justify-content: flex-end;
 }
 
+.page-intro__actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+
 .home-intro h1,
 .page-intro__inner > div:first-child {
   margin: 0;
@@ -214,6 +221,12 @@ button {
 .home-grid,
 .admin-columns {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.competition-layout {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 20px;
 }
 
 .card,
@@ -277,6 +290,11 @@ button {
   margin: 10px 0 0;
   color: var(--muted);
   line-height: 1.8;
+}
+
+.subtle-label {
+  color: var(--muted);
+  font-size: 13px;
 }
 
 .mini-meta {
@@ -357,6 +375,10 @@ button {
 
 .division-grid {
   grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.division-grid--compact {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .division-card p,
@@ -469,6 +491,24 @@ button {
 
 .team-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.team-summary {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.team-summary span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  font-size: 13px;
+  color: var(--muted);
 }
 
 .team-card {
@@ -692,6 +732,7 @@ button {
   .home-intro__panel,
   .page-intro__inner,
   .home-grid,
+  .competition-layout,
   .team-feature,
   .admin-columns,
   .admin-form-preview__grid {

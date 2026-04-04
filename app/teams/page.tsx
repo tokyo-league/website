@@ -1,18 +1,46 @@
 import Image from "next/image";
+import Link from "next/link";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { teams } from "@/lib/site-data";
+import { siteAssets, teams } from "@/lib/site-data";
 
 export default function TeamsPage() {
   return (
     <>
       <SiteHeader />
       <main className="page-main">
-        <section className="page-intro page-intro--compact">
+        <section className="page-intro">
+          <div className="container page-intro__inner">
+            <div>
+              <p className="section-kicker">Teams</p>
+              <h1>参加チーム</h1>
+              <p>現サイトの写真とロゴを使いながら、チームの基本情報を一覧で確認しやすく整理します。</p>
+              <div className="page-intro__actions">
+                <Link href="/competitions" className="button">
+                  試合情報へ
+                </Link>
+                <Link href="/contact" className="button button--ghost">
+                  お問い合わせ
+                </Link>
+              </div>
+            </div>
+            <div className="page-intro__visual">
+              <Image
+                src={siteAssets.featuredTeamPhoto}
+                alt="旭フットボールクラブ"
+                fill
+                sizes="(max-width: 960px) 100vw, 32vw"
+              />
+            </div>
+          </div>
+        </section>
+
+        <section className="section-block">
           <div className="container">
-            <p className="section-kicker">Teams</p>
-            <h1>参加チーム</h1>
-            <p>現サイトのチーム写真を活かしながら、一覧性を高めたカード表示に整理します。</p>
+            <div className="team-summary">
+              <span>掲載チーム 3</span>
+              <span>写真・ロゴは現サイトから移設</span>
+            </div>
           </div>
         </section>
 

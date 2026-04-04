@@ -91,54 +91,23 @@ export default async function AdminCompetitionsPage() {
         />
       ) : null}
 
-      <div className="admin-columns">
-        <article className="admin-card">
-          <div className="card__header">
-            <div>
-              <p className="section-kicker">Current</p>
-              <h3>{scope.admin.role === "OWNER" ? "公開中のリーグ" : "担当リーグ"}</h3>
-            </div>
-          </div>
-          <div className="admin-table">
-            <div className="admin-table__row admin-table__row--head">
-              <span>リーグ</span>
-              <span>大会</span>
-              <span>権限</span>
-            </div>
-            {scope.accessibleDivisions.length > 0 ? (
-              scope.accessibleDivisions.map((division) => (
-                <div key={division.id} className="admin-table__row">
-                  <strong>{division.name}</strong>
-                  <span>{division.competitionName}</span>
-                  <span>{division.permissions.join(" / ")}</span>
-                </div>
-              ))
-            ) : (
-              <div className="admin-empty-state">
-                <p>担当リーグがまだ割り当てられていません。</p>
-              </div>
-            )}
-          </div>
-        </article>
-
-        <article className="admin-card">
-          <h3>大会運用メモ</h3>
-          <ul className="admin-list">
-            <li>
-              <strong>東京リーグ</strong>
-              <span>年度ごとに大会を作成し、その配下へ A〜F リーグと所属チームを追加</span>
-            </li>
-            <li>
-              <strong>5年生FES 山藤杯</strong>
-              <span>1大会として管理し、結果は PDF 掲載中心</span>
-            </li>
-            <li>
-              <strong>試合結果</strong>
-              <span>東京リーグは画像中心、補助でスコア入力と勝敗表生成に対応予定</span>
-            </li>
-          </ul>
-        </article>
-      </div>
+      <article className="admin-card">
+        <h3>大会運用メモ</h3>
+        <ul className="admin-list">
+          <li>
+            <strong>東京リーグ</strong>
+            <span>年度ごとに大会を作成し、その配下へ A〜F リーグと所属チームを追加</span>
+          </li>
+          <li>
+            <strong>5年生FES 山藤杯</strong>
+            <span>1大会として管理し、結果は年ごとの画像または PDF を紐づけます</span>
+          </li>
+          <li>
+            <strong>表示方針</strong>
+            <span>大会一覧を主に見せ、リーグ所属チームや担当権限は必要画面でのみ確認する運用に寄せます</span>
+          </li>
+        </ul>
+      </article>
 
       <article className="admin-card">
         <div className="card__header">
@@ -173,38 +142,6 @@ export default async function AdminCompetitionsPage() {
         </div>
       </article>
 
-      <article className="admin-card">
-        <div className="card__header">
-          <div>
-            <p className="section-kicker">Divisions</p>
-            <h3>登録済みリーグ一覧</h3>
-          </div>
-        </div>
-        <div className="admin-table">
-          <div className="admin-table__row admin-table__row--head admin-table__row--five">
-            <span>年度</span>
-            <span>大会</span>
-            <span>リーグ</span>
-            <span>状態</span>
-            <span>表示順</span>
-          </div>
-          {divisions.length > 0 ? (
-            divisions.map((division) => (
-              <div key={division.id} className="admin-table__row admin-table__row--five">
-                <strong>{division.competition.season.label}</strong>
-                <span>{division.competition.name}</span>
-                <span>{division.name}</span>
-                <span>{publishStatusLabel[division.status]}</span>
-                <span>{division.sortOrder}</span>
-              </div>
-            ))
-          ) : (
-            <div className="admin-empty-state">
-              <p>まだリーグは登録されていません。</p>
-            </div>
-          )}
-        </div>
-      </article>
     </AdminLayoutShell>
   );
 }
@@ -219,10 +156,4 @@ const competitionStatusLabel = {
   DRAFT: "下書き",
   PUBLISHED: "公開",
   CLOSED: "終了",
-} as const;
-
-const publishStatusLabel = {
-  DRAFT: "下書き",
-  PUBLISHED: "公開",
-  ARCHIVED: "非公開",
 } as const;

@@ -135,7 +135,7 @@ async function importLeagueHistory(categories) {
       continue;
     }
 
-    const seasonYear = edition + 1929;
+    const seasonYear = getLeagueSeasonYear(edition);
     const seasonLabel = `${seasonYear}年度`;
 
     const season = await prisma.season.upsert({
@@ -339,6 +339,14 @@ function parseLeaguePage(html) {
 function parseEdition(name) {
   const match = name.match(/^第(\d+)回東京リーグ$/);
   return match ? Number(match[1]) : null;
+}
+
+function getLeagueSeasonYear(edition) {
+  if (edition >= 91) {
+    return 2020 + Math.floor((edition - 91) / 2);
+  }
+
+  return edition + 1929;
 }
 
 function buildNewsSlug(post) {

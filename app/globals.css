@@ -178,6 +178,11 @@ button {
   align-items: stretch;
 }
 
+.page-intro--feature .page-intro__inner {
+  grid-template-columns: minmax(320px, 0.84fr) minmax(0, 1.16fr);
+  align-items: stretch;
+}
+
 .home-intro h1,
 .page-intro__inner > div:first-child {
   margin: 0;
@@ -221,13 +226,18 @@ button {
   min-height: 360px;
 }
 
-.page-intro__visual--teams::after {
+.page-intro__visual--teams::after,
+.page-intro__visual--feature::after {
   content: "";
   position: absolute;
   inset: 0;
   background:
     linear-gradient(135deg, rgba(8, 16, 30, 0.78) 0%, rgba(8, 16, 30, 0.14) 52%, rgba(255, 255, 255, 0) 100%),
     linear-gradient(180deg, rgba(255, 255, 255, 0) 54%, rgba(8, 16, 30, 0.36) 100%);
+}
+
+.page-intro__visual--feature {
+  min-height: 360px;
 }
 
 .page-intro__visual-caption {
@@ -1235,7 +1245,8 @@ button {
     font-size: 13px;
   }
 
-  .page-intro--teams .page-intro__inner {
+  .page-intro--teams .page-intro__inner,
+  .page-intro--feature .page-intro__inner {
     grid-template-columns: 1fr;
   }
 
@@ -1298,7 +1309,8 @@ button {
     padding: 20px;
   }
 
-  .page-intro__visual--teams {
+  .page-intro__visual--teams,
+  .page-intro__visual--feature {
     min-height: 280px;
   }
 

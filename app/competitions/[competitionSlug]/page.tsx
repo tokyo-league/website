@@ -42,7 +42,7 @@ export default async function CompetitionDetailPage({
     <>
       <SiteHeader />
       <main className="page-main">
-        <section className="page-intro">
+        <section className="page-intro page-intro--feature">
           <div className="container page-intro__inner">
             <div>
               <p className="section-kicker">{competition.season.label}</p>
@@ -63,8 +63,12 @@ export default async function CompetitionDetailPage({
                 ) : null}
               </div>
             </div>
-            <div className="page-intro__visual">
-              <Image src={siteAssets.competitionMainVisual} alt={competition.name} fill sizes="(max-width: 960px) 100vw, 32vw" />
+            <div className="page-intro__visual page-intro__visual--feature">
+              <Image src={siteAssets.competitionMainVisual} alt={competition.name} fill sizes="100vw" />
+              <div className="page-intro__visual-caption">
+                <span>Tokyo League Match</span>
+                <strong>試合情報</strong>
+              </div>
             </div>
           </div>
         </section>

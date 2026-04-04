@@ -8,15 +8,19 @@ export default function ContactPage() {
     <>
       <SiteHeader />
       <main className="page-main">
-        <section className="page-intro">
+        <section className="page-intro page-intro--feature">
           <div className="container page-intro__inner">
             <div>
               <p className="section-kicker">Contact</p>
               <h1>お問い合わせ</h1>
               <p>運用負荷とスパム対策を考慮し、初期はメール案内を基本にする想定です。</p>
             </div>
-            <div className="page-intro__visual">
-              <Image src={siteAssets.contactHero} alt="お問い合わせ" fill sizes="(max-width: 960px) 100vw, 32vw" />
+            <div className="page-intro__visual page-intro__visual--feature">
+              <Image src={siteAssets.contactHero} alt="お問い合わせ" fill sizes="100vw" />
+              <div className="page-intro__visual-caption">
+                <span>Tokyo League Contact</span>
+                <strong>お問い合わせ</strong>
+              </div>
             </div>
           </div>
         </section>

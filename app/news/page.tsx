@@ -9,15 +9,19 @@ export default function NewsPage() {
     <>
       <SiteHeader />
       <main className="page-main">
-        <section className="page-intro">
+        <section className="page-intro page-intro--feature">
           <div className="container page-intro__inner">
             <div>
               <p className="section-kicker">News</p>
               <h1>ニュース</h1>
               <p>お知らせ、大会情報、募集情報をカテゴリごとに整理して掲載します。</p>
             </div>
-            <div className="page-intro__visual">
-              <Image src={siteAssets.newsHero} alt="東京リーグのニュース" fill sizes="(max-width: 960px) 100vw, 32vw" />
+            <div className="page-intro__visual page-intro__visual--feature">
+              <Image src={siteAssets.newsHero} alt="東京リーグのニュース" fill sizes="100vw" />
+              <div className="page-intro__visual-caption">
+                <span>Tokyo League News</span>
+                <strong>ニュース</strong>
+              </div>
             </div>
           </div>
         </section>

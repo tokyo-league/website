@@ -50,7 +50,7 @@ export default async function TeamsPage() {
               <Image src={siteAssets.teamsHero} alt="参加チーム紹介" fill sizes="100vw" />
               <div className="page-intro__visual-caption">
                 <span>Tokyo League Teams</span>
-                <strong>横長のメインビジュアルで参加チームの空気感を見せる構成</strong>
+                <strong>チーム紹介</strong>
               </div>
             </div>
           </div>

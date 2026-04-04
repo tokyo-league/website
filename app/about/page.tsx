@@ -9,7 +9,7 @@ export default function AboutPage() {
     <>
       <SiteHeader />
       <main className="page-main">
-        <section className="page-intro">
+        <section className="page-intro page-intro--feature">
           <div className="container page-intro__inner">
             <div>
               <p className="section-kicker">About</p>
@@ -24,13 +24,17 @@ export default function AboutPage() {
                 </Link>
               </div>
             </div>
-            <div className="page-intro__visual">
+            <div className="page-intro__visual page-intro__visual--feature">
               <Image
                 src={siteAssets.aboutHero}
                 alt="東京リーグについて"
                 fill
-                sizes="(max-width: 960px) 100vw, 32vw"
+                sizes="100vw"
               />
+              <div className="page-intro__visual-caption">
+                <span>Tokyo League About</span>
+                <strong>東京リーグについて</strong>
+              </div>
             </div>
           </div>
         </section>

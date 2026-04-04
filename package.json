@@ -7,6 +7,8 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
+    "assets:download": "node ./scripts/download-site-images.mjs",
+    "assets:organize": "node ./scripts/organize-site-images.mjs",
     "prisma:generate": "prisma generate",
     "prisma:validate": "prisma validate",
     "prisma:migrate": "node ./scripts/run-with-env.mjs prisma migrate dev --name init",

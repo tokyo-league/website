@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { divisionCards, newsItems } from "@/lib/site-data";
+import { divisionCards, newsItems, siteAssets } from "@/lib/site-data";
 
 export function PublicHome() {
   return (
@@ -24,7 +24,7 @@ export function PublicHome() {
           </div>
           <div className="home-hero__visual">
             <Image
-              src="https://tokyo-league.jp/wp-content/uploads/2022/10/A%E3%83%AA%E3%83%BC%E3%82%B0-3.jpg"
+              src={siteAssets.heroResult}
               alt="東京リーグの試合結果画像"
               fill
               sizes="(max-width: 960px) 100vw, 42vw"
@@ -68,7 +68,7 @@ export function PublicHome() {
             <div className="team-feature">
               <div className="team-feature__image">
                 <Image
-                  src="https://tokyo-league.jp/wp-content/uploads/2019/09/17%E4%B8%8A%E6%AE%B5_%E6%97%AD%E3%83%95%E3%83%83%E3%83%88%E3%83%9C%E3%83%BC%E3%83%AB%E3%82%AF%E3%83%A9%E3%83%96.jpg"
+                  src={siteAssets.featuredTeamPhoto}
                   alt="旭フットボールクラブ"
                   fill
                   sizes="(max-width: 960px) 100vw, 20vw"

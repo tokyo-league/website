@@ -1,15 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
-import { siteNav } from "@/lib/site-data";
+import { siteAssets, siteNav } from "@/lib/site-data";
 
 export function SiteHeader() {
   return (
     <header className="site-header">
       <div className="container site-header__inner">
-        <Link href="/" className="site-header__logo" aria-label="TOKYO LEAGUE">
+        <Link href="/" className="site-header__logo" aria-label="TOKYO Junior Soccer League">
           <Image
-            src="https://tokyo-league.jp/wp-content/themes/tokyo-league/assets/img/common/logo_head.svg"
-            alt="TOKYO LEAGUE"
+            src={siteAssets.logo}
+            alt="TOKYO Junior Soccer League"
             width={182}
             height={53}
             priority

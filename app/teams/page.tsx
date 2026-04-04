@@ -27,6 +27,11 @@ export default function TeamsPage() {
                     fill
                     sizes="(max-width: 720px) 100vw, (max-width: 960px) 50vw, 33vw"
                   />
+                  {"logo" in team && team.logo ? (
+                    <div className="team-card__logo">
+                      <Image src={team.logo} alt={`${team.name} ロゴ`} width={72} height={72} />
+                    </div>
+                  ) : null}
                 </div>
                 <div className="team-card__body">
                   <p className="section-kicker">{team.area}</p>

@@ -8,12 +8,11 @@
   </head>
   <body class="variant-body variant-b">
     <div class="variant-shell">
-      <header class="variant-topbar score-topbar">
-        <img
-          class="variant-logo"
-          src="https://tokyo-league.jp/wp-content/themes/tokyo-league/assets/img/common/logo_head.svg"
-          alt="東京リーグ ロゴ"
-        />
+      <header class="variant-topbar terminal-topbar">
+        <div class="variant-brandline">
+          <img class="variant-logo" src="../public/site-assets/common/logo_head.svg" alt="東京リーグ ロゴ" />
+          <strong>TOKYO Junior Soccer League</strong>
+        </div>
         <nav>
           <span>結果一覧</span>
           <span>大会情報</span>
@@ -23,55 +22,41 @@
       </header>
 
       <main class="variant-main">
-        <section class="variant-hero scoreboard-hero">
-          <div>
-            <p class="variant-eyebrow">Pattern B / Results First</p>
-            <h1>最初に見るのは、今どのリーグがどう動いているか。</h1>
-            <p>
-              写真よりも結果と導線を優先し、管理しやすいデータ構造がそのまま見える案です。大会運用の更新性を前面に出します。
-            </p>
+        <section class="variant-hero terminal-hero">
+          <div class="terminal-copy">
+            <p class="variant-eyebrow">TOKYO Junior Soccer League</p>
+            <h1>試合情報</h1>
+            <p>リーグ結果 / 更新日 / 順位表 / 直近の試合結果</p>
           </div>
-          <div class="score-kpis">
-            <div><span>公開中大会</span><strong>2</strong></div>
-            <div><span>更新済リーグ</span><strong>6</strong></div>
-            <div><span>最新更新</span><strong>03.22</strong></div>
+          <div class="terminal-stats">
+            <div><span>公開中大会</span><strong>02</strong></div>
+            <div><span>更新済リーグ</span><strong>06</strong></div>
+            <div><span>最終更新</span><strong>03.22</strong></div>
           </div>
         </section>
 
-        <section class="variant-section">
-          <div class="section-heading-row">
+        <section class="variant-section terminal-panels">
+          <article class="terminal-panel terminal-panel--image">
+            <img src="../public/site-assets/results/Aリーグ-3.jpg" alt="Aリーグ結果" />
+          </article>
+          <article class="terminal-panel">
             <div>
-              <p class="variant-eyebrow">Current Competitions</p>
-              <h2>大会別に迷わず入る</h2>
+              <p class="variant-eyebrow">Competition</p>
+              <h2>第103回 東京リーグ</h2>
             </div>
-            <span>大会一覧</span>
-          </div>
-          <div class="score-competition-grid">
-            <article class="score-competition-card">
-              <h3>第103回 東京リーグ</h3>
-              <p>2026年度 / 2026.04 - 2026.09</p>
-              <div class="score-tags">
-                <span>Aリーグ</span><span>Bリーグ</span><span>Cリーグ</span><span>Dリーグ</span>
-              </div>
-            </article>
-            <article class="score-competition-card image-card">
-              <img
-                src="https://tokyo-league.jp/wp-content/uploads/2022/10/A%E3%83%AA%E3%83%BC%E3%82%B0-3.jpg"
-                alt="Aリーグ結果"
-              />
-            </article>
-          </div>
+            <ul class="terminal-keylines">
+              <li><span>Aリーグ</span><strong>更新済</strong></li>
+              <li><span>Bリーグ</span><strong>更新済</strong></li>
+              <li><span>Cリーグ</span><strong>03.18</strong></li>
+              <li><span>資料</span><strong>要項 / 規約</strong></li>
+            </ul>
+          </article>
         </section>
 
-        <section class="variant-section variant-grid-two">
-          <article class="variant-card standings-card">
-            <div class="section-heading-row">
-              <div>
-                <p class="variant-eyebrow">Standings</p>
-                <h2>Aリーグ順位表</h2>
-              </div>
-              <span>最終更新 03.22</span>
-            </div>
+        <section class="variant-section terminal-layout">
+          <article class="terminal-sheet">
+            <p class="variant-eyebrow">Standings</p>
+            <h2>Aリーグ順位表</h2>
             <table>
               <thead>
                 <tr><th>順位</th><th>チーム</th><th>試</th><th>勝点</th><th>得失点</th></tr>
@@ -84,40 +69,30 @@
               </tbody>
             </table>
           </article>
-          <article class="variant-card fixture-card">
-            <div class="section-heading-row">
-              <div>
-                <p class="variant-eyebrow">Fixtures</p>
-                <h2>直近の結果</h2>
-              </div>
-              <span>試合一覧へ</span>
+          <article class="terminal-sheet">
+            <p class="variant-eyebrow">Fixture Log</p>
+            <h2>直近の結果</h2>
+            <div class="terminal-log">
+              <div><span>03.22</span><strong>FC EAST 2 - 1 CITY CLUB</strong><em>江東競技場</em></div>
+              <div><span>03.21</span><strong>MINATO SC 1 - 1 SETAGAYA</strong><em>大井ふ頭</em></div>
+              <div><span>03.15</span><strong>FC EAST 3 - 0 SETAGAYA</strong><em>世田谷公園</em></div>
+              <div><span>03.14</span><strong>CITY CLUB 2 - 2 MINATO SC</strong><em>夢の島</em></div>
             </div>
-            <ul class="fixture-list">
-              <li><span>03.22</span><strong>FC EAST 2 - 1 CITY CLUB</strong><em>江東競技場</em></li>
-              <li><span>03.21</span><strong>MINATO SC 1 - 1 SETAGAYA</strong><em>大井ふ頭</em></li>
-              <li><span>03.15</span><strong>FC EAST 3 - 0 SETAGAYA</strong><em>世田谷公園</em></li>
-              <li><span>03.14</span><strong>CITY CLUB 2 - 2 MINATO SC</strong><em>夢の島</em></li>
-            </ul>
           </article>
         </section>
 
-        <section class="variant-section variant-grid-two">
-          <article class="variant-card pdf-card">
-            <p class="variant-eyebrow">PDF Links</p>
-            <h2>既存の資料導線を整理</h2>
-            <div class="pdf-links">
-              <a href="https://tokyo-league.jp/wp-content/themes/tokyo-league/assets/img/common/yoko.pdf">リーグ戦要項</a>
-              <a href="#">規約</a>
-              <a href="#">規約細則</a>
-            </div>
+        <section class="variant-section terminal-bottom">
+          <article class="terminal-strip">
+            <span>DOCUMENT</span>
+            <strong>リーグ戦要項</strong>
+            <strong>規約</strong>
+            <strong>規約細則</strong>
           </article>
-          <article class="variant-card compact-list">
-            <p class="variant-eyebrow">News</p>
-            <ul>
-              <li><span>03.21</span><strong>春季大会の要項を公開しました</strong></li>
-              <li><span>03.18</span><strong>第103回東京リーグの組み合わせを掲載</strong></li>
-              <li><span>03.10</span><strong>新規参加チーム募集のお知らせ</strong></li>
-            </ul>
+          <article class="terminal-strip">
+            <span>NEWS</span>
+            <strong>03.21 春季大会の要項を公開しました</strong>
+            <strong>03.18 第103回東京リーグの組み合わせを掲載</strong>
+            <strong>03.10 新規参加チーム募集のお知らせ</strong>
           </article>
         </section>
       </main>

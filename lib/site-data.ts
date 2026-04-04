@@ -7,6 +7,14 @@ export const siteNav = [
   { label: "お問い合わせ", href: "/contact" },
 ];
 
+export const siteAssets = {
+  logo: "/site-assets/common/logo_head.svg",
+  heroResult: "/site-assets/results/Aリーグ-3.jpg",
+  competitionHero: "/site-assets/teams/photos/池2全体.jpg",
+  featuredTeamPhoto: "/site-assets/teams/photos/17上段_旭フットボールクラブ.jpg",
+  featuredTeamLogo: "/site-assets/teams/logos/17上段_旭フットボールクラブロゴ.png",
+};
+
 export const newsItems = [
   {
     date: "2026.03.21",
@@ -92,8 +100,8 @@ export const teams = [
     founded: "1981年",
     representative: "池端 健太郎",
     coach: "池端 健太郎",
-    image:
-      "https://tokyo-league.jp/wp-content/uploads/2019/09/17%E4%B8%8A%E6%AE%B5_%E6%97%AD%E3%83%95%E3%83%83%E3%83%88%E3%83%9C%E3%83%BC%E3%83%AB%E3%82%AF%E3%83%A9%E3%83%96.jpg",
+    image: "/site-assets/teams/photos/17上段_旭フットボールクラブ.jpg",
+    logo: "/site-assets/teams/logos/17上段_旭フットボールクラブロゴ.png",
   },
   {
     name: "池2フットボールクラブ",
@@ -101,8 +109,8 @@ export const teams = [
     founded: "1992年",
     representative: "新野 哲也",
     coach: "新野 哲也",
-    image:
-      "https://tokyo-league.jp/wp-content/uploads/2024/10/%E6%B1%A02%E5%85%A8%E4%BD%93.jpg",
+    image: "/site-assets/teams/photos/池2全体.jpg",
+    logo: "/site-assets/common/logo_head.svg",
   },
   {
     name: "アミーゴフットボールクラブ",
@@ -110,8 +118,8 @@ export const teams = [
     founded: "1972年",
     representative: "金沓 郁",
     coach: "金沓 郁",
-    image:
-      "https://tokyo-league.jp/wp-content/uploads/2020/02/amigo.jpg",
+    image: "/site-assets/teams/photos/33上段_アミーゴFCジュニア.jpg",
+    logo: "/site-assets/teams/logos/33上段_アミーゴFCジュニアロゴ.png",
   },
 ];
 

@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { divisionCards } from "@/lib/site-data";
+import { divisionCards, siteAssets } from "@/lib/site-data";
 
 export default function CompetitionsPage() {
   return (
@@ -19,7 +19,7 @@ export default function CompetitionsPage() {
             </div>
             <div className="page-intro__visual">
               <Image
-                src="https://tokyo-league.jp/wp-content/uploads/2024/10/%E6%B1%A02%E5%85%A8%E4%BD%93.jpg"
+                src={siteAssets.competitionHero}
                 alt="池2フットボールクラブ"
                 fill
                 sizes="(max-width: 960px) 100vw, 32vw"

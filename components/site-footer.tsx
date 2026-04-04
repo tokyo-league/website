@@ -11,7 +11,7 @@ export function SiteFooter() {
     <footer className="site-footer">
       <div className="container site-footer__inner">
         <div>
-          <p className="section-kicker">TOKYO LEAGUE</p>
+          <p className="section-kicker">TOKYO Junior Soccer League</p>
           <p className="site-footer__lead">
             東京少年サッカー連盟 東京リーグの情報を、見やすく更新しやすい形で届けるためのリニューアル案です。
           </p>

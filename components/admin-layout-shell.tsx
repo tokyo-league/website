@@ -1,20 +1,14 @@
 import Link from "next/link";
 import { auth } from "@/auth";
 import { AdminSignOut } from "@/components/admin-sign-out";
-
-const adminNav = [
-  { href: "/admin", label: "ダッシュボード" },
-  { href: "/admin/news", label: "ニュース" },
-  { href: "/admin/competitions", label: "大会" },
-  { href: "/admin/teams", label: "チーム" },
-  { href: "/admin/downloads", label: "資料" },
-];
+import type { AdminScope } from "@/lib/admin-access";
 
 type AdminLayoutShellProps = {
   currentPath: string;
   title: string;
   kicker: string;
   children: React.ReactNode;
+  scope?: AdminScope;
 };
 
 export async function AdminLayoutShell({
@@ -22,8 +16,17 @@ export async function AdminLayoutShell({
   title,
   kicker,
   children,
+  scope,
 }: AdminLayoutShellProps) {
   const session = await auth();
+  const adminNav = [
+    { href: "/admin", label: "ダッシュボード" },
+    { href: "/admin/news", label: "ニュース" },
+    { href: "/admin/competitions", label: "大会" },
+    { href: "/admin/teams", label: "チーム" },
+    { href: "/admin/downloads", label: "資料" },
+    ...(scope?.canManageAssignments ? [{ href: "/admin/assignments", label: "担当割当" }] : []),
+  ];
 
   return (
     <main className="admin-shell">
@@ -39,6 +42,18 @@ export async function AdminLayoutShell({
             </Link>
           ))}
         </nav>
+        {scope ? (
+          <div className="admin-sidebar__meta">
+            <p>
+              権限:
+              <strong>{scope.admin.role === "OWNER" ? "Owner" : "Editor"}</strong>
+            </p>
+            <p>
+              担当リーグ:
+              <strong>{scope.admin.role === "OWNER" ? "全リーグ" : `${scope.accessibleDivisions.length}件`}</strong>
+            </p>
+          </div>
+        ) : null}
       </aside>
 
       <section className="admin-main">
@@ -48,7 +63,10 @@ export async function AdminLayoutShell({
             <h2>{title}</h2>
           </div>
           <div className="admin-heading__actions">
-            <p>{session?.user?.name ?? "管理者"}</p>
+            <div className="admin-user-chip">
+              <p>{session?.user?.name ?? "管理者"}</p>
+              <span>{scope?.admin.role === "OWNER" ? "Owner" : "Editor"}</span>
+            </div>
             <AdminSignOut />
           </div>
         </div>

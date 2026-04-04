@@ -1,9 +1,12 @@
 import { AdminLayoutShell } from "@/components/admin-layout-shell";
+import { getAdminScope } from "@/lib/admin-access";
 import { downloadItems } from "@/lib/site-data";
 
 export default async function AdminDownloadsPage() {
+  const scope = await getAdminScope();
+
   return (
-    <AdminLayoutShell currentPath="/admin/downloads" title="資料管理" kicker="Downloads">
+    <AdminLayoutShell currentPath="/admin/downloads" title="資料管理" kicker="Downloads" scope={scope}>
       <article className="admin-card">
         <div className="card__header">
           <div>

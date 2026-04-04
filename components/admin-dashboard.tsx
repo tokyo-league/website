@@ -1,11 +1,17 @@
 import Link from "next/link";
 import { adminStats, newsItems } from "@/lib/site-data";
+import type { AdminScope } from "@/lib/admin-access";
 
-export function AdminDashboard() {
+export function AdminDashboard({ scope }: { scope: AdminScope }) {
+  const stats = [
+    { label: "担当リーグ", value: scope.admin.role === "OWNER" ? "全リーグ" : String(scope.accessibleDivisions.length) },
+    ...adminStats.slice(1),
+  ];
+
   return (
     <>
       <div className="admin-stats">
-        {adminStats.map((item) => (
+        {stats.map((item) => (
           <article key={item.label} className="admin-card">
             <span>{item.label}</span>
             <strong>{item.value}</strong>
@@ -15,21 +21,21 @@ export function AdminDashboard() {
 
       <div className="admin-columns">
         <article className="admin-card">
-          <h3>最近の更新</h3>
-          <ul className="admin-list">
-            <li>
-              <strong>Aリーグ順位表</strong>
-              <span>中村</span>
-            </li>
-            <li>
-              <strong>春季大会要項</strong>
-              <span>中村</span>
-            </li>
-            <li>
-              <strong>ニュース下書き保存</strong>
-              <span>事務局</span>
-            </li>
-          </ul>
+          <h3>{scope.admin.role === "OWNER" ? "公開リーグ一覧" : "担当リーグ一覧"}</h3>
+          {scope.accessibleDivisions.length > 0 ? (
+            <ul className="admin-list">
+              {scope.accessibleDivisions.slice(0, 4).map((division) => (
+                <li key={division.id}>
+                  <strong>
+                    {division.competitionName} / {division.name}
+                  </strong>
+                  <span>{division.permissions.join(" / ")}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="admin-muted">担当リーグがまだ割り当てられていません。</p>
+          )}
         </article>
 
         <article className="admin-card">

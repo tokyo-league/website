@@ -120,10 +120,6 @@ export function AdminCompetitionForms({
               <input type="text" name="name" placeholder="第103回 東京リーグ" required />
             </label>
             <label className="admin-field">
-              <span>スラッグ</span>
-              <input type="text" name="slug" placeholder="103rd-tokyo-league" />
-            </label>
-            <label className="admin-field">
               <span>大会種別</span>
               <select name="competitionType" defaultValue="LEAGUE">
                 <option value="LEAGUE">東京リーグ向け</option>
@@ -181,13 +177,10 @@ export function AdminCompetitionForms({
               <input type="text" name="name" placeholder="Aリーグ" required />
             </label>
             <label className="admin-field">
-              <span>スラッグ</span>
-              <input type="text" name="slug" placeholder="a-league" />
-            </label>
-            <label className="admin-field">
               <span>表示順</span>
               <input type="number" name="sortOrder" min="0" placeholder="1" />
             </label>
+            <p className="admin-muted">URL用の識別子はリーグ名から自動生成されます。</p>
             <button type="submit" className="button" disabled={divisionPending}>
               {divisionPending ? "保存中..." : "リーグを保存"}
             </button>

@@ -766,6 +766,37 @@ button {
   gap: 14px;
 }
 
+.admin-form-preview__grid--five {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.admin-asset-preview {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-asset-preview__caption {
+  margin: 0;
+  font-size: 12px;
+  color: #6a7380;
+}
+
+.admin-asset-preview__frame {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(17, 24, 39, 0.1);
+  border-radius: 18px;
+  background: #f3f6fa;
+}
+
+.admin-asset-preview__frame img {
+  object-fit: contain;
+}
+
+.admin-asset-preview__frame--wide {
+  min-height: 220px;
+}
+
 .admin-form-preview__grid div {
   padding: 14px 16px;
   border: 1px solid var(--line);

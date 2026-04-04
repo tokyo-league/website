@@ -1,0 +1,222 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { put } from "@vercel/blob";
+import { MatchStatus, PublishStatus } from "@prisma/client";
+import { getAdminScope } from "@/lib/admin-access";
+import { prisma } from "@/lib/prisma";
+import { isValidUuid, parseInteger, sanitizePlainText } from "@/lib/security";
+
+export type ResultActionState = {
+  status: "idle" | "success" | "error";
+  message: string;
+};
+
+export async function updateDivisionResultImage(
+  _prevState: ResultActionState,
+  formData: FormData,
+): Promise<ResultActionState> {
+  const scope = await getAdminScope();
+  const divisionId = sanitizePlainText(String(formData.get("divisionId") ?? ""), 64);
+  const currentResultImagePath = sanitizePlainText(String(formData.get("currentResultImagePath") ?? ""), 255);
+  const description = sanitizePlainText(String(formData.get("description") ?? ""), 400);
+
+  if (!isValidUuid(divisionId)) {
+    return { status: "error", message: "対象リーグが見つかりませんでした。" };
+  }
+
+  if (!canEditDivision(scope, divisionId)) {
+    return { status: "error", message: "このリーグを編集する権限がありません。" };
+  }
+
+  let resultImagePath: string | null = currentResultImagePath || null;
+
+  try {
+    const uploadedResultPath = await uploadResultImage(formData.get("resultImageFile"));
+    resultImagePath = uploadedResultPath ?? resultImagePath;
+  } catch (error) {
+    return {
+      status: "error",
+      message: error instanceof Error ? error.message : "結果画像のアップロードに失敗しました。",
+    };
+  }
+
+  await prisma.division.update({
+    where: { id: divisionId },
+    data: {
+      resultImagePath,
+      description: description || null,
+      status: PublishStatus.PUBLISHED,
+      lastUpdatedAt: new Date(),
+    },
+  });
+
+  revalidatePath("/admin/results");
+
+  return {
+    status: "success",
+    message: "結果画像を更新しました。",
+  };
+}
+
+export async function createMatch(
+  _prevState: ResultActionState,
+  formData: FormData,
+): Promise<ResultActionState> {
+  const scope = await getAdminScope();
+  const divisionId = sanitizePlainText(String(formData.get("divisionId") ?? ""), 64);
+  const homeTeamId = sanitizePlainText(String(formData.get("homeTeamId") ?? ""), 64);
+  const awayTeamId = sanitizePlainText(String(formData.get("awayTeamId") ?? ""), 64);
+  const matchDateText = sanitizePlainText(String(formData.get("matchDate") ?? ""), 20);
+  const venueName = sanitizePlainText(String(formData.get("venueName") ?? ""), 80);
+  const homeScore = parseInteger(String(formData.get("homeScore") ?? ""));
+  const awayScore = parseInteger(String(formData.get("awayScore") ?? ""));
+  const note = sanitizePlainText(String(formData.get("note") ?? ""), 240);
+
+  if (!isValidUuid(divisionId) || !isValidUuid(homeTeamId) || !isValidUuid(awayTeamId) || !matchDateText) {
+    return { status: "error", message: "試合情報の入力内容を確認してください。" };
+  }
+
+  if (homeTeamId === awayTeamId) {
+    return { status: "error", message: "同じチーム同士では登録できません。" };
+  }
+
+  if (!canEditDivision(scope, divisionId)) {
+    return { status: "error", message: "このリーグを編集する権限がありません。" };
+  }
+
+  const matchDate = new Date(matchDateText);
+
+  if (Number.isNaN(matchDate.getTime())) {
+    return { status: "error", message: "試合日を確認してください。" };
+  }
+
+  let venueId = null;
+
+  if (venueName) {
+    const venue = await prisma.venue.upsert({
+      where: { name: venueName },
+      update: {},
+      create: { name: venueName },
+      select: { id: true },
+    });
+    venueId = venue.id;
+  }
+
+  await prisma.match.create({
+    data: {
+      divisionId,
+      matchDate,
+      venueId,
+      homeTeamId,
+      awayTeamId,
+      homeScore: homeScore ?? null,
+      awayScore: awayScore ?? null,
+      status: homeScore !== null && awayScore !== null ? MatchStatus.PLAYED : MatchStatus.SCHEDULED,
+      note: note || null,
+      createdById: scope.admin.id,
+      updatedById: scope.admin.id,
+    },
+  });
+
+  revalidatePath("/admin/results");
+
+  return {
+    status: "success",
+    message: "試合結果を追加しました。",
+  };
+}
+
+export async function upsertStanding(
+  _prevState: ResultActionState,
+  formData: FormData,
+): Promise<ResultActionState> {
+  const scope = await getAdminScope();
+  const divisionId = sanitizePlainText(String(formData.get("divisionId") ?? ""), 64);
+  const teamId = sanitizePlainText(String(formData.get("teamId") ?? ""), 64);
+  const rank = parseInteger(String(formData.get("rank") ?? ""));
+  const played = parseInteger(String(formData.get("played") ?? "0"));
+  const won = parseInteger(String(formData.get("won") ?? "0"));
+  const drawn = parseInteger(String(formData.get("drawn") ?? "0"));
+  const lost = parseInteger(String(formData.get("lost") ?? "0"));
+  const goalsFor = parseInteger(String(formData.get("goalsFor") ?? "0"));
+  const goalsAgainst = parseInteger(String(formData.get("goalsAgainst") ?? "0"));
+  const points = parseInteger(String(formData.get("points") ?? "0"));
+
+  if (!isValidUuid(divisionId) || !isValidUuid(teamId) || !rank) {
+    return { status: "error", message: "順位表の入力内容を確認してください。" };
+  }
+
+  if (!canEditDivision(scope, divisionId)) {
+    return { status: "error", message: "このリーグを編集する権限がありません。" };
+  }
+
+  await prisma.standing.upsert({
+    where: {
+      divisionId_teamId: {
+        divisionId,
+        teamId,
+      },
+    },
+    update: {
+      rank,
+      played: played ?? 0,
+      won: won ?? 0,
+      drawn: drawn ?? 0,
+      lost: lost ?? 0,
+      goalsFor: goalsFor ?? 0,
+      goalsAgainst: goalsAgainst ?? 0,
+      goalDifference: (goalsFor ?? 0) - (goalsAgainst ?? 0),
+      points: points ?? 0,
+    },
+    create: {
+      divisionId,
+      teamId,
+      rank,
+      played: played ?? 0,
+      won: won ?? 0,
+      drawn: drawn ?? 0,
+      lost: lost ?? 0,
+      goalsFor: goalsFor ?? 0,
+      goalsAgainst: goalsAgainst ?? 0,
+      goalDifference: (goalsFor ?? 0) - (goalsAgainst ?? 0),
+      points: points ?? 0,
+    },
+  });
+
+  revalidatePath("/admin/results");
+
+  return {
+    status: "success",
+    message: "順位表を更新しました。",
+  };
+}
+
+function canEditDivision(
+  scope: Awaited<ReturnType<typeof getAdminScope>>,
+  divisionId: string,
+) {
+  return scope.admin.role === "OWNER" || scope.accessibleDivisions.some((division) => division.id === divisionId);
+}
+
+async function uploadResultImage(fileValue: FormDataEntryValue | null) {
+  if (!(fileValue instanceof File) || fileValue.size === 0) {
+    return null;
+  }
+
+  if (!fileValue.type.startsWith("image/")) {
+    throw new Error("結果画像は画像ファイルのみアップロードできます。");
+  }
+
+  if (fileValue.size > 10 * 1024 * 1024) {
+    throw new Error("結果画像は 10MB 以下にしてください。");
+  }
+
+  const safeName = sanitizePlainText(fileValue.name, 120).replace(/[^a-zA-Z0-9._-]/g, "-");
+  const blob = await put(`results/${Date.now()}-${safeName}`, fileValue, {
+    access: "public",
+    addRandomSuffix: true,
+  });
+
+  return blob.url;
+}

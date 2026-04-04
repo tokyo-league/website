@@ -22,6 +22,7 @@ export async function AdminLayoutShell({
   const adminNav = [
     { href: "/admin", label: "ダッシュボード" },
     { href: "/admin/competitions", label: "大会" },
+    { href: "/admin/results", label: "結果管理" },
     ...(scope?.canManageGlobalContent
       ? [
           { href: "/admin/news", label: "ニュース" },

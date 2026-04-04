@@ -43,12 +43,29 @@ export function AdminTeamForm({
   const [toast, setToast] = useState<TeamActionState>(initialTeamActionState);
   const [selectedLogo, setSelectedLogo] = useState(initialValues.logoPath);
   const [selectedPhoto, setSelectedPhoto] = useState(initialValues.photoPath);
+  const [uploadedLogoPreview, setUploadedLogoPreview] = useState<string | null>(null);
+  const [uploadedPhotoPreview, setUploadedPhotoPreview] = useState<string | null>(null);
 
   useEffect(() => {
     if (state.status !== "idle") {
       setToast(state);
     }
   }, [state]);
+
+  useEffect(() => {
+    return () => {
+      if (uploadedLogoPreview) {
+        URL.revokeObjectURL(uploadedLogoPreview);
+      }
+
+      if (uploadedPhotoPreview) {
+        URL.revokeObjectURL(uploadedPhotoPreview);
+      }
+    };
+  }, [uploadedLogoPreview, uploadedPhotoPreview]);
+
+  const logoPreview = uploadedLogoPreview ?? selectedLogo;
+  const photoPreview = uploadedPhotoPreview ?? selectedPhoto;
 
   return (
     <>
@@ -71,7 +88,7 @@ export function AdminTeamForm({
             一覧へ戻る
           </Link>
         </div>
-        <form action={formAction} className="admin-form-stack">
+        <form action={formAction} className="admin-form-stack" encType="multipart/form-data">
           {mode === "edit" && initialValues.id ? <input type="hidden" name="teamId" value={initialValues.id} /> : null}
           <label className="admin-field">
             <span>チーム名</span>
@@ -96,10 +113,25 @@ export function AdminTeamForm({
               ))}
             </select>
           </label>
-          {selectedLogo ? (
-            <div className="admin-asset-preview">
-              <Image src={selectedLogo} alt="選択中のロゴ" width={120} height={120} />
-            </div>
+          <label className="admin-field">
+            <span>ロゴ画像をアップロード</span>
+            <input
+              type="file"
+              name="logoFile"
+              accept="image/*"
+              onChange={(event) => {
+                if (uploadedLogoPreview) {
+                  URL.revokeObjectURL(uploadedLogoPreview);
+                }
+
+                const file = event.target.files?.[0];
+                setUploadedLogoPreview(file ? URL.createObjectURL(file) : null);
+              }}
+            />
+            <small className="admin-field__help">新規アップロードした画像が、選択済みのロゴより優先されます。</small>
+          </label>
+          {logoPreview ? (
+            <AssetPreview src={logoPreview} alt="選択中のロゴ" width={120} height={120} wide={false} />
           ) : null}
           <label className="admin-field">
             <span>チーム画像</span>
@@ -112,10 +144,25 @@ export function AdminTeamForm({
               ))}
             </select>
           </label>
-          {selectedPhoto ? (
-            <div className="admin-asset-preview admin-asset-preview--wide">
-              <Image src={selectedPhoto} alt="選択中のチーム画像" width={320} height={180} />
-            </div>
+          <label className="admin-field">
+            <span>チーム画像をアップロード</span>
+            <input
+              type="file"
+              name="photoFile"
+              accept="image/*"
+              onChange={(event) => {
+                if (uploadedPhotoPreview) {
+                  URL.revokeObjectURL(uploadedPhotoPreview);
+                }
+
+                const file = event.target.files?.[0];
+                setUploadedPhotoPreview(file ? URL.createObjectURL(file) : null);
+              }}
+            />
+            <small className="admin-field__help">新規アップロードした画像が、選択済みのチーム画像より優先されます。</small>
+          </label>
+          {photoPreview ? (
+            <AssetPreview src={photoPreview} alt="選択中のチーム画像" width={320} height={180} wide />
           ) : null}
           <label className="admin-field">
             <span>結成</span>
@@ -155,5 +202,35 @@ export function AdminTeamForm({
         </form>
       </article>
     </>
+  );
+}
+
+function AssetPreview({
+  src,
+  alt,
+  width,
+  height,
+  wide,
+}: {
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+  wide: boolean;
+}) {
+  const className = wide ? "admin-asset-preview admin-asset-preview--wide" : "admin-asset-preview";
+
+  if (src.startsWith("blob:")) {
+    return (
+      <div className={className}>
+        <img src={src} alt={alt} width={width} height={height} />
+      </div>
+    );
+  }
+
+  return (
+    <div className={className}>
+      <Image src={src} alt={alt} width={width} height={height} />
+    </div>
   );
 }

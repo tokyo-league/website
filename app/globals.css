@@ -755,6 +755,11 @@ button {
   font-size: 13px;
 }
 
+.admin-field__help {
+  color: var(--muted);
+  font-size: 12px;
+}
+
 .admin-field select {
   min-height: 46px;
   padding: 0 14px;

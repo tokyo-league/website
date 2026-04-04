@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { put } from "@vercel/blob";
 import { PublishStatus } from "@prisma/client";
 import { requireOwner } from "@/lib/admin-access";
 import { prisma } from "@/lib/prisma";
@@ -17,19 +18,25 @@ export async function createTeam(
 ): Promise<TeamActionState> {
   await requireOwner();
 
-  const payload = getTeamPayload(formData);
-
-  if (!payload.name) {
-    return {
-      status: "error",
-      message: "チーム名を入力してください。",
-    };
-  }
-
   try {
+    const payload = await getTeamPayload(formData);
+
+    if (!payload.name) {
+      return {
+        status: "error",
+        message: "チーム名を入力してください。",
+      };
+    }
+
     await prisma.team.create({
       data: payload,
     });
+    revalidatePath("/admin/teams");
+
+    return {
+      status: "success",
+      message: `${payload.name} を追加しました。`,
+    };
   } catch (error) {
     console.error("createTeam failed", error);
 
@@ -38,13 +45,6 @@ export async function createTeam(
       message: "チーム保存に失敗しました。入力内容またはサーバーログを確認してください。",
     };
   }
-
-  revalidatePath("/admin/teams");
-
-  return {
-    status: "success",
-    message: `${payload.name} を追加しました。`,
-  };
 }
 
 export async function updateTeam(
@@ -61,17 +61,16 @@ export async function updateTeam(
       message: "編集対象のチームが見つかりませんでした。",
     };
   }
-
-  const payload = getTeamPayload(formData);
-
-  if (!payload.name) {
-    return {
-      status: "error",
-      message: "チーム名を入力してください。",
-    };
-  }
-
   try {
+    const payload = await getTeamPayload(formData);
+
+    if (!payload.name) {
+      return {
+        status: "error",
+        message: "チーム名を入力してください。",
+      };
+    }
+
     const currentTeam = await prisma.team.findUnique({
       where: { id: teamId },
       select: { slug: true },
@@ -91,6 +90,13 @@ export async function updateTeam(
         slug: currentTeam.slug,
       },
     });
+    revalidatePath("/admin/teams");
+    revalidatePath(`/admin/teams/${teamId}`);
+
+    return {
+      status: "success",
+      message: `${payload.name} を更新しました。`,
+    };
   } catch (error) {
     console.error("updateTeam failed", error);
 
@@ -99,14 +105,6 @@ export async function updateTeam(
       message: "チーム情報の更新に失敗しました。",
     };
   }
-
-  revalidatePath("/admin/teams");
-  revalidatePath(`/admin/teams/${teamId}`);
-
-  return {
-    status: "success",
-    message: `${payload.name} を更新しました。`,
-  };
 }
 
 export async function deleteTeam(
@@ -175,7 +173,7 @@ export async function deleteTeam(
   };
 }
 
-function getTeamPayload(formData: FormData) {
+async function getTeamPayload(formData: FormData) {
   const name = sanitizePlainText(String(formData.get("name") ?? ""), 80);
   const shortName = sanitizePlainText(String(formData.get("shortName") ?? ""), 80);
   const profile = sanitizePlainText(String(formData.get("profile") ?? ""), 1000);
@@ -186,6 +184,8 @@ function getTeamPayload(formData: FormData) {
   const websiteUrl = sanitizePlainText(String(formData.get("websiteUrl") ?? ""), 255);
   const logoPath = sanitizePlainText(String(formData.get("logoPath") ?? ""), 255);
   const photoPath = sanitizePlainText(String(formData.get("photoPath") ?? ""), 255);
+  const uploadedLogoPath = await uploadTeamImage(formData.get("logoFile"), "logos");
+  const uploadedPhotoPath = await uploadTeamImage(formData.get("photoFile"), "photos");
   const sortOrder = Number.parseInt(String(formData.get("sortOrder") ?? "0"), 10);
   const status = String(formData.get("status") ?? "PUBLISHED") as PublishStatus;
 
@@ -199,9 +199,31 @@ function getTeamPayload(formData: FormData) {
     representativeName: representativeName || null,
     headCoachName: headCoachName || null,
     websiteUrl: websiteUrl && websiteUrl !== "ー" && websiteUrl !== "-" ? websiteUrl : null,
-    logoPath: logoPath || null,
-    photoPath: photoPath || null,
+    logoPath: uploadedLogoPath ?? (logoPath || null),
+    photoPath: uploadedPhotoPath ?? (photoPath || null),
     status: ["DRAFT", "PUBLISHED", "ARCHIVED"].includes(status) ? status : PublishStatus.PUBLISHED,
     sortOrder: Number.isFinite(sortOrder) ? sortOrder : 0,
   };
+}
+
+async function uploadTeamImage(fileValue: FormDataEntryValue | null, folder: "logos" | "photos") {
+  if (!(fileValue instanceof File) || fileValue.size === 0) {
+    return null;
+  }
+
+  if (!fileValue.type.startsWith("image/")) {
+    throw new Error("画像ファイルのみアップロードできます。");
+  }
+
+  if (fileValue.size > 5 * 1024 * 1024) {
+    throw new Error("画像サイズは 5MB 以下にしてください。");
+  }
+
+  const safeName = sanitizePlainText(fileValue.name, 120).replace(/[^a-zA-Z0-9._-]/g, "-");
+  const blob = await put(`teams/${folder}/${Date.now()}-${safeName}`, fileValue, {
+    access: "public",
+    addRandomSuffix: true,
+  });
+
+  return blob.url;
 }

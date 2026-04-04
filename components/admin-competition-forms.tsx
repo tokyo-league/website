@@ -2,10 +2,12 @@
 
 import { useActionState, useEffect, useState } from "react";
 import {
+  assignTeamToDivision,
   createCompetition,
   createDivision,
   createSeason,
   initialCompetitionActionState,
+  removeTeamFromDivision,
   type CompetitionActionState,
 } from "@/app/admin/competitions/actions";
 
@@ -23,12 +25,37 @@ type CompetitionOption = {
   competitionType: string;
 };
 
+type DivisionOption = {
+  id: string;
+  name: string;
+  competitionLabel: string;
+};
+
+type TeamOption = {
+  id: string;
+  name: string;
+  region: string | null;
+};
+
+type DivisionTeamRow = {
+  id: string;
+  divisionLabel: string;
+  teamName: string;
+  region: string | null;
+};
+
 export function AdminCompetitionForms({
   seasons,
   competitions,
+  divisions,
+  teams,
+  divisionTeams,
 }: {
   seasons: SeasonOption[];
   competitions: CompetitionOption[];
+  divisions: DivisionOption[];
+  teams: TeamOption[];
+  divisionTeams: DivisionTeamRow[];
 }) {
   const [seasonState, seasonAction, seasonPending] = useActionState(
     createSeason,
@@ -40,6 +67,10 @@ export function AdminCompetitionForms({
   );
   const [divisionState, divisionAction, divisionPending] = useActionState(
     createDivision,
+    initialCompetitionActionState,
+  );
+  const [teamAssignmentState, teamAssignmentAction, teamAssignmentPending] = useActionState(
+    assignTeamToDivision,
     initialCompetitionActionState,
   );
   const [toast, setToast] = useState<CompetitionActionState>(initialCompetitionActionState);
@@ -55,6 +86,10 @@ export function AdminCompetitionForms({
   useEffect(() => {
     if (divisionState.status !== "idle") setToast(divisionState);
   }, [divisionState]);
+
+  useEffect(() => {
+    if (teamAssignmentState.status !== "idle") setToast(teamAssignmentState);
+  }, [teamAssignmentState]);
 
   return (
     <>
@@ -186,7 +221,112 @@ export function AdminCompetitionForms({
             </button>
           </form>
         </article>
+
+        <article className="admin-card">
+          <div className="card__header">
+            <div>
+              <p className="section-kicker">Teams</p>
+              <h3>リーグ所属チームを追加</h3>
+            </div>
+          </div>
+          <form action={teamAssignmentAction} className="admin-form-stack">
+            <label className="admin-field">
+              <span>リーグ</span>
+              <select name="divisionId" defaultValue="">
+                <option value="" disabled>
+                  リーグを選択
+                </option>
+                {divisions.map((division) => (
+                  <option key={division.id} value={division.id}>
+                    {division.competitionLabel} / {division.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="admin-field">
+              <span>チーム</span>
+              <select name="teamId" defaultValue="">
+                <option value="" disabled>
+                  チームを選択
+                </option>
+                {teams.map((team) => (
+                  <option key={team.id} value={team.id}>
+                    {team.name}{team.region ? ` / ${team.region}` : ""}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="admin-field">
+              <span>表示順</span>
+              <input type="number" name="sortOrder" min="0" placeholder="1" />
+            </label>
+            <button type="submit" className="button" disabled={teamAssignmentPending}>
+              {teamAssignmentPending ? "追加中..." : "所属チームを追加"}
+            </button>
+          </form>
+        </article>
       </div>
+
+      <article className="admin-card">
+        <div className="card__header">
+          <div>
+            <p className="section-kicker">Assignments</p>
+            <h3>リーグ所属チーム一覧</h3>
+          </div>
+        </div>
+        <div className="admin-table">
+          <div className="admin-table__row admin-table__row--head admin-table__row--five">
+            <span>リーグ</span>
+            <span>チーム名</span>
+            <span>地域</span>
+            <span>状態</span>
+            <span>操作</span>
+          </div>
+          {divisionTeams.length > 0 ? (
+            divisionTeams.map((assignment) => (
+              <DivisionTeamDeleteRow key={assignment.id} assignment={assignment} onDone={setToast} />
+            ))
+          ) : (
+            <div className="admin-empty-state">
+              <p>まだリーグにチームは割り当てられていません。</p>
+            </div>
+          )}
+        </div>
+      </article>
     </>
+  );
+}
+
+function DivisionTeamDeleteRow({
+  assignment,
+  onDone,
+}: {
+  assignment: DivisionTeamRow;
+  onDone: (state: CompetitionActionState) => void;
+}) {
+  const [state, formAction, pending] = useActionState(
+    removeTeamFromDivision,
+    initialCompetitionActionState,
+  );
+
+  useEffect(() => {
+    if (state.status !== "idle") {
+      onDone(state);
+    }
+  }, [onDone, state]);
+
+  return (
+    <div className="admin-table__row admin-table__row--five">
+      <strong>{assignment.divisionLabel}</strong>
+      <span>{assignment.teamName}</span>
+      <span>{assignment.region ?? "-"}</span>
+      <span>所属中</span>
+      <form action={formAction}>
+        <input type="hidden" name="assignmentId" value={assignment.id} />
+        <button type="submit" className="button button--ghost" disabled={pending}>
+          {pending ? "解除中..." : "解除"}
+        </button>
+      </form>
+    </div>
   );
 }

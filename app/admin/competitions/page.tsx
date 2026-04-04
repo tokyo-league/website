@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 
 export default async function AdminCompetitionsPage() {
   const scope = await getAdminScope();
-  const [seasons, competitions, divisions] = await Promise.all([
+  const [seasons, competitions, divisions, teams, divisionTeams] = await Promise.all([
     prisma.season.findMany({
       orderBy: [{ year: "desc" }],
     }),
@@ -25,6 +25,29 @@ export default async function AdminCompetitionsPage() {
         },
       },
       orderBy: [{ competition: { season: { year: "desc" } } }, { competition: { sortOrder: "asc" } }, { sortOrder: "asc" }],
+    }),
+    prisma.team.findMany({
+      orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+    }),
+    prisma.divisionTeam.findMany({
+      include: {
+        division: {
+          include: {
+            competition: {
+              include: {
+                season: true,
+              },
+            },
+          },
+        },
+        team: true,
+      },
+      orderBy: [
+        { division: { competition: { season: { year: "desc" } } } },
+        { division: { competition: { sortOrder: "asc" } } },
+        { division: { sortOrder: "asc" } },
+        { sortOrder: "asc" },
+      ],
     }),
   ]);
 
@@ -48,6 +71,22 @@ export default async function AdminCompetitionsPage() {
             name: competition.name,
             seasonLabel: competition.season.label,
             competitionType: competition.competitionType,
+          }))}
+          divisions={divisions.map((division) => ({
+            id: division.id,
+            name: division.name,
+            competitionLabel: `${division.competition.season.label} / ${division.competition.name}`,
+          }))}
+          teams={teams.map((team) => ({
+            id: team.id,
+            name: team.name,
+            region: team.region,
+          }))}
+          divisionTeams={divisionTeams.map((assignment) => ({
+            id: assignment.id,
+            divisionLabel: `${assignment.division.competition.season.label} / ${assignment.division.competition.name} / ${assignment.division.name}`,
+            teamName: assignment.team.name,
+            region: assignment.team.region,
           }))}
         />
       ) : null}
@@ -87,7 +126,7 @@ export default async function AdminCompetitionsPage() {
           <ul className="admin-list">
             <li>
               <strong>東京リーグ</strong>
-              <span>年度ごとに大会を作成し、その配下へ A〜F リーグを追加</span>
+              <span>年度ごとに大会を作成し、その配下へ A〜F リーグと所属チームを追加</span>
             </li>
             <li>
               <strong>5年生FES 山藤杯</strong>

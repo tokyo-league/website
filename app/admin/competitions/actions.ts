@@ -170,3 +170,74 @@ export async function createDivision(
     message: `${name} を追加しました。`,
   };
 }
+
+export async function assignTeamToDivision(
+  _prevState: CompetitionActionState,
+  formData: FormData,
+): Promise<CompetitionActionState> {
+  await requireOwner();
+
+  const divisionId = sanitizePlainText(String(formData.get("divisionId") ?? ""), 64);
+  const teamId = sanitizePlainText(String(formData.get("teamId") ?? ""), 64);
+  const sortOrder = parseInteger(String(formData.get("sortOrder") ?? "0"));
+
+  if (!isValidUuid(divisionId) || !isValidUuid(teamId)) {
+    return {
+      status: "error",
+      message: "リーグとチームを選択してください。",
+    };
+  }
+
+  const existing = await prisma.divisionTeam.findFirst({
+    where: {
+      divisionId,
+      teamId,
+    },
+  });
+
+  if (!existing) {
+    await prisma.divisionTeam.create({
+      data: {
+        divisionId,
+        teamId,
+        sortOrder: sortOrder ?? 0,
+      },
+    });
+  }
+
+  revalidatePath("/admin/competitions");
+
+  return {
+    status: "success",
+    message: existing ? "このチームは既に所属済みです。" : "リーグにチームを追加しました。",
+  };
+}
+
+export async function removeTeamFromDivision(
+  _prevState: CompetitionActionState,
+  formData: FormData,
+): Promise<CompetitionActionState> {
+  await requireOwner();
+
+  const assignmentId = sanitizePlainText(String(formData.get("assignmentId") ?? ""), 64);
+
+  if (!isValidUuid(assignmentId)) {
+    return {
+      status: "error",
+      message: "解除対象の所属情報が見つかりませんでした。",
+    };
+  }
+
+  await prisma.divisionTeam.delete({
+    where: {
+      id: assignmentId,
+    },
+  });
+
+  revalidatePath("/admin/competitions");
+
+  return {
+    status: "success",
+    message: "リーグ所属チームを解除しました。",
+  };
+}

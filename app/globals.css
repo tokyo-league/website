@@ -921,6 +921,13 @@ button {
   transform: translateY(-1px);
 }
 
+.upload-field__label.is-dragging {
+  border-color: rgba(26, 69, 142, 0.54);
+  background:
+    linear-gradient(180deg, rgba(240, 246, 255, 0.98), rgba(232, 240, 252, 0.98));
+  box-shadow: 0 14px 30px rgba(19, 36, 74, 0.12);
+}
+
 .upload-field__button {
   display: inline-flex;
   align-items: center;

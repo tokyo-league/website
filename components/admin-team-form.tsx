@@ -213,6 +213,8 @@ function UploadField({
   hint: string;
   onFileChange: (file: File | null) => void;
 }) {
+  const [isDragging, setIsDragging] = useState(false);
+
   return (
     <div className="upload-field">
       <input
@@ -223,9 +225,37 @@ function UploadField({
         className="upload-field__input"
         onChange={(event) => onFileChange(event.target.files?.[0] ?? null)}
       />
-      <label htmlFor={inputId} className="upload-field__label">
+      <label
+        htmlFor={inputId}
+        className={`upload-field__label${isDragging ? " is-dragging" : ""}`}
+        onDragOver={(event) => {
+          event.preventDefault();
+          setIsDragging(true);
+        }}
+        onDragEnter={(event) => {
+          event.preventDefault();
+          setIsDragging(true);
+        }}
+        onDragLeave={(event) => {
+          event.preventDefault();
+          const relatedTarget = event.relatedTarget;
+
+          if (!(relatedTarget instanceof Node) || !event.currentTarget.contains(relatedTarget)) {
+            setIsDragging(false);
+          }
+        }}
+        onDrop={(event) => {
+          event.preventDefault();
+          setIsDragging(false);
+
+          const file = event.dataTransfer.files?.[0] ?? null;
+          onFileChange(file);
+        }}
+      >
         <span className="upload-field__button">{label}</span>
-        <span className="upload-field__meta">{fileName || "未選択"}</span>
+        <span className="upload-field__meta">
+          {fileName || "ここにドラッグ&ドロップ、またはクリックして選択"}
+        </span>
       </label>
       <small className="admin-field__help">{hint}</small>
     </div>

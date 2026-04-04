@@ -38,3 +38,5 @@
 - 管理者への初期登録は現状 `npm run prisma:seed-admin` か DB 直接投入のみで、管理画面UIはまだない
 - `npm run prisma:seed-admin` 実行時は `SEED_ADMIN_EMAIL` が必要
 - Neon を使う場合、`DATABASE_URL` は pooled 接続、`DIRECT_URL` は direct 接続を使う
+- 更新系サーバアクションでは、入力の正規化、形式検証、長さ制限を必須にする
+- React の自動エスケープ前提で `dangerouslySetInnerHTML` は使わない

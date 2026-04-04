@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { AdminRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireOwner } from "@/lib/admin-access";
+import { isValidEmail, isValidUuid, normalizeEmail, sanitizePlainText } from "@/lib/security";
 
 export type AssignmentActionState = {
   status: "idle" | "success" | "error";
@@ -21,11 +22,11 @@ export async function createAdminUser(
 ): Promise<AssignmentActionState> {
   await requireOwner();
 
-  const email = String(formData.get("email") ?? "").trim().toLowerCase();
-  const name = String(formData.get("name") ?? "").trim();
+  const email = normalizeEmail(String(formData.get("email") ?? ""));
+  const name = sanitizePlainText(String(formData.get("name") ?? ""), 80);
   const role = String(formData.get("role") ?? "EDITOR") as AdminRole;
 
-  if (!email || !name || !["OWNER", "EDITOR"].includes(role)) {
+  if (!email || !name || !isValidEmail(email) || !["OWNER", "EDITOR"].includes(role)) {
     return {
       status: "error",
       message: "メールアドレス、表示名、ロールを確認してください。",
@@ -59,10 +60,10 @@ export async function createDivisionAssignment(
 ): Promise<AssignmentActionState> {
   await requireOwner();
 
-  const userId = String(formData.get("userId") ?? "");
-  const divisionId = String(formData.get("divisionId") ?? "");
+  const userId = sanitizePlainText(String(formData.get("userId") ?? ""), 64);
+  const divisionId = sanitizePlainText(String(formData.get("divisionId") ?? ""), 64);
 
-  if (!userId || !divisionId) {
+  if (!userId || !divisionId || !isValidUuid(userId) || !isValidUuid(divisionId)) {
     return {
       status: "error",
       message: "担当者とリーグを選択してください。",
@@ -103,9 +104,9 @@ export async function deleteDivisionAssignment(
 ): Promise<AssignmentActionState> {
   await requireOwner();
 
-  const assignmentId = String(formData.get("assignmentId") ?? "");
+  const assignmentId = sanitizePlainText(String(formData.get("assignmentId") ?? ""), 64);
 
-  if (!assignmentId) {
+  if (!assignmentId || !isValidUuid(assignmentId)) {
     return {
       status: "error",
       message: "解除対象が見つかりませんでした。",

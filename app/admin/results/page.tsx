@@ -69,6 +69,10 @@ export default async function AdminResultsPage() {
       <AdminResultsForms
         divisions={divisions.map((division) => ({
           id: division.id,
+          seasonYear: division.competition.season.year,
+          seasonLabel: division.competition.season.label,
+          competitionName: division.competition.name,
+          divisionName: division.name,
           label: `${division.competition.season.label} / ${division.competition.name} / ${division.name}`,
           resultImagePath: division.resultImagePath ?? "",
           description: division.description ?? "",

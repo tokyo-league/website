@@ -833,6 +833,16 @@ button {
   grid-template-columns: repeat(6, minmax(0, 1fr));
 }
 
+.admin-form-preview__grid--three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.admin-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
 .admin-asset-preview {
   display: grid;
   gap: 10px;
@@ -1210,6 +1220,7 @@ button {
   .news-layout,
   .team-feature,
   .admin-columns,
+  .admin-filter-grid,
   .admin-form-preview__grid,
   .admin-table__row {
     grid-template-columns: 1fr;

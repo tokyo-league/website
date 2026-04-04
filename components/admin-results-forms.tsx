@@ -20,6 +20,10 @@ const initialState: ResultActionState = {
 
 type DivisionOption = {
   id: string;
+  seasonYear: number;
+  seasonLabel: string;
+  competitionName: string;
+  divisionName: string;
   label: string;
   resultImagePath: string;
   description: string;
@@ -57,7 +61,31 @@ export function AdminResultsForms({
 }: {
   divisions: DivisionOption[];
 }) {
-  const [selectedDivisionId, setSelectedDivisionId] = useState(divisions[0]?.id ?? "");
+  const seasons = Array.from(new Map(divisions.map((division) => [division.seasonYear, division.seasonLabel])).entries())
+    .sort((left, right) => right[0] - left[0]);
+  const [selectedSeasonYear, setSelectedSeasonYear] = useState(seasons[0]?.[0] ?? 0);
+  const competitionsForSeason = Array.from(
+    new Set(divisions.filter((division) => division.seasonYear === selectedSeasonYear).map((division) => division.competitionName)),
+  );
+  const [selectedCompetitionName, setSelectedCompetitionName] = useState(competitionsForSeason[0] ?? "");
+  const filteredDivisions = divisions.filter(
+    (division) =>
+      division.seasonYear === selectedSeasonYear && division.competitionName === selectedCompetitionName,
+  );
+  const [selectedDivisionId, setSelectedDivisionId] = useState(filteredDivisions[0]?.id ?? divisions[0]?.id ?? "");
+
+  useEffect(() => {
+    if (!competitionsForSeason.includes(selectedCompetitionName)) {
+      setSelectedCompetitionName(competitionsForSeason[0] ?? "");
+    }
+  }, [competitionsForSeason, selectedCompetitionName]);
+
+  useEffect(() => {
+    if (!filteredDivisions.some((division) => division.id === selectedDivisionId)) {
+      setSelectedDivisionId(filteredDivisions[0]?.id ?? "");
+    }
+  }, [filteredDivisions, selectedDivisionId]);
+
   const selectedDivision = divisions.find((division) => division.id === selectedDivisionId) ?? divisions[0];
 
   const [resultState, resultAction, resultPending] = useActionState(updateDivisionResultImage, initialState);
@@ -110,16 +138,73 @@ export function AdminResultsForms({
             <h3>対象リーグ</h3>
           </div>
         </div>
-        <label className="admin-field">
-          <span>リーグを選択</span>
-          <select value={selectedDivision.id} onChange={(event) => setSelectedDivisionId(event.target.value)}>
-            {divisions.map((division) => (
-              <option key={division.id} value={division.id}>
-                {division.label}
-              </option>
-            ))}
-          </select>
-        </label>
+        <div className="admin-filter-grid">
+          <label className="admin-field">
+            <span>年度</span>
+            <select value={selectedSeasonYear} onChange={(event) => setSelectedSeasonYear(Number(event.target.value))}>
+              {seasons.map(([year, label]) => (
+                <option key={year} value={year}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="admin-field">
+            <span>大会</span>
+            <select value={selectedCompetitionName} onChange={(event) => setSelectedCompetitionName(event.target.value)}>
+              {competitionsForSeason.map((competitionName) => (
+                <option key={competitionName} value={competitionName}>
+                  {competitionName}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="admin-field">
+            <span>リーグ</span>
+            <select value={selectedDivision.id} onChange={(event) => setSelectedDivisionId(event.target.value)}>
+              {filteredDivisions.map((division) => (
+                <option key={division.id} value={division.id}>
+                  {division.divisionName}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+      </article>
+
+      <article className="admin-card">
+        <div className="card__header">
+          <div>
+            <p className="section-kicker">Overview</p>
+            <h3>選択中リーグの確認</h3>
+          </div>
+        </div>
+        <div className="admin-form-preview__grid admin-form-preview__grid--three">
+          <div>
+            <span>対象</span>
+            <p>{selectedDivision.label}</p>
+          </div>
+          <div>
+            <span>登録試合</span>
+            <p>{selectedDivision.matches.length} 件</p>
+          </div>
+          <div>
+            <span>順位表</span>
+            <p>{selectedDivision.standings.length} 行</p>
+          </div>
+          <div>
+            <span>所属チーム</span>
+            <p>{selectedDivision.teams.length} チーム</p>
+          </div>
+          <div>
+            <span>結果画像</span>
+            <p>{selectedDivision.resultImagePath ? "あり" : "未登録"}</p>
+          </div>
+          <div>
+            <span>補足</span>
+            <p>{selectedDivision.description || "未登録"}</p>
+          </div>
+        </div>
       </article>
 
       <div className="admin-columns">

@@ -132,7 +132,7 @@ export function AdminAssignmentForms({
               </select>
             </label>
             <label className="admin-field">
-              <span>リーグ</span>
+              <span>年度 / 大会 / リーグ</span>
               <select name="divisionId" defaultValue="">
                 <option value="" disabled>
                   リーグを選択
@@ -144,10 +144,9 @@ export function AdminAssignmentForms({
                 ))}
               </select>
             </label>
-            <label className="admin-field">
-              <span>権限</span>
-              <input type="text" value="担当リーグ編集" readOnly />
-            </label>
+            <p className="admin-muted">
+              割り当てた担当者は、そのリーグの試合結果・順位表・リーグ管理をまとめて編集できます。
+            </p>
             <button type="submit" className="button" disabled={assignPending}>
               {assignPending ? "割当中..." : "割当を追加"}
             </button>
@@ -166,8 +165,8 @@ export function AdminAssignmentForms({
           <div className="admin-table__row admin-table__row--head admin-table__row--five">
             <span>担当者</span>
             <span>メール</span>
-            <span>大会 / リーグ</span>
-            <span>権限</span>
+            <span>年度 / 大会 / リーグ</span>
+            <span>担当範囲</span>
             <span>操作</span>
           </div>
           {assignments.length > 0 ? (

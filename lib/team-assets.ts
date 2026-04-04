@@ -1,5 +1,4 @@
-import { readFile } from "node:fs/promises";
-import { fileURLToPath } from "node:url";
+import manifestData from "@/public/site-assets/manifest.json";
 
 type ManifestFile = {
   group: string;
@@ -15,29 +14,13 @@ export type TeamAssetOption = {
   path: string;
 };
 
-let cachedManifest: Manifest | null = null;
-
-async function readManifest() {
-  if (cachedManifest) {
-    return cachedManifest;
-  }
-
-  const manifest = JSON.parse(
-    await readFile(fileURLToPath(new URL("../public/site-assets/manifest.json", import.meta.url)), "utf8"),
-  ) as Manifest;
-
-  cachedManifest = manifest;
-
-  return manifest;
-}
+const manifest = manifestData as Manifest;
 
 function toLabel(path: string) {
   return path.split("/").pop() ?? path;
 }
 
 export async function getTeamAssetOptions() {
-  const manifest = await readManifest();
-
   const logos = manifest.files
     .filter((file) => file.group === "teams/logos")
     .map((file) => file.output.replace(/^public/, ""))

@@ -10,6 +10,20 @@ const initialTeamActionState: TeamActionState = {
   message: "",
 };
 
+const CLIENT_IMAGE_RULES = {
+  logos: {
+    label: "ロゴ画像",
+    minWidth: 240,
+    minHeight: 240,
+  },
+  photos: {
+    label: "チーム画像",
+    minWidth: 1200,
+    minHeight: 675,
+    minAspectRatio: 1.2,
+  },
+} as const;
+
 type TeamFormValues = {
   id?: string;
   name: string;
@@ -40,6 +54,8 @@ export function AdminTeamForm({
   const [uploadedPhotoPreview, setUploadedPhotoPreview] = useState<string | null>(null);
   const [logoFileName, setLogoFileName] = useState("");
   const [photoFileName, setPhotoFileName] = useState("");
+  const [logoUploadError, setLogoUploadError] = useState("");
+  const [photoUploadError, setPhotoUploadError] = useState("");
   const logoInputId = useId();
   const photoInputId = useId();
 
@@ -109,11 +125,22 @@ export function AdminTeamForm({
               fileName={logoFileName}
               label="ロゴ画像を選択"
               hint={mode === "edit" ? "アップロードすると現在のロゴ画像を置き換えます。" : "PNG / JPG / WebP などの画像をアップロードできます。"}
-              onFileChange={(file) => {
+              errorMessage={logoUploadError}
+              onFileChange={async (file) => {
+                const result = await validateImageFile(file, "logos");
+
                 if (uploadedLogoPreview) {
                   URL.revokeObjectURL(uploadedLogoPreview);
                 }
 
+                if (result.status === "error") {
+                  setLogoFileName("");
+                  setUploadedLogoPreview(null);
+                  setLogoUploadError(result.message);
+                  return;
+                }
+
+                setLogoUploadError("");
                 setLogoFileName(file?.name ?? "");
                 setUploadedLogoPreview(file ? URL.createObjectURL(file) : null);
               }}
@@ -137,11 +164,22 @@ export function AdminTeamForm({
               fileName={photoFileName}
               label="チーム画像を選択"
               hint={mode === "edit" ? "アップロードすると現在のチーム画像を置き換えます。" : "横長の画像だと一覧で見やすく表示されます。"}
-              onFileChange={(file) => {
+              errorMessage={photoUploadError}
+              onFileChange={async (file) => {
+                const result = await validateImageFile(file, "photos");
+
                 if (uploadedPhotoPreview) {
                   URL.revokeObjectURL(uploadedPhotoPreview);
                 }
 
+                if (result.status === "error") {
+                  setPhotoFileName("");
+                  setUploadedPhotoPreview(null);
+                  setPhotoUploadError(result.message);
+                  return;
+                }
+
+                setPhotoUploadError("");
                 setPhotoFileName(file?.name ?? "");
                 setUploadedPhotoPreview(file ? URL.createObjectURL(file) : null);
               }}
@@ -204,6 +242,7 @@ function UploadField({
   fileName,
   label,
   hint,
+  errorMessage,
   onFileChange,
 }: {
   inputId: string;
@@ -211,7 +250,8 @@ function UploadField({
   fileName: string;
   label: string;
   hint: string;
-  onFileChange: (file: File | null) => void;
+  errorMessage: string;
+  onFileChange: (file: File | null) => void | Promise<void>;
 }) {
   const [isDragging, setIsDragging] = useState(false);
 
@@ -258,8 +298,66 @@ function UploadField({
         </span>
       </label>
       <small className="admin-field__help">{hint}</small>
+      {errorMessage ? <small className="admin-field__error">{errorMessage}</small> : null}
     </div>
   );
+}
+
+async function validateImageFile(file: File | null, kind: "logos" | "photos") {
+  if (!file) {
+    return { status: "idle" as const, message: "" };
+  }
+
+  if (!file.type.startsWith("image/")) {
+    return { status: "error" as const, message: "画像ファイルのみ選択できます。" };
+  }
+
+  if (file.size > 5 * 1024 * 1024) {
+    return { status: "error" as const, message: "画像サイズは 5MB 以下にしてください。" };
+  }
+
+  const rules = CLIENT_IMAGE_RULES[kind];
+
+  try {
+    const { width, height } = await readImageSize(file);
+
+    if (width < rules.minWidth || height < rules.minHeight) {
+      return {
+        status: "error" as const,
+        message: `${rules.label}は ${rules.minWidth}x${rules.minHeight}px 以上にしてください。`,
+      };
+    }
+
+    if ("minAspectRatio" in rules && width / height < rules.minAspectRatio) {
+      return {
+        status: "error" as const,
+        message: `${rules.label}は横長画像を選択してください。`,
+      };
+    }
+  } catch {
+    return { status: "error" as const, message: "画像サイズを確認できませんでした。" };
+  }
+
+  return { status: "success" as const, message: "" };
+}
+
+function readImageSize(file: File) {
+  return new Promise<{ width: number; height: number }>((resolve, reject) => {
+    const objectUrl = URL.createObjectURL(file);
+    const image = new window.Image();
+
+    image.onload = () => {
+      resolve({ width: image.naturalWidth, height: image.naturalHeight });
+      URL.revokeObjectURL(objectUrl);
+    };
+
+    image.onerror = () => {
+      reject(new Error("Failed to load image."));
+      URL.revokeObjectURL(objectUrl);
+    };
+
+    image.src = objectUrl;
+  });
 }
 
 function AssetPreview({

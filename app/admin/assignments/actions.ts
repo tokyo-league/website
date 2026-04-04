@@ -11,11 +11,6 @@ export type AssignmentActionState = {
   message: string;
 };
 
-export const initialAssignmentActionState: AssignmentActionState = {
-  status: "idle",
-  message: "",
-};
-
 export async function createAdminUser(
   _prevState: AssignmentActionState,
   formData: FormData,

@@ -1,7 +1,12 @@
 "use client";
 
 import { useActionState, useEffect, useState } from "react";
-import { deleteTeam, initialTeamActionState } from "@/app/admin/teams/actions";
+import { deleteTeam, type TeamActionState } from "@/app/admin/teams/actions";
+
+const initialTeamActionState: TeamActionState = {
+  status: "idle",
+  message: "",
+};
 
 export function AdminTeamDeleteButton({ teamId }: { teamId: string }) {
   const [state, action, pending] = useActionState(deleteTeam, initialTeamActionState);

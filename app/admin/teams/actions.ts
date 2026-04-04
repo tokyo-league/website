@@ -11,11 +11,6 @@ export type TeamActionState = {
   message: string;
 };
 
-export const initialTeamActionState: TeamActionState = {
-  status: "idle",
-  message: "",
-};
-
 export async function createTeam(
   _prevState: TeamActionState,
   formData: FormData,

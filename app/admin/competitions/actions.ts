@@ -17,11 +17,6 @@ export type CompetitionActionState = {
   message: string;
 };
 
-export const initialCompetitionActionState: CompetitionActionState = {
-  status: "idle",
-  message: "",
-};
-
 export async function createSeason(
   _prevState: CompetitionActionState,
   formData: FormData,

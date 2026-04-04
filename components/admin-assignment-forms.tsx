@@ -6,9 +6,13 @@ import {
   createDivisionAssignment,
   deleteAdminUser,
   deleteDivisionAssignment,
-  initialAssignmentActionState,
   type AssignmentActionState,
 } from "@/app/admin/assignments/actions";
+
+const initialAssignmentActionState: AssignmentActionState = {
+  status: "idle",
+  message: "",
+};
 
 type UserOption = {
   id: string;

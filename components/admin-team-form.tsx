@@ -3,8 +3,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useActionState, useEffect, useState } from "react";
-import { createTeam, initialTeamActionState, type TeamActionState, updateTeam } from "@/app/admin/teams/actions";
+import { createTeam, type TeamActionState, updateTeam } from "@/app/admin/teams/actions";
 import type { TeamAssetOption } from "@/lib/team-assets";
+
+const initialTeamActionState: TeamActionState = {
+  status: "idle",
+  message: "",
+};
 
 type TeamFormValues = {
   id?: string;

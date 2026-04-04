@@ -6,10 +6,14 @@ import {
   createCompetition,
   createDivision,
   createSeason,
-  initialCompetitionActionState,
   removeTeamFromDivision,
   type CompetitionActionState,
 } from "@/app/admin/competitions/actions";
+
+const initialCompetitionActionState: CompetitionActionState = {
+  status: "idle",
+  message: "",
+};
 
 type SeasonOption = {
   id: string;

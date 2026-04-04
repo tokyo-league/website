@@ -812,6 +812,36 @@ button {
   margin: 0;
 }
 
+.admin-toast {
+  position: sticky;
+  top: 20px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding: 14px 16px;
+  border: 1px solid var(--line-strong);
+  border-radius: 18px;
+  background: white;
+  box-shadow: var(--shadow);
+}
+
+.admin-toast p {
+  margin: 0;
+}
+
+.admin-toast--success {
+  border-color: rgba(32, 121, 74, 0.28);
+  background: #f3fbf6;
+}
+
+.admin-toast--error {
+  border-color: rgba(166, 51, 36, 0.28);
+  background: #fff5f3;
+}
+
 .login-shell {
   display: grid;
   place-items: center;

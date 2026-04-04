@@ -5,7 +5,20 @@ import { AdminRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireOwner } from "@/lib/admin-access";
 
-export async function createAdminUser(formData: FormData) {
+export type AssignmentActionState = {
+  status: "idle" | "success" | "error";
+  message: string;
+};
+
+export const initialAssignmentActionState: AssignmentActionState = {
+  status: "idle",
+  message: "",
+};
+
+export async function createAdminUser(
+  _prevState: AssignmentActionState,
+  formData: FormData,
+): Promise<AssignmentActionState> {
   await requireOwner();
 
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
@@ -13,7 +26,10 @@ export async function createAdminUser(formData: FormData) {
   const role = String(formData.get("role") ?? "EDITOR") as AdminRole;
 
   if (!email || !name || !["OWNER", "EDITOR"].includes(role)) {
-    return;
+    return {
+      status: "error",
+      message: "メールアドレス、表示名、ロールを確認してください。",
+    };
   }
 
   await prisma.user.upsert({
@@ -30,16 +46,27 @@ export async function createAdminUser(formData: FormData) {
   });
 
   revalidatePath("/admin/assignments");
+
+  return {
+    status: "success",
+    message: `${name} を ${role === "OWNER" ? "Owner" : "Editor"} として保存しました。`,
+  };
 }
 
-export async function createDivisionAssignment(formData: FormData) {
+export async function createDivisionAssignment(
+  _prevState: AssignmentActionState,
+  formData: FormData,
+): Promise<AssignmentActionState> {
   await requireOwner();
 
   const userId = String(formData.get("userId") ?? "");
   const divisionId = String(formData.get("divisionId") ?? "");
 
   if (!userId || !divisionId) {
-    return;
+    return {
+      status: "error",
+      message: "担当者とリーグを選択してください。",
+    };
   }
 
   const existing = await prisma.divisionEditorAssignment.findFirst({
@@ -63,15 +90,26 @@ export async function createDivisionAssignment(formData: FormData) {
   revalidatePath("/admin");
   revalidatePath("/admin/competitions");
   revalidatePath("/admin/assignments");
+
+  return {
+    status: "success",
+    message: existing ? "この担当リーグは既に割り当て済みです。" : "担当リーグを割り当てました。",
+  };
 }
 
-export async function deleteDivisionAssignment(formData: FormData) {
+export async function deleteDivisionAssignment(
+  _prevState: AssignmentActionState,
+  formData: FormData,
+): Promise<AssignmentActionState> {
   await requireOwner();
 
   const assignmentId = String(formData.get("assignmentId") ?? "");
 
   if (!assignmentId) {
-    return;
+    return {
+      status: "error",
+      message: "解除対象が見つかりませんでした。",
+    };
   }
 
   await prisma.divisionEditorAssignment.delete({
@@ -83,4 +121,9 @@ export async function deleteDivisionAssignment(formData: FormData) {
   revalidatePath("/admin");
   revalidatePath("/admin/competitions");
   revalidatePath("/admin/assignments");
+
+  return {
+    status: "success",
+    message: "担当リーグの割当を解除しました。",
+  };
 }

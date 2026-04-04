@@ -1,7 +1,7 @@
 import { AdminLayoutShell } from "@/components/admin-layout-shell";
+import { AdminAssignmentForms } from "@/components/admin-assignment-forms";
 import { prisma } from "@/lib/prisma";
 import { requireOwner } from "@/lib/admin-access";
-import { createAdminUser, createDivisionAssignment, deleteDivisionAssignment } from "./actions";
 
 export default async function AdminAssignmentsPage() {
   const scope = await requireOwner();
@@ -36,82 +36,27 @@ export default async function AdminAssignmentsPage() {
       kicker="Assignments"
       scope={scope}
     >
-      <div className="admin-columns">
-        <article className="admin-card">
-          <div className="card__header">
-            <div>
-              <p className="section-kicker">Users</p>
-              <h3>担当者を追加</h3>
-            </div>
-          </div>
-          <form action={createAdminUser} className="admin-form-stack">
-            <label className="admin-field">
-              <span>Googleメールアドレス</span>
-              <input type="email" name="email" placeholder="user@example.com" required />
-            </label>
-            <label className="admin-field">
-              <span>表示名</span>
-              <input type="text" name="name" placeholder="担当者名" required />
-            </label>
-            <label className="admin-field">
-              <span>ロール</span>
-              <select name="role" defaultValue="EDITOR">
-                <option value="EDITOR">Editor</option>
-                <option value="OWNER">Owner</option>
-              </select>
-            </label>
-            <button type="submit" className="button">
-              担当者を保存
-            </button>
-          </form>
-        </article>
-
-        <article className="admin-card">
-          <div className="card__header">
-            <div>
-              <p className="section-kicker">Assign</p>
-              <h3>担当リーグを割り当て</h3>
-            </div>
-          </div>
-          <form action={createDivisionAssignment} className="admin-form-stack">
-            <label className="admin-field">
-              <span>担当者</span>
-              <select name="userId" defaultValue="">
-                <option value="" disabled>
-                  担当者を選択
-                </option>
-                {users
-                  .filter((user) => user.role === "EDITOR")
-                  .map((user) => (
-                    <option key={user.id} value={user.id}>
-                      {user.name} / {user.email}
-                    </option>
-                  ))}
-              </select>
-            </label>
-            <label className="admin-field">
-              <span>リーグ</span>
-              <select name="divisionId" defaultValue="">
-                <option value="" disabled>
-                  リーグを選択
-                </option>
-                {divisions.map((division) => (
-                  <option key={division.id} value={division.id}>
-                    {division.competition.name} / {division.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="admin-field">
-              <span>権限</span>
-              <input type="text" value="担当リーグ編集" readOnly />
-            </label>
-            <button type="submit" className="button">
-              割当を追加
-            </button>
-          </form>
-        </article>
-      </div>
+      <AdminAssignmentForms
+        users={users.map((user) => ({
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        }))}
+        divisions={divisions.map((division) => ({
+          id: division.id,
+          name: division.name,
+          competitionName: division.competition.name,
+        }))}
+        assignments={assignments.map((assignment) => ({
+          id: assignment.id,
+          userName: assignment.user.name,
+          userEmail: assignment.user.email,
+          divisionName: assignment.division.name,
+          competitionName: assignment.division.competition.name,
+          permissionLabel: permissionLabel[assignment.permission],
+        }))}
+      />
 
       <article className="admin-card">
         <div className="card__header">
@@ -134,46 +79,6 @@ export default async function AdminAssignmentsPage() {
             <span>試合結果、順位表、リーグ管理をまとめて編集可能</span>
           </li>
         </ul>
-      </article>
-
-      <article className="admin-card">
-        <div className="card__header">
-          <div>
-            <p className="section-kicker">Current</p>
-            <h3>現在の割当一覧</h3>
-          </div>
-        </div>
-        <div className="admin-table">
-          <div className="admin-table__row admin-table__row--head admin-table__row--five">
-            <span>担当者</span>
-            <span>メール</span>
-            <span>大会 / リーグ</span>
-            <span>権限</span>
-            <span>操作</span>
-          </div>
-          {assignments.length > 0 ? (
-            assignments.map((assignment) => (
-              <div key={assignment.id} className="admin-table__row admin-table__row--five">
-                <strong>{assignment.user.name}</strong>
-                <span>{assignment.user.email}</span>
-                <span>
-                  {assignment.division.competition.name} / {assignment.division.name}
-                </span>
-                <span>{permissionLabel[assignment.permission]}</span>
-                <form action={deleteDivisionAssignment}>
-                  <input type="hidden" name="assignmentId" value={assignment.id} />
-                  <button type="submit" className="button button--ghost">
-                    解除
-                  </button>
-                </form>
-              </div>
-            ))
-          ) : (
-            <div className="admin-empty-state">
-              <p>まだ担当リーグの割当はありません。</p>
-            </div>
-          )}
-        </div>
       </article>
     </AdminLayoutShell>
   );

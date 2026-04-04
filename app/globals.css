@@ -229,6 +229,17 @@ button {
   gap: 20px;
 }
 
+.news-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 20px;
+}
+
+.news-layout__main,
+.news-layout__side {
+  min-width: 0;
+}
+
 .card,
 .division-card,
 .admin-card {
@@ -733,6 +744,7 @@ button {
   .page-intro__inner,
   .home-grid,
   .competition-layout,
+  .news-layout,
   .team-feature,
   .admin-columns,
   .admin-form-preview__grid {

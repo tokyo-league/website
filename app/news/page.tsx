@@ -1,6 +1,7 @@
+import Link from "next/link";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { newsItems } from "@/lib/site-data";
+import { downloadItems, newsItems } from "@/lib/site-data";
 
 export default function NewsPage() {
   return (
@@ -16,24 +17,43 @@ export default function NewsPage() {
         </section>
 
         <section className="section-block">
-          <div className="container narrow">
-            <div className="filter-row">
-              <span className="filter-pill is-active">すべて</span>
-              <span className="filter-pill">大会情報</span>
-              <span className="filter-pill">お知らせ</span>
+          <div className="container news-layout">
+            <div className="news-layout__main">
+              <div className="filter-row">
+                <span className="filter-pill is-active">すべて</span>
+                <span className="filter-pill">大会情報</span>
+                <span className="filter-pill">お知らせ</span>
+              </div>
+              <div className="list-stack">
+                {newsItems.map((item) => (
+                  <article key={item.title} className="list-row list-row--large">
+                    <p className="list-row__meta">
+                      <span>{item.date}</span>
+                      <span>{item.category}</span>
+                    </p>
+                    <h2>{item.title}</h2>
+                    <p>{item.excerpt}</p>
+                  </article>
+                ))}
+              </div>
             </div>
-            <div className="list-stack">
-              {newsItems.map((item) => (
-                <article key={item.title} className="list-row list-row--large">
-                  <p className="list-row__meta">
-                    <span>{item.date}</span>
-                    <span>{item.category}</span>
-                  </p>
-                  <h2>{item.title}</h2>
-                  <p>{item.excerpt}</p>
-                </article>
-              ))}
-            </div>
+
+            <aside className="news-layout__side">
+              <article className="card">
+                <div className="card__header">
+                  <div>
+                    <p className="section-kicker">Documents</p>
+                    <h2>関連資料</h2>
+                  </div>
+                  <Link href="/downloads">資料一覧へ</Link>
+                </div>
+                <div className="download-shortcuts">
+                  {downloadItems.map((item) => (
+                    <span key={item.title}>{item.title}</span>
+                  ))}
+                </div>
+              </article>
+            </aside>
           </div>
         </section>
       </main>

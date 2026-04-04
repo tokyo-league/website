@@ -26,8 +26,8 @@ export default function AboutPage() {
             </div>
             <div className="page-intro__visual">
               <Image
-                src={siteAssets.competitionHero}
-                alt="池2フットボールクラブ"
+                src={siteAssets.aboutHero}
+                alt="東京リーグについて"
                 fill
                 sizes="(max-width: 960px) 100vw, 32vw"
               />

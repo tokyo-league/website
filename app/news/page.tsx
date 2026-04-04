@@ -1,18 +1,24 @@
+import Image from "next/image";
 import Link from "next/link";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { downloadItems, newsItems } from "@/lib/site-data";
+import { downloadItems, newsItems, siteAssets } from "@/lib/site-data";
 
 export default function NewsPage() {
   return (
     <>
       <SiteHeader />
       <main className="page-main">
-        <section className="page-intro page-intro--compact">
-          <div className="container">
-            <p className="section-kicker">News</p>
-            <h1>ニュース</h1>
-            <p>お知らせ、大会情報、募集情報をカテゴリごとに整理して掲載します。</p>
+        <section className="page-intro">
+          <div className="container page-intro__inner">
+            <div>
+              <p className="section-kicker">News</p>
+              <h1>ニュース</h1>
+              <p>お知らせ、大会情報、募集情報をカテゴリごとに整理して掲載します。</p>
+            </div>
+            <div className="page-intro__visual">
+              <Image src={siteAssets.newsHero} alt="東京リーグのニュース" fill sizes="(max-width: 960px) 100vw, 32vw" />
+            </div>
           </div>
         </section>
 

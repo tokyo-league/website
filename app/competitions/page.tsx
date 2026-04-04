@@ -52,7 +52,7 @@ export default async function CompetitionsPage() {
             </div>
             <div className="page-intro__visual">
               <Image
-                src={siteAssets.competitionHero}
+                src={siteAssets.competitionMainVisual}
                 alt="東京リーグの試合情報"
                 fill
                 sizes="(max-width: 960px) 100vw, 32vw"

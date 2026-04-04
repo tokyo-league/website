@@ -36,10 +36,6 @@ export default async function CompetitionDetailPage({
     notFound();
   }
 
-  const heroImage =
-    competition.competitionType === "LEAGUE"
-      ? competition.divisions.find((division) => division.resultImagePath)?.resultImagePath || siteAssets.heroResult
-      : siteAssets.competitionHero;
   const isImageResult = Boolean(competition.resultFilePath?.match(/\.(png|jpe?g|webp)$/i));
 
   return (
@@ -68,7 +64,7 @@ export default async function CompetitionDetailPage({
               </div>
             </div>
             <div className="page-intro__visual">
-              <Image src={heroImage} alt={competition.name} fill sizes="(max-width: 960px) 100vw, 32vw" />
+              <Image src={siteAssets.competitionMainVisual} alt={competition.name} fill sizes="(max-width: 960px) 100vw, 32vw" />
             </div>
           </div>
         </section>

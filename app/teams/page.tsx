@@ -31,7 +31,7 @@ export default async function TeamsPage() {
     <>
       <SiteHeader />
       <main className="page-main">
-        <section className="page-intro">
+        <section className="page-intro page-intro--teams">
           <div className="container page-intro__inner">
             <div>
               <p className="section-kicker">Teams</p>
@@ -46,8 +46,12 @@ export default async function TeamsPage() {
                 </Link>
               </div>
             </div>
-            <div className="page-intro__visual">
-              <Image src={siteAssets.teamsHero} alt="参加チーム紹介" fill sizes="(max-width: 960px) 100vw, 32vw" />
+            <div className="page-intro__visual page-intro__visual--teams">
+              <Image src={siteAssets.teamsHero} alt="参加チーム紹介" fill sizes="100vw" />
+              <div className="page-intro__visual-caption">
+                <span>Tokyo League Teams</span>
+                <strong>横長のメインビジュアルで参加チームの空気感を見せる構成</strong>
+              </div>
             </div>
           </div>
         </section>

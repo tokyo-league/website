@@ -40,6 +40,7 @@ export default async function CompetitionDetailPage({
     competition.competitionType === "LEAGUE"
       ? competition.divisions.find((division) => division.resultImagePath)?.resultImagePath || siteAssets.heroResult
       : siteAssets.competitionHero;
+  const isImageResult = Boolean(competition.resultFilePath?.match(/\.(png|jpe?g|webp)$/i));
 
   return (
     <>
@@ -113,11 +114,23 @@ export default async function CompetitionDetailPage({
                 </div>
                 <p>{competition.resultFilePath ? "結果ファイルを掲載しています。" : "結果ファイルは準備中です。"}</p>
                 {competition.resultFilePath ? (
-                  <div className="page-intro__actions">
-                    <a href={competition.resultFilePath} target="_blank" rel="noreferrer" className="button">
-                      結果を見る
-                    </a>
-                  </div>
+                  <>
+                    {isImageResult ? (
+                      <div className="result-feature__image result-feature__image--large">
+                        <Image
+                          src={competition.resultFilePath}
+                          alt={`${competition.name} 結果画像`}
+                          fill
+                          sizes="(max-width: 960px) 100vw, 800px"
+                        />
+                      </div>
+                    ) : null}
+                    <div className="page-intro__actions">
+                      <a href={competition.resultFilePath} target="_blank" rel="noreferrer" className="button">
+                        結果を見る
+                      </a>
+                    </div>
+                  </>
                 ) : null}
               </article>
             </div>

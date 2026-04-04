@@ -27,6 +27,20 @@ export default async function DivisionDetailPage({
             },
             orderBy: { sortOrder: "asc" },
           },
+          standings: {
+            include: {
+              team: true,
+            },
+            orderBy: { rank: "asc" },
+          },
+          matches: {
+            include: {
+              venue: true,
+              homeTeam: true,
+              awayTeam: true,
+            },
+            orderBy: [{ matchDate: "desc" }, { sortOrder: "asc" }],
+          },
         },
       },
     },
@@ -112,8 +126,79 @@ export default async function DivisionDetailPage({
             </article>
           </div>
         </section>
+
+        <section className="section-block">
+          <div className="container home-grid">
+            <article className="card">
+              <div className="card__header">
+                <div>
+                  <p className="section-kicker">Standings</p>
+                  <h2>順位表</h2>
+                </div>
+              </div>
+              {division.standings.length > 0 ? (
+                <div className="standing-table">
+                  <div className="standing-table__row standing-table__row--head">
+                    <span>順位</span>
+                    <span>チーム</span>
+                    <span>試合</span>
+                    <span>勝点</span>
+                    <span>得失点</span>
+                  </div>
+                  {division.standings.map((standing) => (
+                    <div key={standing.id} className="standing-table__row">
+                      <strong>{standing.rank}</strong>
+                      <span>{standing.team.name}</span>
+                      <span>{standing.played}</span>
+                      <span>{standing.points}</span>
+                      <span>{standing.goalDifference}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="admin-muted">順位表データは準備中です。現時点では結果画像を掲載しています。</p>
+              )}
+            </article>
+
+            <article className="card">
+              <div className="card__header">
+                <div>
+                  <p className="section-kicker">Matches</p>
+                  <h2>試合一覧</h2>
+                </div>
+              </div>
+              {division.matches.length > 0 ? (
+                <div className="list-stack">
+                  {division.matches.map((match) => (
+                    <article key={match.id} className="list-row">
+                      <p className="list-row__meta">
+                        <span>{formatDate(match.matchDate)}</span>
+                        <span>{match.venue?.name || "会場未設定"}</span>
+                        <span>{match.status === "PLAYED" ? "試合終了" : "日程"}</span>
+                      </p>
+                      <h3>
+                        {match.homeTeam.name} {match.homeScore ?? "-"} - {match.awayScore ?? "-"} {match.awayTeam.name}
+                      </h3>
+                      {match.note ? <p>{match.note}</p> : null}
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <p className="admin-muted">個別スコア入力はまだありません。過去大会は結果画像を正本として扱います。</p>
+              )}
+            </article>
+          </div>
+        </section>
       </main>
       <SiteFooter />
     </>
   );
+}
+
+function formatDate(value: Date) {
+  return new Intl.DateTimeFormat("ja-JP", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(value);
 }

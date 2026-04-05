@@ -101,6 +101,7 @@ export default async function AdminResultsPage() {
             lost: standing.lost,
             goalsFor: standing.goalsFor,
             goalsAgainst: standing.goalsAgainst,
+            goalDifference: standing.goalDifference,
             points: standing.points,
           })),
         }))}

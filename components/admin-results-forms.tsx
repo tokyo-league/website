@@ -7,10 +7,10 @@ import {
   deleteMatch,
   deleteStanding,
   regenerateStandingsFromMatches,
+  replaceStandings,
   type ResultActionState,
   updateDivisionResultImage,
   updateMatch,
-  upsertStanding,
 } from "@/app/admin/results/actions";
 
 const initialState: ResultActionState = {
@@ -52,6 +52,7 @@ type DivisionOption = {
     lost: number;
     goalsFor: number;
     goalsAgainst: number;
+    goalDifference: number;
     points: number;
   }>;
 };
@@ -90,7 +91,7 @@ export function AdminResultsForms({
 
   const [resultState, resultAction, resultPending] = useActionState(updateDivisionResultImage, initialState);
   const [matchState, matchAction, matchPending] = useActionState(createMatch, initialState);
-  const [standingState, standingAction, standingPending] = useActionState(upsertStanding, initialState);
+  const [standingState, standingAction, standingPending] = useActionState(replaceStandings, initialState);
   const [regenState, regenerateAction, regeneratePending] = useActionState(regenerateStandingsFromMatches, initialState);
   const [toast, setToast] = useState(initialState);
   const [resultPreview, setResultPreview] = useState<string | null>(null);
@@ -370,7 +371,7 @@ export function AdminResultsForms({
         <div className="card__header">
           <div>
             <p className="section-kicker">Standing</p>
-            <h3>順位表を更新</h3>
+            <h3>順位表を作成・更新</h3>
           </div>
           <form action={regenerateAction}>
             <input type="hidden" name="divisionId" value={selectedDivision.id} />
@@ -379,57 +380,17 @@ export function AdminResultsForms({
             </button>
           </form>
         </div>
-        <form action={standingAction} className="admin-form-stack">
-          <input type="hidden" name="divisionId" value={selectedDivision.id} />
-          <div className="admin-form-preview__grid admin-form-preview__grid--five">
-            <label className="admin-field">
-              <span>チーム</span>
-              <select name="teamId" required>
-                <option value="">選択してください</option>
-                {selectedDivision.teams.map((team) => (
-                  <option key={team.id} value={team.id}>
-                    {team.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="admin-field">
-              <span>順位</span>
-              <input type="number" name="rank" min="1" required />
-            </label>
-            <label className="admin-field">
-              <span>試合</span>
-              <input type="number" name="played" min="0" defaultValue="0" />
-            </label>
-            <label className="admin-field">
-              <span>勝</span>
-              <input type="number" name="won" min="0" defaultValue="0" />
-            </label>
-            <label className="admin-field">
-              <span>分</span>
-              <input type="number" name="drawn" min="0" defaultValue="0" />
-            </label>
-            <label className="admin-field">
-              <span>負</span>
-              <input type="number" name="lost" min="0" defaultValue="0" />
-            </label>
-            <label className="admin-field">
-              <span>得点</span>
-              <input type="number" name="goalsFor" min="0" defaultValue="0" />
-            </label>
-            <label className="admin-field">
-              <span>失点</span>
-              <input type="number" name="goalsAgainst" min="0" defaultValue="0" />
-            </label>
-            <label className="admin-field">
-              <span>勝点</span>
-              <input type="number" name="points" min="0" defaultValue="0" />
-            </label>
-          </div>
-          <button type="submit" className="button" disabled={standingPending}>
-            {standingPending ? "保存中..." : "順位表を保存"}
-          </button>
-        </form>
+        {regenState.status !== "idle" ? (
+          <p className={`admin-inline-message admin-inline-message--${regenState.status}`}>{regenState.message}</p>
+        ) : null}
+        <BulkStandingEditor
+          key={selectedDivision.id}
+          divisionId={selectedDivision.id}
+          teams={selectedDivision.teams}
+          standings={selectedDivision.standings}
+          action={standingAction}
+          pending={standingPending}
+        />
       </article>
 
       <article className="admin-card">
@@ -460,21 +421,21 @@ export function AdminResultsForms({
         <div className="card__header">
           <div>
             <p className="section-kicker">Registered Standings</p>
-            <h3>登録済み順位表</h3>
+            <h3>登録済み順位表の確認</h3>
           </div>
         </div>
         {selectedDivision.standings.length === 0 ? (
           <p className="admin-muted">まだ順位表は登録されていません。</p>
         ) : (
-          <div className="admin-item-list">
+          <div className="admin-standings-summary">
             {selectedDivision.standings.map((standing) => (
-              <ExistingStandingEditor
-                key={standing.id}
-                divisionId={selectedDivision.id}
-                teams={selectedDivision.teams}
-                standing={standing}
-                onToast={setToast}
-              />
+              <div key={standing.id} className="admin-standings-summary__row">
+                <span>{standing.rank}位</span>
+                <strong>{standing.teamName}</strong>
+                <span>{standing.points} pt</span>
+                <span>{standing.played}試合</span>
+                <span>得失点差 {standing.goalDifference >= 0 ? `+${standing.goalDifference}` : standing.goalDifference}</span>
+              </div>
             ))}
           </div>
         )}
@@ -569,23 +530,121 @@ function ExistingMatchEditor({
   );
 }
 
-function ExistingStandingEditor({
+function BulkStandingEditor({
   divisionId,
   teams,
+  standings,
+  action,
+  pending,
+}: {
+  divisionId: string;
+  teams: DivisionOption["teams"];
+  standings: DivisionOption["standings"];
+  action: (payload: FormData) => void;
+  pending: boolean;
+}) {
+  const [rows, setRows] = useState(() =>
+    teams.map((team, index) => {
+      const existing = standings.find((standing) => standing.teamId === team.id);
+
+      return {
+        teamId: team.id,
+        teamName: team.name,
+        rank: existing?.rank ?? index + 1,
+        played: existing?.played ?? 0,
+        won: existing?.won ?? 0,
+        drawn: existing?.drawn ?? 0,
+        lost: existing?.lost ?? 0,
+        goalsFor: existing?.goalsFor ?? 0,
+        goalsAgainst: existing?.goalsAgainst ?? 0,
+        points: existing?.points ?? 0,
+      };
+    }),
+  );
+
+  useEffect(() => {
+    setRows(
+      teams.map((team, index) => {
+        const existing = standings.find((standing) => standing.teamId === team.id);
+
+        return {
+          teamId: team.id,
+          teamName: team.name,
+          rank: existing?.rank ?? index + 1,
+          played: existing?.played ?? 0,
+          won: existing?.won ?? 0,
+          drawn: existing?.drawn ?? 0,
+          lost: existing?.lost ?? 0,
+          goalsFor: existing?.goalsFor ?? 0,
+          goalsAgainst: existing?.goalsAgainst ?? 0,
+          points: existing?.points ?? 0,
+        };
+      }),
+    );
+  }, [teams, standings]);
+
+  function updateRow(teamId: string, field: keyof (typeof rows)[number], value: string) {
+    setRows((currentRows) =>
+      currentRows.map((row) =>
+        row.teamId === teamId
+          ? {
+              ...row,
+              [field]: field === "teamId" || field === "teamName" ? value : Math.max(0, Number(value) || 0),
+            }
+          : row,
+      ),
+    );
+  }
+
+  return (
+    <form action={action} className="admin-form-stack">
+      <input type="hidden" name="divisionId" value={divisionId} />
+      <input type="hidden" name="rowsJson" value={JSON.stringify(rows)} />
+      <div className="admin-standings-table">
+        <div className="admin-standings-table__head">
+          <span>チーム</span>
+          <span>順位</span>
+          <span>試合</span>
+          <span>勝</span>
+          <span>分</span>
+          <span>負</span>
+          <span>得点</span>
+          <span>失点</span>
+          <span>勝点</span>
+        </div>
+        {rows.map((row) => (
+          <div key={row.teamId} className="admin-standings-table__row">
+            <strong>{row.teamName}</strong>
+            <input type="number" min="1" value={row.rank} onChange={(event) => updateRow(row.teamId, "rank", event.target.value)} />
+            <input type="number" min="0" value={row.played} onChange={(event) => updateRow(row.teamId, "played", event.target.value)} />
+            <input type="number" min="0" value={row.won} onChange={(event) => updateRow(row.teamId, "won", event.target.value)} />
+            <input type="number" min="0" value={row.drawn} onChange={(event) => updateRow(row.teamId, "drawn", event.target.value)} />
+            <input type="number" min="0" value={row.lost} onChange={(event) => updateRow(row.teamId, "lost", event.target.value)} />
+            <input type="number" min="0" value={row.goalsFor} onChange={(event) => updateRow(row.teamId, "goalsFor", event.target.value)} />
+            <input type="number" min="0" value={row.goalsAgainst} onChange={(event) => updateRow(row.teamId, "goalsAgainst", event.target.value)} />
+            <input type="number" min="0" value={row.points} onChange={(event) => updateRow(row.teamId, "points", event.target.value)} />
+          </div>
+        ))}
+      </div>
+      <div className="admin-item-card__actions">
+        <button type="submit" className="button" disabled={pending}>
+          {pending ? "保存中..." : "順位表をまとめて保存"}
+        </button>
+      </div>
+    </form>
+  );
+}
+
+function ExistingStandingEditor({
+  divisionId,
   standing,
   onToast,
 }: {
   divisionId: string;
-  teams: DivisionOption["teams"];
   standing: DivisionOption["standings"][number];
   onToast: (state: ResultActionState) => void;
 }) {
-  const [updateState, updateAction, updatePending] = useActionState(upsertStanding, initialState);
   const [deleteState, deleteAction, deletePending] = useActionState(deleteStanding, initialState);
-
-  useEffect(() => {
-    if (updateState.status !== "idle") onToast(updateState);
-  }, [updateState, onToast]);
 
   useEffect(() => {
     if (deleteState.status !== "idle") onToast(deleteState);
@@ -593,58 +652,15 @@ function ExistingStandingEditor({
 
   return (
     <div className="admin-item-card">
-      <form action={updateAction} className="admin-form-stack">
-        <input type="hidden" name="divisionId" value={divisionId} />
-        <div className="admin-form-preview__grid admin-form-preview__grid--five">
-          <label className="admin-field">
-            <span>チーム</span>
-            <select name="teamId" defaultValue={standing.teamId} required>
-              {teams.map((team) => (
-                <option key={team.id} value={team.id}>
-                  {team.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="admin-field">
-            <span>順位</span>
-            <input type="number" name="rank" min="1" defaultValue={standing.rank} required />
-          </label>
-          <label className="admin-field">
-            <span>試合</span>
-            <input type="number" name="played" min="0" defaultValue={standing.played} />
-          </label>
-          <label className="admin-field">
-            <span>勝</span>
-            <input type="number" name="won" min="0" defaultValue={standing.won} />
-          </label>
-          <label className="admin-field">
-            <span>分</span>
-            <input type="number" name="drawn" min="0" defaultValue={standing.drawn} />
-          </label>
-          <label className="admin-field">
-            <span>負</span>
-            <input type="number" name="lost" min="0" defaultValue={standing.lost} />
-          </label>
-          <label className="admin-field">
-            <span>得点</span>
-            <input type="number" name="goalsFor" min="0" defaultValue={standing.goalsFor} />
-          </label>
-          <label className="admin-field">
-            <span>失点</span>
-            <input type="number" name="goalsAgainst" min="0" defaultValue={standing.goalsAgainst} />
-          </label>
-          <label className="admin-field">
-            <span>勝点</span>
-            <input type="number" name="points" min="0" defaultValue={standing.points} />
-          </label>
-        </div>
-        <div className="admin-item-card__actions">
-          <button type="submit" className="button" disabled={updatePending}>
-            {updatePending ? "保存中..." : "順位表を更新"}
-          </button>
-        </div>
-      </form>
+      <div className="admin-item-card__summary">
+        <strong>
+          {standing.rank}位 {standing.teamName}
+        </strong>
+        <p>
+          {standing.points} pt / {standing.played}試合 / 得失点差{" "}
+          {standing.goalDifference >= 0 ? `+${standing.goalDifference}` : standing.goalDifference}
+        </p>
+      </div>
       <form action={deleteAction}>
         <input type="hidden" name="standingId" value={standing.id} />
         <input type="hidden" name="divisionId" value={divisionId} />

@@ -296,6 +296,101 @@ export async function deleteStanding(
   };
 }
 
+export async function replaceStandings(
+  _prevState: ResultActionState,
+  formData: FormData,
+): Promise<ResultActionState> {
+  try {
+    const scope = await getAdminScope();
+    const divisionId = sanitizePlainText(String(formData.get("divisionId") ?? ""), 64);
+    const rowsJson = String(formData.get("rowsJson") ?? "");
+
+    if (!isValidUuid(divisionId) || !rowsJson) {
+      return { status: "error", message: "順位表データを確認してください。" };
+    }
+
+    if (!canEditDivision(scope, divisionId)) {
+      return { status: "error", message: "このリーグを編集する権限がありません。" };
+    }
+
+    const parsed = JSON.parse(rowsJson);
+
+    if (!Array.isArray(parsed) || parsed.length === 0) {
+      return { status: "error", message: "順位表データがありません。" };
+    }
+
+    const rows = parsed
+      .map((row) => ({
+        teamId: sanitizePlainText(String(row.teamId ?? ""), 64),
+        rank: parseInteger(String(row.rank ?? "")),
+        played: parseInteger(String(row.played ?? "0")) ?? 0,
+        won: parseInteger(String(row.won ?? "0")) ?? 0,
+        drawn: parseInteger(String(row.drawn ?? "0")) ?? 0,
+        lost: parseInteger(String(row.lost ?? "0")) ?? 0,
+        goalsFor: parseInteger(String(row.goalsFor ?? "0")) ?? 0,
+        goalsAgainst: parseInteger(String(row.goalsAgainst ?? "0")) ?? 0,
+        points: parseInteger(String(row.points ?? "0")) ?? 0,
+      }))
+      .filter((row) => isValidUuid(row.teamId));
+
+    if (rows.length === 0) {
+      return { status: "error", message: "順位表データがありません。" };
+    }
+
+    const invalidRow = rows.find((row) => !row.rank || row.rank < 1);
+
+    if (invalidRow) {
+      return { status: "error", message: "順位は 1 以上で入力してください。" };
+    }
+
+    const uniqueTeamIds = new Set(rows.map((row) => row.teamId));
+    const uniqueRanks = new Set(rows.map((row) => row.rank));
+
+    if (uniqueTeamIds.size !== rows.length) {
+      return { status: "error", message: "同じチームが重複しています。" };
+    }
+
+    if (uniqueRanks.size !== rows.length) {
+      return { status: "error", message: "順位が重複しています。" };
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.standing.deleteMany({
+        where: { divisionId },
+      });
+
+      await tx.standing.createMany({
+        data: rows.map((row) => ({
+          divisionId,
+          teamId: row.teamId,
+          rank: row.rank ?? 0,
+          played: row.played,
+          won: row.won,
+          drawn: row.drawn,
+          lost: row.lost,
+          goalsFor: row.goalsFor,
+          goalsAgainst: row.goalsAgainst,
+          goalDifference: row.goalsFor - row.goalsAgainst,
+          points: row.points,
+        })),
+      });
+    });
+
+    revalidatePath("/admin/results");
+
+    return {
+      status: "success",
+      message: `${rows.length}チーム分の順位表を保存しました。`,
+    };
+  } catch (error) {
+    console.error("replaceStandings failed", error);
+    return {
+      status: "error",
+      message: "順位表の保存に失敗しました。ログを確認してください。",
+    };
+  }
+}
+
 export async function regenerateStandingsFromMatches(
   _prevState: ResultActionState,
   formData: FormData,

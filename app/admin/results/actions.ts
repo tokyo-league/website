@@ -457,7 +457,7 @@ export async function regenerateStandingsFromMatches(
 
     return {
       status: "success",
-      message: "試合結果から順位表を再計算しました。",
+      message: `${division.matches.length}試合・${rows.length}チームから順位表を再計算しました。`,
     };
   } catch (error) {
     console.error("regenerateStandingsFromMatches failed", error);

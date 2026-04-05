@@ -300,133 +300,172 @@ export async function regenerateStandingsFromMatches(
   _prevState: ResultActionState,
   formData: FormData,
 ): Promise<ResultActionState> {
-  const scope = await getAdminScope();
-  const divisionId = sanitizePlainText(String(formData.get("divisionId") ?? ""), 64);
+  try {
+    const scope = await getAdminScope();
+    const divisionId = sanitizePlainText(String(formData.get("divisionId") ?? ""), 64);
 
-  if (!isValidUuid(divisionId)) {
-    return { status: "error", message: "対象リーグが見つかりませんでした。" };
-  }
-
-  if (!canEditDivision(scope, divisionId)) {
-    return { status: "error", message: "このリーグを編集する権限がありません。" };
-  }
-
-  const division = await prisma.division.findUnique({
-    where: { id: divisionId },
-    include: {
-      teams: {
-        include: { team: true },
-      },
-      matches: {
-        where: {
-          status: MatchStatus.PLAYED,
-          homeScore: { not: null },
-          awayScore: { not: null },
-        },
-        orderBy: [{ matchDate: "asc" }, { createdAt: "asc" }],
-      },
-    },
-  });
-
-  if (!division) {
-    return { status: "error", message: "対象リーグが見つかりませんでした。" };
-  }
-
-  const table = new Map(
-    division.teams.map((assignment) => [
-      assignment.teamId,
-      {
-        teamId: assignment.teamId,
-        played: 0,
-        won: 0,
-        drawn: 0,
-        lost: 0,
-        goalsFor: 0,
-        goalsAgainst: 0,
-        goalDifference: 0,
-        points: 0,
-      },
-    ]),
-  );
-
-  for (const match of division.matches) {
-    const home = table.get(match.homeTeamId);
-    const away = table.get(match.awayTeamId);
-
-    if (!home || !away || match.homeScore === null || match.awayScore === null) {
-      continue;
+    if (!isValidUuid(divisionId)) {
+      return { status: "error", message: "対象リーグが見つかりませんでした。" };
     }
 
-    home.played += 1;
-    away.played += 1;
-    home.goalsFor += match.homeScore;
-    home.goalsAgainst += match.awayScore;
-    away.goalsFor += match.awayScore;
-    away.goalsAgainst += match.homeScore;
-
-    if (match.homeScore > match.awayScore) {
-      home.won += 1;
-      away.lost += 1;
-      home.points += 3;
-    } else if (match.homeScore < match.awayScore) {
-      away.won += 1;
-      home.lost += 1;
-      away.points += 3;
-    } else {
-      home.drawn += 1;
-      away.drawn += 1;
-      home.points += 1;
-      away.points += 1;
+    if (!canEditDivision(scope, divisionId)) {
+      return { status: "error", message: "このリーグを編集する権限がありません。" };
     }
-  }
 
-  const rows = Array.from(table.values())
-    .map((row) => ({
-      ...row,
-      goalDifference: row.goalsFor - row.goalsAgainst,
-    }))
-    .sort((a, b) => {
-      if (b.points !== a.points) return b.points - a.points;
-      if (b.goalDifference !== a.goalDifference) return b.goalDifference - a.goalDifference;
-      if (b.goalsFor !== a.goalsFor) return b.goalsFor - a.goalsFor;
-      const aName = division.teams.find((team) => team.teamId === a.teamId)?.team.name ?? "";
-      const bName = division.teams.find((team) => team.teamId === b.teamId)?.team.name ?? "";
-      return aName.localeCompare(bName, "ja");
-    })
-    .map((row, index) => ({
-      ...row,
-      rank: index + 1,
-    }));
-
-  await prisma.$transaction([
-    prisma.standing.deleteMany({
-      where: { divisionId },
-    }),
-    ...rows.map((row) =>
-      prisma.standing.create({
-        data: {
-          divisionId,
-          teamId: row.teamId,
-          rank: row.rank,
-          played: row.played,
-          won: row.won,
-          drawn: row.drawn,
-          lost: row.lost,
-          goalsFor: row.goalsFor,
-          goalsAgainst: row.goalsAgainst,
-          goalDifference: row.goalDifference,
-          points: row.points,
+    const division = await prisma.division.findUnique({
+      where: { id: divisionId },
+      include: {
+        teams: {
+          include: { team: true },
         },
-      }),
-    ),
-  ]);
+        matches: {
+          where: {
+            status: MatchStatus.PLAYED,
+            homeScore: { not: null },
+            awayScore: { not: null },
+          },
+          include: {
+            homeTeam: true,
+            awayTeam: true,
+          },
+          orderBy: [{ matchDate: "asc" }, { createdAt: "asc" }],
+        },
+      },
+    });
 
-  revalidatePath("/admin/results");
+    if (!division) {
+      return { status: "error", message: "対象リーグが見つかりませんでした。" };
+    }
 
-  return {
-    status: "success",
-    message: "試合結果から順位表を再計算しました。",
-  };
+    if (division.matches.length === 0) {
+      return { status: "error", message: "再計算できる試合結果がありません。" };
+    }
+
+    const teamNameMap = new Map<string, string>();
+
+    for (const assignment of division.teams) {
+      teamNameMap.set(assignment.teamId, assignment.team.name);
+    }
+
+    for (const match of division.matches) {
+      teamNameMap.set(match.homeTeamId, match.homeTeam.name);
+      teamNameMap.set(match.awayTeamId, match.awayTeam.name);
+    }
+
+    const participantTeamIds = Array.from(
+      new Set([
+        ...division.teams.map((assignment) => assignment.teamId),
+        ...division.matches.flatMap((match) => [match.homeTeamId, match.awayTeamId]),
+      ]),
+    );
+
+    if (participantTeamIds.length === 0) {
+      return { status: "error", message: "再計算対象のチームが見つかりませんでした。" };
+    }
+
+    const table = new Map(
+      participantTeamIds.map((teamId) => [
+        teamId,
+        {
+          teamId,
+          played: 0,
+          won: 0,
+          drawn: 0,
+          lost: 0,
+          goalsFor: 0,
+          goalsAgainst: 0,
+          goalDifference: 0,
+          points: 0,
+        },
+      ]),
+    );
+
+    for (const match of division.matches) {
+      const home = table.get(match.homeTeamId);
+      const away = table.get(match.awayTeamId);
+
+      if (!home || !away || match.homeScore === null || match.awayScore === null) {
+        continue;
+      }
+
+      home.played += 1;
+      away.played += 1;
+      home.goalsFor += match.homeScore;
+      home.goalsAgainst += match.awayScore;
+      away.goalsFor += match.awayScore;
+      away.goalsAgainst += match.homeScore;
+
+      if (match.homeScore > match.awayScore) {
+        home.won += 1;
+        away.lost += 1;
+        home.points += 3;
+      } else if (match.homeScore < match.awayScore) {
+        away.won += 1;
+        home.lost += 1;
+        away.points += 3;
+      } else {
+        home.drawn += 1;
+        away.drawn += 1;
+        home.points += 1;
+        away.points += 1;
+      }
+    }
+
+    const rows = Array.from(table.values())
+      .map((row) => ({
+        ...row,
+        goalDifference: row.goalsFor - row.goalsAgainst,
+      }))
+      .sort((a, b) => {
+        if (b.points !== a.points) return b.points - a.points;
+        if (b.goalDifference !== a.goalDifference) return b.goalDifference - a.goalDifference;
+        if (b.goalsFor !== a.goalsFor) return b.goalsFor - a.goalsFor;
+        const aName = teamNameMap.get(a.teamId) ?? "";
+        const bName = teamNameMap.get(b.teamId) ?? "";
+        return aName.localeCompare(bName, "ja");
+      })
+      .map((row, index) => ({
+        ...row,
+        rank: index + 1,
+      }));
+
+    await prisma.$transaction(async (tx) => {
+      await tx.standing.deleteMany({
+        where: { divisionId },
+      });
+
+      if (rows.length > 0) {
+        await tx.standing.createMany({
+          data: rows.map((row) => ({
+            divisionId,
+            teamId: row.teamId,
+            rank: row.rank,
+            played: row.played,
+            won: row.won,
+            drawn: row.drawn,
+            lost: row.lost,
+            goalsFor: row.goalsFor,
+            goalsAgainst: row.goalsAgainst,
+            goalDifference: row.goalDifference,
+            points: row.points,
+          })),
+        });
+      }
+    });
+
+    revalidatePath("/admin/results");
+
+    return {
+      status: "success",
+      message: "試合結果から順位表を再計算しました。",
+    };
+  } catch (error) {
+    console.error("regenerateStandingsFromMatches failed", error);
+    return {
+      status: "error",
+      message: "順位表の再計算に失敗しました。ログを確認してください。",
+    };
+  }
 }
 
 function canEditDivision(

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { CompetitionStatus, CompetitionType, PublishStatus } from "@prisma/client";
 import { requireOwner } from "@/lib/admin-access";
+import { normalizeDivisionSlug } from "@/lib/league-slug";
 import { prisma } from "@/lib/prisma";
 import {
   isValidSlug,
@@ -130,7 +131,7 @@ export async function createDivision(
   const competitionId = sanitizePlainText(String(formData.get("competitionId") ?? ""), 64);
   const name = sanitizePlainText(String(formData.get("name") ?? ""), 80);
   const slugInput = sanitizePlainText(String(formData.get("slug") ?? ""), 80);
-  const slug = normalizeSlug(slugInput || name, 80);
+  const slug = slugInput ? normalizeSlug(slugInput, 80) : normalizeDivisionSlug(name);
   const sortOrder = parseInteger(String(formData.get("sortOrder") ?? "0"));
 
   if (!isValidUuid(competitionId) || !name || !slug || !isValidSlug(slug)) {

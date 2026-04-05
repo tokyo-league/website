@@ -71,6 +71,7 @@ export default async function AdminResultsPage() {
           id: division.id,
           seasonYear: division.competition.season.year,
           seasonLabel: division.competition.season.label,
+          seasonIsCurrent: division.competition.season.isCurrent,
           competitionName: division.competition.name,
           divisionName: division.name,
           label: `${division.competition.season.label} / ${division.competition.name} / ${division.name}`,

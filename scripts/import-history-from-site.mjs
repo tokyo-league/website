@@ -367,8 +367,14 @@ function buildNewsSlug(post) {
 }
 
 function slugify(value) {
-  const normalized = value
-    .normalize("NFKC")
+  const raw = String(value).normalize("NFKC").trim();
+  const leagueMatch = raw.match(/^([A-Za-z])\s*(?:リーグ|グループ)$/);
+
+  if (leagueMatch) {
+    return `${leagueMatch[1].toLowerCase()}-league`;
+  }
+
+  const normalized = raw
     .toLowerCase()
     .replace(/[\s_]+/g, "-")
     .replace(/[^\p{Letter}\p{Number}-]+/gu, "-")

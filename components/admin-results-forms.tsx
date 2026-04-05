@@ -22,6 +22,7 @@ type DivisionOption = {
   id: string;
   seasonYear: number;
   seasonLabel: string;
+  seasonIsCurrent: boolean;
   competitionName: string;
   divisionName: string;
   label: string;
@@ -88,6 +89,10 @@ export function AdminResultsForms({
   }, [filteredDivisions, selectedDivisionId]);
 
   const selectedDivision = divisions.find((division) => division.id === selectedDivisionId) ?? divisions[0];
+  const currentSeasonYear = new Date().getFullYear();
+  const canEditScores = Boolean(
+    selectedDivision && (selectedDivision.seasonIsCurrent || selectedDivision.seasonYear === currentSeasonYear),
+  );
 
   const [resultState, resultAction, resultPending] = useActionState(updateDivisionResultImage, initialState);
   const [matchState, matchAction, matchPending] = useActionState(createMatch, initialState);
@@ -307,64 +312,66 @@ export function AdminResultsForms({
           </form>
         </article>
 
-        <article className="admin-card">
-          <div className="card__header">
-            <div>
-              <p className="section-kicker">Match</p>
-              <h3>試合結果を追加</h3>
+        {canEditScores ? (
+          <article className="admin-card">
+            <div className="card__header">
+              <div>
+                <p className="section-kicker">Match</p>
+                <h3>試合結果を追加</h3>
+              </div>
             </div>
-          </div>
-          <form action={matchAction} className="admin-form-stack">
-            <input type="hidden" name="divisionId" value={selectedDivision.id} />
-            <label className="admin-field">
-              <span>試合日</span>
-              <input type="date" name="matchDate" required />
-            </label>
-            <label className="admin-field">
-              <span>ホーム</span>
-              <select name="homeTeamId" required>
-                <option value="">選択してください</option>
-                {selectedDivision.teams.map((team) => (
-                  <option key={team.id} value={team.id}>
-                    {team.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="admin-field">
-              <span>アウェイ</span>
-              <select name="awayTeamId" required>
-                <option value="">選択してください</option>
-                {selectedDivision.teams.map((team) => (
-                  <option key={team.id} value={team.id}>
-                    {team.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <div className="admin-form-preview__grid">
+            <form action={matchAction} className="admin-form-stack">
+              <input type="hidden" name="divisionId" value={selectedDivision.id} />
               <label className="admin-field">
-                <span>ホーム得点</span>
-                <input type="number" name="homeScore" min="0" />
+                <span>試合日</span>
+                <input type="date" name="matchDate" required />
               </label>
               <label className="admin-field">
-                <span>アウェイ得点</span>
-                <input type="number" name="awayScore" min="0" />
+                <span>ホーム</span>
+                <select name="homeTeamId" required>
+                  <option value="">選択してください</option>
+                  {selectedDivision.teams.map((team) => (
+                    <option key={team.id} value={team.id}>
+                      {team.name}
+                    </option>
+                  ))}
+                </select>
               </label>
-            </div>
-            <label className="admin-field">
-              <span>会場</span>
-              <input type="text" name="venueName" />
-            </label>
-            <label className="admin-field">
-              <span>備考</span>
-              <textarea name="note" rows={3} />
-            </label>
-            <button type="submit" className="button" disabled={matchPending}>
-              {matchPending ? "保存中..." : "試合結果を追加"}
-            </button>
-          </form>
-        </article>
+              <label className="admin-field">
+                <span>アウェイ</span>
+                <select name="awayTeamId" required>
+                  <option value="">選択してください</option>
+                  {selectedDivision.teams.map((team) => (
+                    <option key={team.id} value={team.id}>
+                      {team.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <div className="admin-form-preview__grid">
+                <label className="admin-field">
+                  <span>ホーム得点</span>
+                  <input type="number" name="homeScore" min="0" />
+                </label>
+                <label className="admin-field">
+                  <span>アウェイ得点</span>
+                  <input type="number" name="awayScore" min="0" />
+                </label>
+              </div>
+              <label className="admin-field">
+                <span>会場</span>
+                <input type="text" name="venueName" />
+              </label>
+              <label className="admin-field">
+                <span>備考</span>
+                <textarea name="note" rows={3} />
+              </label>
+              <button type="submit" className="button" disabled={matchPending}>
+                {matchPending ? "保存中..." : "試合結果を追加"}
+              </button>
+            </form>
+          </article>
+        ) : null}
       </div>
 
       <article className="admin-card">
@@ -373,49 +380,58 @@ export function AdminResultsForms({
             <p className="section-kicker">Standing</p>
             <h3>順位表を作成・更新</h3>
           </div>
-          <form action={regenerateAction}>
-            <input type="hidden" name="divisionId" value={selectedDivision.id} />
-            <button type="submit" className="button button--ghost" disabled={regeneratePending}>
-              {regeneratePending ? "計算中..." : "試合結果から再計算"}
-            </button>
-          </form>
+          {canEditScores ? (
+            <form action={regenerateAction}>
+              <input type="hidden" name="divisionId" value={selectedDivision.id} />
+              <button type="submit" className="button button--ghost" disabled={regeneratePending}>
+                {regeneratePending ? "計算中..." : "試合結果から再計算"}
+              </button>
+            </form>
+          ) : null}
         </div>
-        {regenState.status !== "idle" ? (
+        {!canEditScores ? (
+          <p className="admin-muted">過去大会は結果画像を正本として扱います。スコア入力と再計算は今年度大会のみです。</p>
+        ) : null}
+        {canEditScores && regenState.status !== "idle" ? (
           <p className={`admin-inline-message admin-inline-message--${regenState.status}`}>{regenState.message}</p>
         ) : null}
-        <BulkStandingEditor
-          key={selectedDivision.id}
-          divisionId={selectedDivision.id}
-          teams={selectedDivision.teams}
-          standings={selectedDivision.standings}
-          action={standingAction}
-          pending={standingPending}
-        />
+        {canEditScores ? (
+          <BulkStandingEditor
+            key={selectedDivision.id}
+            divisionId={selectedDivision.id}
+            teams={selectedDivision.teams}
+            standings={selectedDivision.standings}
+            action={standingAction}
+            pending={standingPending}
+          />
+        ) : null}
       </article>
 
-      <article className="admin-card">
-        <div className="card__header">
-          <div>
-            <p className="section-kicker">Registered Matches</p>
-            <h3>登録済み試合</h3>
+      {canEditScores ? (
+        <article className="admin-card">
+          <div className="card__header">
+            <div>
+              <p className="section-kicker">Registered Matches</p>
+              <h3>登録済み試合</h3>
+            </div>
           </div>
-        </div>
-        {selectedDivision.matches.length === 0 ? (
-          <p className="admin-muted">まだ試合結果は登録されていません。</p>
-        ) : (
-          <div className="admin-item-list">
-            {selectedDivision.matches.map((match) => (
-              <ExistingMatchEditor
-                key={match.id}
-                divisionId={selectedDivision.id}
-                teams={selectedDivision.teams}
-                match={match}
-                onToast={setToast}
-              />
-            ))}
-          </div>
-        )}
-      </article>
+          {selectedDivision.matches.length === 0 ? (
+            <p className="admin-muted">まだ試合結果は登録されていません。</p>
+          ) : (
+            <div className="admin-item-list">
+              {selectedDivision.matches.map((match) => (
+                <ExistingMatchEditor
+                  key={match.id}
+                  divisionId={selectedDivision.id}
+                  teams={selectedDivision.teams}
+                  match={match}
+                  onToast={setToast}
+                />
+              ))}
+            </div>
+          )}
+        </article>
+      ) : null}
 
       <article className="admin-card">
         <div className="card__header">

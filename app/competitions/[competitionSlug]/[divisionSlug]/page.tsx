@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { normalizeDivisionSlug } from "@/lib/league-slug";
 import { prisma } from "@/lib/prisma";
 import { siteAssets } from "@/lib/site-data";
 
@@ -14,12 +15,15 @@ export default async function DivisionDetailPage({
   params: Promise<{ competitionSlug: string; divisionSlug: string }>;
 }) {
   const { competitionSlug, divisionSlug } = await params;
+  const normalizedDivisionSlug = normalizeDivisionSlug(decodeURIComponent(divisionSlug));
   const competition = await prisma.competition.findUnique({
     where: { slug: competitionSlug },
     include: {
       season: true,
       divisions: {
-        where: { slug: divisionSlug },
+        where: {
+          OR: [{ slug: divisionSlug }, { slug: normalizedDivisionSlug }, { name: decodeURIComponent(divisionSlug) }],
+        },
         include: {
           teams: {
             include: {

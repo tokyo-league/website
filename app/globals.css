@@ -1054,6 +1054,23 @@ button {
   width: min(100%, 360px);
 }
 
+.admin-asset-preview--result {
+  width: 100%;
+  justify-items: stretch;
+}
+
+.admin-result-image-group {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-result-image-group__title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
 .upload-field {
   display: grid;
   gap: 8px;

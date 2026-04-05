@@ -112,6 +112,12 @@ export function AdminResultsForms({
     }
   }, [resultPreview]);
 
+  useEffect(() => {
+    setResultUploadError("");
+    setResultFileName("");
+    setResultPreview(null);
+  }, [selectedDivisionId]);
+
   if (!selectedDivision) {
     return (
       <article className="admin-card">
@@ -220,6 +226,23 @@ export function AdminResultsForms({
             {selectedDivision.resultImagePath ? (
               <input type="hidden" name="currentResultImagePath" value={selectedDivision.resultImagePath} />
             ) : null}
+            {selectedDivision.resultImagePath ? (
+              <div className="admin-result-image-group">
+                <p className="admin-result-image-group__title">登録済み結果画像</p>
+                <div className="admin-asset-preview admin-asset-preview--wide admin-asset-preview--result">
+                  <div className="admin-asset-preview__frame admin-asset-preview__frame--wide">
+                    <Image
+                      src={selectedDivision.resultImagePath}
+                      alt={`${selectedDivision.label} の結果画像`}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 640px"
+                    />
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <p className="admin-muted">このリーグには結果画像がまだ登録されていません。</p>
+            )}
             <label className="admin-field">
               <span>結果画像</span>
               <UploadField
@@ -260,14 +283,12 @@ export function AdminResultsForms({
                 }}
               />
             </label>
-            {(resultPreview ?? selectedDivision.resultImagePath) ? (
+            {resultPreview ? (
               <div className="admin-asset-preview">
-                <p className="admin-asset-preview__caption">
-                  {resultPreview ? "アップロード予定の結果画像" : "現在の結果画像"}
-                </p>
+                <p className="admin-asset-preview__caption">アップロード予定の結果画像</p>
                 <div className="admin-asset-preview__frame admin-asset-preview__frame--wide">
                   <Image
-                    src={resultPreview ?? selectedDivision.resultImagePath}
+                    src={resultPreview}
                     alt="結果画像プレビュー"
                     fill
                     sizes="(max-width: 768px) 100vw, 480px"

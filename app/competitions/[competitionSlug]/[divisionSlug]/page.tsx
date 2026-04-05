@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ResultImageLightbox } from "@/components/result-image-lightbox";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { normalizeDivisionSlug } from "@/lib/league-slug";
@@ -99,14 +100,10 @@ export default async function DivisionDetailPage({
                   <h2>試合結果画像</h2>
                 </div>
               </div>
-              <div className="result-feature__image result-feature__image--large">
-                <Image
-                  src={division.resultImagePath || siteAssets.heroResult}
-                  alt={`${division.name} 試合結果画像`}
-                  fill
-                  sizes="(max-width: 960px) 100vw, 60vw"
-                />
-              </div>
+              <ResultImageLightbox
+                src={division.resultImagePath || siteAssets.heroResult}
+                alt={`${division.name} 試合結果画像`}
+              />
             </article>
 
             <article className="card">

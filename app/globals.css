@@ -222,6 +222,57 @@ button {
   object-fit: cover;
 }
 
+.result-image-trigger {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: zoom-in;
+  text-align: left;
+}
+
+.result-image-trigger__hint {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.result-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(10, 15, 26, 0.82);
+}
+
+.result-lightbox__inner {
+  position: relative;
+  width: min(1100px, 100%);
+  height: min(86vh, 900px);
+}
+
+.result-lightbox__image {
+  object-fit: contain;
+}
+
+.result-lightbox__close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 2;
+  min-height: 42px;
+  padding: 0 16px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+  font: inherit;
+  cursor: pointer;
+}
+
 .page-intro__visual--teams img,
 .page-intro__visual--feature img {
   object-position: left center;

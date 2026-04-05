@@ -1024,26 +1024,6 @@ button {
   font-size: 12px;
 }
 
-.admin-upload-samples {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-top: 6px;
-  color: var(--muted);
-  font-size: 12px;
-}
-
-.admin-upload-samples a {
-  color: #1f4ea3;
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.admin-upload-samples a:hover {
-  text-decoration: underline;
-}
-
 .admin-asset-preview {
   display: inline-grid;
   gap: 12px;

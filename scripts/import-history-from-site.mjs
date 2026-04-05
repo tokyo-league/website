@@ -334,7 +334,9 @@ function parseLeaguePage(html) {
   const teamMatches = [...html.matchAll(/<div class="team_table">[\s\S]*?<ul>([\s\S]*?)<\/ul>/g)];
   const teamListBlock = teamMatches[0]?.[1] ?? "";
   const teams = [...teamListBlock.matchAll(/<li>(.*?)<\/li>/g)].map((match) => sanitizeText(match[1]));
-  const resultImageSrc = html.match(/<div class="chart">[\s\S]*?<img src="([^"]+)"/)?.[1] ?? null;
+  const chartHtml = html.match(/<div class="chart">([\s\S]*?)<\/div>/)?.[1] ?? "";
+  const imageSources = [...chartHtml.matchAll(/<img[^>]+src="([^"]+)"/g)].map((match) => match[1]);
+  const resultImageSrc = imageSources.find((src) => resolveLocalAsset(src)) ?? null;
   const noteText = sanitizeText(
     html
       .match(/<div class="info">\s*<h4>第\d+回東京リーグ<\/h4>([\s\S]*?)<\/div>/)?.[1]
@@ -426,7 +428,17 @@ function resolveLocalAsset(src) {
 
   const url = new URL(src, SITE_URL);
   const key = url.pathname.replace(/^\//, "");
-  return assetMap.get(key) ?? null;
+  const resolved = assetMap.get(key) ?? null;
+
+  if (!resolved) {
+    return null;
+  }
+
+  if (resolved.startsWith("/site-assets/common/")) {
+    return null;
+  }
+
+  return resolved;
 }
 
 function normalizeTeamName(value) {

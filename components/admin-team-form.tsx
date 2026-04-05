@@ -145,6 +145,12 @@ export function AdminTeamForm({
                 setUploadedLogoPreview(file ? URL.createObjectURL(file) : null);
               }}
             />
+            <div className="admin-upload-samples">
+              <span>サンプル:</span>
+              <a href="/site-assets/teams/logos/retouched/fckumano-logo-512.png" download>
+                ロゴ画像サンプルをダウンロード
+              </a>
+            </div>
           </label>
           {logoPreview ? (
             <AssetPreview
@@ -184,6 +190,12 @@ export function AdminTeamForm({
                 setUploadedPhotoPreview(file ? URL.createObjectURL(file) : null);
               }}
             />
+            <div className="admin-upload-samples">
+              <span>サンプル:</span>
+              <a href="/site-assets/mv/mv_team.jpg" download>
+                チーム画像サンプルをダウンロード
+              </a>
+            </div>
           </label>
           {photoPreview ? (
             <AssetPreview

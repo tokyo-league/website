@@ -1,10 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
+import { PublishStatus } from "@prisma/client";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { downloadItems, newsItems, siteAssets } from "@/lib/site-data";
+import { prisma } from "@/lib/prisma";
+import { downloadItems, newsItems as fallbackNewsItems, siteAssets } from "@/lib/site-data";
 
-export default function NewsPage() {
+export default async function NewsPage() {
+  const posts = await getPublishedNews();
+
   return (
     <>
       <SiteHeader />
@@ -14,7 +18,6 @@ export default function NewsPage() {
             <div>
               <p className="section-kicker">News</p>
               <h1>ニュース</h1>
-              <p>お知らせ、大会情報、募集情報をカテゴリごとに整理して掲載します。</p>
             </div>
             <div className="page-intro__visual page-intro__visual--feature">
               <Image src={siteAssets.newsHero} alt="東京リーグのニュース" fill sizes="100vw" />
@@ -31,15 +34,14 @@ export default function NewsPage() {
             <div className="news-layout__main">
               <div className="filter-row">
                 <span className="filter-pill is-active">すべて</span>
-                <span className="filter-pill">大会情報</span>
                 <span className="filter-pill">お知らせ</span>
               </div>
               <div className="list-stack">
-                {newsItems.map((item) => (
-                  <article key={item.title} className="list-row list-row--large">
+                {posts.map((item) => (
+                  <article key={item.id} className="list-row list-row--large">
                     <p className="list-row__meta">
-                      <span>{item.date}</span>
-                      <span>{item.category}</span>
+                      <span>{formatDate(item.publishedAt)}</span>
+                      <span>{item.categoryName}</span>
                     </p>
                     <h2>{item.title}</h2>
                     <p>{item.excerpt}</p>
@@ -70,4 +72,51 @@ export default function NewsPage() {
       <SiteFooter />
     </>
   );
+}
+
+async function getPublishedNews() {
+  try {
+    const posts = await prisma.newsPost.findMany({
+      where: {
+        status: PublishStatus.PUBLISHED,
+      },
+      include: {
+        category: true,
+      },
+      orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
+    });
+
+    return posts.map((post) => ({
+      id: post.id,
+      title: post.title,
+      excerpt: post.excerpt || post.body.slice(0, 160),
+      publishedAt: post.publishedAt,
+      categoryName: post.category?.name || "お知らせ",
+    }));
+  } catch {
+    return fallbackNewsItems.map((item, index) => ({
+      id: `fallback-${index + 1}`,
+      title: item.title,
+      excerpt: item.excerpt,
+      publishedAt: item.date,
+      categoryName: item.category,
+    }));
+  }
+}
+
+function formatDate(value: Date | string | null) {
+  if (!value) {
+    return "-";
+  }
+
+  if (typeof value === "string") {
+    return value;
+  }
+
+  return value.toLocaleDateString("ja-JP", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    timeZone: "Asia/Tokyo",
+  });
 }

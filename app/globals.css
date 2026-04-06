@@ -273,6 +273,40 @@ button {
   cursor: pointer;
 }
 
+.news-modal {
+  width: min(760px, 100%);
+  max-height: min(82vh, 860px);
+  overflow: auto;
+  padding: 28px;
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  background: #fff;
+  box-shadow: var(--shadow);
+}
+
+.news-modal h2 {
+  margin: 0;
+  font-size: clamp(28px, 3vw, 40px);
+  line-height: 1.18;
+  letter-spacing: -0.03em;
+}
+
+.news-modal__body {
+  display: grid;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.news-modal__body p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.9;
+}
+
+.news-modal-trigger {
+  margin-top: 18px;
+}
+
 .page-intro__visual--teams img,
 .page-intro__visual--feature img {
   object-position: left center;

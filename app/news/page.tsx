@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { PublishStatus } from "@prisma/client";
+import { NewsModalList } from "@/components/news-modal-list";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { prisma } from "@/lib/prisma";
@@ -36,18 +37,7 @@ export default async function NewsPage() {
                 <span className="filter-pill is-active">すべて</span>
                 <span className="filter-pill">お知らせ</span>
               </div>
-              <div className="list-stack">
-                {posts.map((item) => (
-                  <article key={item.id} className="list-row list-row--large">
-                    <p className="list-row__meta">
-                      <span>{formatDate(item.publishedAt)}</span>
-                      <span>{item.categoryName}</span>
-                    </p>
-                    <h2>{item.title}</h2>
-                    <p>{item.excerpt}</p>
-                  </article>
-                ))}
-              </div>
+              <NewsModalList items={posts} />
             </div>
 
             <aside className="news-layout__side">
@@ -90,7 +80,8 @@ async function getPublishedNews() {
       id: post.id,
       title: post.title,
       excerpt: post.excerpt || post.body.slice(0, 160),
-      publishedAt: post.publishedAt,
+      body: post.body,
+      publishedAtLabel: formatDate(post.publishedAt),
       categoryName: post.category?.name || "お知らせ",
     }));
   } catch {
@@ -98,7 +89,8 @@ async function getPublishedNews() {
       id: `fallback-${index + 1}`,
       title: item.title,
       excerpt: item.excerpt,
-      publishedAt: item.date,
+      body: item.excerpt,
+      publishedAtLabel: item.date,
       categoryName: item.category,
     }));
   }

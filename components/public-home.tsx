@@ -100,38 +100,68 @@ export async function PublicHome() {
               <Link href="/teams">参加チーム一覧</Link>
             </div>
             {featuredTeams.length > 0 ? (
-              <div className="list-stack">
+              <div className="home-team-grid">
                 {featuredTeams.map((team) => (
-                  <article key={team.id} className="team-feature">
-                    <div className="team-feature__image">
+                  <article key={team.id} className="home-team-card">
+                    <div className="home-team-card__image">
                       <Image
                         src={team.photoPath || siteAssets.teamsHero}
                         alt={team.name}
                         fill
-                        sizes="(max-width: 960px) 100vw, 20vw"
+                        sizes="(max-width: 960px) 100vw, 33vw"
                       />
                     </div>
-                    <div className="team-feature__copy">
+                    <div className="home-team-card__copy">
                       <h3>{team.name}</h3>
-                      <p>{team.profile || "東京リーグ参加チームの紹介です。"}</p>
+                      <p>{team.region || "東京都内"}</p>
                     </div>
                   </article>
                 ))}
               </div>
             ) : (
-              <div className="team-feature">
-                <div className="team-feature__image">
+              <div className="home-team-grid">
+                <article className="home-team-card">
+                  <div className="home-team-card__image">
+                    <Image
+                      src={siteAssets.featuredTeamPhoto}
+                      alt="参加チーム紹介"
+                      fill
+                      sizes="(max-width: 960px) 100vw, 33vw"
+                    />
+                  </div>
+                  <div className="home-team-card__copy">
+                    <h3>参加チーム紹介</h3>
+                    <p>東京都内</p>
+                  </div>
+                </article>
+                <article className="home-team-card">
+                  <div className="home-team-card__image">
+                    <Image
+                      src={siteAssets.teamsHero}
+                      alt="参加チーム紹介"
+                      fill
+                      sizes="(max-width: 960px) 100vw, 33vw"
+                    />
+                  </div>
+                  <div className="home-team-card__copy">
+                    <h3>参加チーム紹介</h3>
+                    <p>東京都内</p>
+                  </div>
+                </article>
+                <article className="home-team-card">
+                  <div className="home-team-card__image">
                   <Image
-                    src={siteAssets.featuredTeamPhoto}
+                    src={siteAssets.heroResult}
                     alt="参加チーム紹介"
                     fill
-                    sizes="(max-width: 960px) 100vw, 20vw"
+                    sizes="(max-width: 960px) 100vw, 33vw"
                   />
-                </div>
-                <div className="team-feature__copy">
-                  <h3>参加チーム紹介</h3>
-                  <p>公開中チームの情報を準備中です。</p>
-                </div>
+                  </div>
+                  <div className="home-team-card__copy">
+                    <h3>参加チーム紹介</h3>
+                    <p>東京都内</p>
+                  </div>
+                </article>
               </div>
             )}
           </article>
@@ -166,7 +196,7 @@ async function getRandomFeaturedTeams(limit: number) {
       select: {
         id: true,
         name: true,
-        profile: true,
+        region: true,
         photoPath: true,
         sortOrder: true,
       },
@@ -182,7 +212,7 @@ async function getRandomFeaturedTeams(limit: number) {
     return fallbackTeams.slice(0, limit).map((team, index) => ({
       id: `fallback-${index + 1}`,
       name: team.name,
-      profile: `${team.area} / 結成 ${team.founded}`,
+      region: team.area,
       photoPath: team.image,
       sortOrder: index,
     }));

@@ -1,8 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
-import { divisionCards, newsItems, siteAssets } from "@/lib/site-data";
+import { PublishStatus } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
+import { divisionCards, newsItems, siteAssets, teams as fallbackTeams } from "@/lib/site-data";
 
-export function PublicHome() {
+export async function PublicHome() {
+  const featuredTeams = await getRandomFeaturedTeams(3);
+
   return (
     <main>
       <section className="home-intro">
@@ -95,20 +99,41 @@ export function PublicHome() {
               </div>
               <Link href="/teams">参加チーム一覧</Link>
             </div>
-            <div className="team-feature">
-              <div className="team-feature__image">
-                <Image
-                  src={siteAssets.featuredTeamPhoto}
-                  alt="旭フットボールクラブ"
-                  fill
-                  sizes="(max-width: 960px) 100vw, 20vw"
-                />
+            {featuredTeams.length > 0 ? (
+              <div className="list-stack">
+                {featuredTeams.map((team) => (
+                  <article key={team.id} className="team-feature">
+                    <div className="team-feature__image">
+                      <Image
+                        src={team.photoPath || siteAssets.teamsHero}
+                        alt={team.name}
+                        fill
+                        sizes="(max-width: 960px) 100vw, 20vw"
+                      />
+                    </div>
+                    <div className="team-feature__copy">
+                      <h3>{team.name}</h3>
+                      <p>{team.profile || "東京リーグ参加チームの紹介です。"}</p>
+                    </div>
+                  </article>
+                ))}
               </div>
-              <div className="team-feature__copy">
-                <h3>旭フットボールクラブ</h3>
-                <p>現サイトのチーム写真とロゴを使い、紹介一覧を見やすく整理します。</p>
+            ) : (
+              <div className="team-feature">
+                <div className="team-feature__image">
+                  <Image
+                    src={siteAssets.featuredTeamPhoto}
+                    alt="参加チーム紹介"
+                    fill
+                    sizes="(max-width: 960px) 100vw, 20vw"
+                  />
+                </div>
+                <div className="team-feature__copy">
+                  <h3>参加チーム紹介</h3>
+                  <p>公開中チームの情報を準備中です。</p>
+                </div>
               </div>
-            </div>
+            )}
           </article>
 
           <article className="card card--download">
@@ -130,4 +155,36 @@ export function PublicHome() {
       </section>
     </main>
   );
+}
+
+async function getRandomFeaturedTeams(limit: number) {
+  try {
+    const teams = await prisma.team.findMany({
+      where: {
+        status: PublishStatus.PUBLISHED,
+      },
+      select: {
+        id: true,
+        name: true,
+        profile: true,
+        photoPath: true,
+        sortOrder: true,
+      },
+      orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+    });
+
+    return [...teams]
+      .map((team) => ({ team, sortKey: Math.random() }))
+      .sort((left, right) => left.sortKey - right.sortKey)
+      .slice(0, limit)
+      .map(({ team }) => team);
+  } catch {
+    return fallbackTeams.slice(0, limit).map((team, index) => ({
+      id: `fallback-${index + 1}`,
+      name: team.name,
+      profile: `${team.area} / 結成 ${team.founded}`,
+      photoPath: team.image,
+      sortOrder: index,
+    }));
+  }
 }

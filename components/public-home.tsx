@@ -15,7 +15,6 @@ export async function PublicHome() {
             <div>
               <p className="section-kicker">2026 Season</p>
               <h1>第103回 東京リーグ</h1>
-              <p>試合情報、ニュース、参加チーム、資料を既存サイトの雰囲気に寄せて整理したトップページです。</p>
             </div>
             <div className="home-intro__links">
               <Link href="/competitions" className="button">

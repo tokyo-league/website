@@ -12,9 +12,6 @@ export function SiteFooter() {
       <div className="container site-footer__inner">
         <div>
           <p className="section-kicker">TOKYO Junior Soccer League</p>
-          <p className="site-footer__lead">
-            東京少年サッカー連盟 東京リーグの情報を、見やすく更新しやすい形で届けるためのリニューアル案です。
-          </p>
         </div>
         <div className="site-footer__links">
           {footerLinks.map((item) => (

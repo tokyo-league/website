@@ -2,19 +2,38 @@
 
 import { useActionState, useEffect, useId, useState } from "react";
 import type { PublishStatus } from "@prisma/client";
-import { createNewsPost, type NewsActionState } from "@/app/admin/news/actions";
+import {
+  createNewsPost,
+  updateNewsPost,
+  type NewsActionState,
+} from "@/app/admin/news/actions";
 
 const initialState: NewsActionState = {
   status: "idle",
   message: "",
 };
 
+type NewsFormValues = {
+  id?: string;
+  title: string;
+  excerpt: string;
+  body: string;
+  categoryId: string;
+  status: PublishStatus;
+  publishedAt: string;
+};
+
 export function AdminNewsForm({
   categories,
+  mode,
+  initialValues,
 }: {
   categories: Array<{ id: string; name: string }>;
+  mode: "create" | "edit";
+  initialValues: NewsFormValues;
 }) {
-  const [state, formAction, pending] = useActionState(createNewsPost, initialState);
+  const action = mode === "create" ? createNewsPost : updateNewsPost;
+  const [state, formAction, pending] = useActionState(action, initialState);
   const [toast, setToast] = useState(initialState);
   const inputId = useId();
   const [fileName, setFileName] = useState("");
@@ -39,18 +58,19 @@ export function AdminNewsForm({
       <article className="admin-card">
         <div className="card__header">
           <div>
-            <p className="section-kicker">Create</p>
-            <h3>ニュースを新規作成</h3>
+            <p className="section-kicker">{mode === "create" ? "Create" : "Edit"}</p>
+            <h3>{mode === "create" ? "ニュースを新規作成" : "ニュースを編集"}</h3>
           </div>
         </div>
         <form action={formAction} className="admin-form-stack" encType="multipart/form-data">
+          {mode === "edit" && initialValues.id ? <input type="hidden" name="newsId" value={initialValues.id} /> : null}
           <label className="admin-field">
             <span>タイトル</span>
-            <input type="text" name="title" required />
+            <input type="text" name="title" required defaultValue={initialValues.title} />
           </label>
           <label className="admin-field">
             <span>カテゴリ</span>
-            <select name="categoryId" defaultValue="">
+            <select name="categoryId" defaultValue={initialValues.categoryId}>
               <option value="">未設定</option>
               {categories.map((category) => (
                 <option key={category.id} value={category.id}>
@@ -61,11 +81,11 @@ export function AdminNewsForm({
           </label>
           <label className="admin-field">
             <span>概要</span>
-            <textarea name="excerpt" rows={3} />
+            <textarea name="excerpt" rows={3} defaultValue={initialValues.excerpt} />
           </label>
           <label className="admin-field">
             <span>本文</span>
-            <textarea name="body" rows={8} required />
+            <textarea name="body" rows={8} required defaultValue={initialValues.body} />
           </label>
           <label className="admin-field">
             <span>アイキャッチ画像</span>
@@ -87,15 +107,15 @@ export function AdminNewsForm({
           <div className="admin-form-preview__grid">
             <label className="admin-field">
               <span>公開状態</span>
-              <StatusSelect name="status" />
+              <StatusSelect name="status" defaultValue={initialValues.status} />
             </label>
             <label className="admin-field">
-              <span>公開日</span>
-              <input type="date" name="publishedAt" />
+              <span>公開日時</span>
+              <input type="datetime-local" name="publishedAt" defaultValue={initialValues.publishedAt} />
             </label>
           </div>
           <button type="submit" className="button" disabled={pending}>
-            {pending ? "保存中..." : "ニュースを保存"}
+            {pending ? "保存中..." : mode === "create" ? "ニュースを保存" : "更新を保存"}
           </button>
         </form>
       </article>
@@ -103,7 +123,7 @@ export function AdminNewsForm({
   );
 }
 
-function StatusSelect({ name }: { name: string }) {
+function StatusSelect({ name, defaultValue }: { name: string; defaultValue: PublishStatus }) {
   const options: Array<{ value: PublishStatus; label: string }> = [
     { value: "DRAFT", label: "下書き" },
     { value: "PUBLISHED", label: "公開" },
@@ -111,7 +131,7 @@ function StatusSelect({ name }: { name: string }) {
   ];
 
   return (
-    <select name={name} defaultValue="DRAFT">
+    <select name={name} defaultValue={defaultValue}>
       {options.map((option) => (
         <option key={option.value} value={option.value}>
           {option.label}
@@ -119,4 +139,29 @@ function StatusSelect({ name }: { name: string }) {
       ))}
     </select>
   );
+}
+
+export function formatDateTimeLocal(value: Date | null) {
+  if (!value) {
+    return "";
+  }
+
+  const parts = new Intl.DateTimeFormat("sv-SE", {
+    timeZone: "Asia/Tokyo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(value);
+
+  const get = (type: string) => parts.find((part) => part.type === type)?.value ?? "";
+  const year = get("year");
+  const month = get("month");
+  const day = get("day");
+  const hours = get("hour");
+  const minutes = get("minute");
+
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
 }

@@ -12,67 +12,56 @@ export type NewsActionState = {
   message: string;
 };
 
+type ParsedNewsPayload =
+  | {
+      ok: true;
+      title: string;
+      excerpt: string;
+      body: string;
+      categoryId: string;
+      status: PublishStatus;
+      publishedAt: Date | null;
+    }
+  | {
+      ok: false;
+      error: NewsActionState;
+    };
+
 export async function createNewsPost(
   _prevState: NewsActionState,
   formData: FormData,
 ): Promise<NewsActionState> {
   try {
     const scope = await requireOwner();
-    const title = sanitizePlainText(String(formData.get("title") ?? ""), 120);
-    const excerpt = sanitizePlainText(String(formData.get("excerpt") ?? ""), 240);
-    const body = sanitizePlainText(String(formData.get("body") ?? ""), 12000);
-    const categoryId = sanitizePlainText(String(formData.get("categoryId") ?? ""), 64);
-    const status = String(formData.get("status") ?? "DRAFT") as PublishStatus;
-    const publishedAtText = sanitizePlainText(String(formData.get("publishedAt") ?? ""), 32);
+    const payload = parseNewsPayload(formData);
 
-    if (!title || !body || !["DRAFT", "PUBLISHED", "ARCHIVED"].includes(status)) {
-      return { status: "error", message: "ニュース内容を確認してください。" };
+    if (!payload.ok) {
+      return payload.error;
     }
 
-    if (categoryId && !isValidUuid(categoryId)) {
-      return { status: "error", message: "カテゴリを確認してください。" };
-    }
-
-    const slug = await createUniqueNewsSlug(title);
-    const publishedAt =
-      status === "PUBLISHED" ? (publishedAtText ? new Date(publishedAtText) : new Date()) : null;
-
-    if (publishedAtText && publishedAt && Number.isNaN(publishedAt.getTime())) {
-      return { status: "error", message: "公開日を確認してください。" };
-    }
-
-    let eyecatchAssetId: string | null = null;
-
-    try {
-      eyecatchAssetId = await uploadEyecatchAsset(formData.get("eyecatchFile"), scope.admin.id);
-    } catch (error) {
-      return {
-        status: "error",
-        message: error instanceof Error ? error.message : "アイキャッチ画像の保存に失敗しました。",
-      };
-    }
+    const slug = await createUniqueNewsSlug(payload.title);
+    const eyecatchAssetId = await uploadEyecatchAsset(formData.get("eyecatchFile"), scope.admin.id);
 
     await prisma.newsPost.create({
       data: {
         slug,
-        title,
-        excerpt: excerpt || null,
-        body,
-        categoryId: categoryId || null,
+        title: payload.title,
+        excerpt: payload.excerpt || null,
+        body: payload.body,
+        categoryId: payload.categoryId || null,
         eyecatchAssetId,
-        status,
-        publishedAt,
+        status: payload.status,
+        publishedAt: payload.publishedAt,
         createdById: scope.admin.id,
         updatedById: scope.admin.id,
       },
     });
 
-    revalidatePath("/admin/news");
-    revalidatePath("/news");
+    revalidateNewsPaths();
 
     return {
       status: "success",
-      message: `ニュース「${title}」を作成しました。`,
+      message: `ニュース「${payload.title}」を作成しました。`,
     };
   } catch (error) {
     console.error("createNewsPost failed", error);
@@ -81,6 +70,139 @@ export async function createNewsPost(
       message: "ニュースの作成に失敗しました。ログを確認してください。",
     };
   }
+}
+
+export async function updateNewsPost(
+  _prevState: NewsActionState,
+  formData: FormData,
+): Promise<NewsActionState> {
+  try {
+    const scope = await requireOwner();
+    const newsId = sanitizePlainText(String(formData.get("newsId") ?? ""), 64);
+
+    if (!isValidUuid(newsId)) {
+      return { status: "error", message: "対象ニュースを確認してください。" };
+    }
+
+    const existing = await prisma.newsPost.findUnique({
+      where: { id: newsId },
+      select: { id: true, title: true, eyecatchAssetId: true },
+    });
+
+    if (!existing) {
+      return { status: "error", message: "対象ニュースが見つかりません。" };
+    }
+
+    const payload = parseNewsPayload(formData);
+
+    if (!payload.ok) {
+      return payload.error;
+    }
+
+    const eyecatchAssetId =
+      (await uploadEyecatchAsset(formData.get("eyecatchFile"), scope.admin.id)) ?? existing.eyecatchAssetId;
+
+    await prisma.newsPost.update({
+      where: { id: newsId },
+      data: {
+        title: payload.title,
+        excerpt: payload.excerpt || null,
+        body: payload.body,
+        categoryId: payload.categoryId || null,
+        eyecatchAssetId,
+        status: payload.status,
+        publishedAt: payload.publishedAt,
+        updatedById: scope.admin.id,
+      },
+    });
+
+    revalidateNewsPaths();
+
+    return {
+      status: "success",
+      message: `ニュース「${payload.title}」を更新しました。`,
+    };
+  } catch (error) {
+    console.error("updateNewsPost failed", error);
+    return {
+      status: "error",
+      message: "ニュースの更新に失敗しました。ログを確認してください。",
+    };
+  }
+}
+
+export async function deleteNewsPost(
+  _prevState: NewsActionState,
+  formData: FormData,
+): Promise<NewsActionState> {
+  try {
+    await requireOwner();
+    const newsId = sanitizePlainText(String(formData.get("newsId") ?? ""), 64);
+
+    if (!isValidUuid(newsId)) {
+      return { status: "error", message: "対象ニュースを確認してください。" };
+    }
+
+    const existing = await prisma.newsPost.findUnique({
+      where: { id: newsId },
+      select: { id: true, title: true },
+    });
+
+    if (!existing) {
+      return { status: "error", message: "対象ニュースが見つかりません。" };
+    }
+
+    await prisma.newsPost.delete({
+      where: { id: newsId },
+    });
+
+    revalidateNewsPaths();
+
+    return {
+      status: "success",
+      message: `ニュース「${existing.title}」を削除しました。`,
+    };
+  } catch (error) {
+    console.error("deleteNewsPost failed", error);
+    return {
+      status: "error",
+      message: "ニュースの削除に失敗しました。ログを確認してください。",
+    };
+  }
+}
+
+function parseNewsPayload(formData: FormData): ParsedNewsPayload {
+  const title = sanitizePlainText(String(formData.get("title") ?? ""), 120);
+  const excerpt = sanitizePlainText(String(formData.get("excerpt") ?? ""), 240);
+  const body = sanitizePlainText(String(formData.get("body") ?? ""), 12000);
+  const categoryId = sanitizePlainText(String(formData.get("categoryId") ?? ""), 64);
+  const status = String(formData.get("status") ?? "DRAFT") as PublishStatus;
+  const publishedAtText = sanitizePlainText(String(formData.get("publishedAt") ?? ""), 32);
+
+  if (!title || !body || !["DRAFT", "PUBLISHED", "ARCHIVED"].includes(status)) {
+    return { ok: false, error: { status: "error", message: "ニュース内容を確認してください。" } };
+  }
+
+  if (categoryId && !isValidUuid(categoryId)) {
+    return { ok: false, error: { status: "error", message: "カテゴリを確認してください。" } };
+  }
+
+  const publishedAt =
+    status === "PUBLISHED" ? (publishedAtText ? parseDateTimeAsJst(publishedAtText) : new Date()) : null;
+
+  if (publishedAtText && publishedAt && Number.isNaN(publishedAt.getTime())) {
+    return { ok: false, error: { status: "error", message: "公開日時を確認してください。" } };
+  }
+
+  return {
+    ok: true,
+    title,
+    excerpt,
+    body,
+    categoryId,
+    status,
+    publishedAt,
+  };
 }
 
 async function createUniqueNewsSlug(title: string) {
@@ -129,4 +251,29 @@ async function uploadEyecatchAsset(fileValue: FormDataEntryValue | null, userId:
   });
 
   return asset.id;
+}
+
+function revalidateNewsPaths() {
+  revalidatePath("/admin/news");
+  revalidatePath("/news");
+}
+
+function parseDateTimeAsJst(value: string) {
+  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/);
+
+  if (!match) {
+    return new Date(Number.NaN);
+  }
+
+  const [, year, month, day, hour, minute] = match;
+
+  return new Date(
+    Date.UTC(
+      Number(year),
+      Number(month) - 1,
+      Number(day),
+      Number(hour) - 9,
+      Number(minute),
+    ),
+  );
 }

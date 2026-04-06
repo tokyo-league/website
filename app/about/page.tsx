@@ -73,7 +73,7 @@ export default function AboutPage() {
         </section>
 
         <section className="section-block">
-          <div className="container narrow">
+          <div className="container">
             <div className="text-section-stack">
               <article className="text-section">
                 <h2>組織概要</h2>

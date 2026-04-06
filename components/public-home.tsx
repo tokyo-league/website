@@ -165,22 +165,6 @@ export async function PublicHome() {
               </div>
             )}
           </article>
-
-          <article className="card card--download">
-            <div className="card__header">
-              <div>
-                <p className="section-kicker">Download</p>
-                <h2>資料ダウンロード</h2>
-              </div>
-              <Link href="/downloads">一覧へ</Link>
-            </div>
-            <div className="download-shortcuts">
-              <span>リーグ戦要項</span>
-              <span>規約</span>
-              <span>規約細則</span>
-              <span>注意事項</span>
-            </div>
-          </article>
         </div>
       </section>
     </main>

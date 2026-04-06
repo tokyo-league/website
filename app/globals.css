@@ -713,6 +713,77 @@ button {
   line-height: 1.9;
 }
 
+.about-overview {
+  display: grid;
+  gap: 0;
+  margin-top: 14px;
+}
+
+.about-overview__row {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  gap: 18px;
+  padding: 14px 0;
+  border-top: 1px solid var(--line);
+}
+
+.about-overview__row:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.about-overview__row dt,
+.about-overview__row dd {
+  margin: 0;
+}
+
+.about-overview__row dt {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.about-overview__row dd {
+  line-height: 1.8;
+}
+
+.about-board {
+  display: grid;
+  margin-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.about-board__row {
+  display: grid;
+  grid-template-columns: 130px 1fr 180px;
+  gap: 16px;
+  align-items: start;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.about-board__row span,
+.about-board__row strong {
+  line-height: 1.7;
+}
+
+.about-board__row--head {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.text-list {
+  display: grid;
+  gap: 12px;
+  margin: 14px 0 0;
+  padding-left: 1.3em;
+  color: var(--muted);
+  line-height: 1.8;
+}
+
+.text-list--numbered {
+  padding-left: 1.5em;
+}
+
 .team-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
@@ -1452,6 +1523,12 @@ button {
   .page-intro--teams .page-intro__inner,
   .page-intro--feature .page-intro__inner {
     grid-template-columns: 1fr;
+  }
+
+  .about-overview__row,
+  .about-board__row {
+    grid-template-columns: 1fr;
+    gap: 6px;
   }
 
   .admin-shell {

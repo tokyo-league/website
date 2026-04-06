@@ -90,7 +90,7 @@ export async function PublicHome() {
       </section>
 
       <section className="section-block">
-        <div className="container home-grid">
+        <div className="container text-section-stack">
           <article className="card">
             <div className="card__header">
               <div>
@@ -150,12 +150,12 @@ export async function PublicHome() {
                 </article>
                 <article className="home-team-card">
                   <div className="home-team-card__image">
-                  <Image
-                    src={siteAssets.heroResult}
-                    alt="参加チーム紹介"
-                    fill
-                    sizes="(max-width: 960px) 100vw, 33vw"
-                  />
+                    <Image
+                      src={siteAssets.heroResult}
+                      alt="参加チーム紹介"
+                      fill
+                      sizes="(max-width: 960px) 100vw, 33vw"
+                    />
                   </div>
                   <div className="home-team-card__copy">
                     <h3>参加チーム紹介</h3>

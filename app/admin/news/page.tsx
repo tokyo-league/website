@@ -9,9 +9,6 @@ export default async function AdminNewsPage() {
   noStore();
   const scope = await requireOwner();
   const posts = await prisma.newsPost.findMany({
-    include: {
-      category: true,
-    },
     orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
   });
 
@@ -30,7 +27,7 @@ export default async function AdminNewsPage() {
         <div className="admin-table">
           <div className="admin-table__row admin-table__row--head admin-table__row--five">
             <span>公開日時</span>
-            <span>カテゴリ</span>
+            <span>区分</span>
             <span>タイトル</span>
             <span>状態</span>
             <span>操作</span>
@@ -38,7 +35,7 @@ export default async function AdminNewsPage() {
           {posts.map((item) => (
             <div key={item.id} className="admin-table__row admin-table__row--five">
               <span>{formatDateTime(item.publishedAt)}</span>
-              <span>{item.category?.name ?? "未設定"}</span>
+              <span>お知らせ</span>
               <strong>{item.title}</strong>
               <span>{formatStatus(item.status)}</span>
               <div className="admin-inline-actions">

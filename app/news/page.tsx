@@ -89,7 +89,7 @@ async function getPublishedNews() {
       excerpt: buildNewsExcerpt(post.body, 120),
       body: post.body,
       publishedAtLabel: formatDate(post.publishedAt),
-      categoryName: post.category?.name || "お知らせ",
+      categoryName: "お知らせ",
       imageUrl: await resolveAssetUrl(post.eyecatchAsset?.storageKey),
     })));
   } catch {

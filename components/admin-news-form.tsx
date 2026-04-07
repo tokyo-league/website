@@ -18,18 +18,15 @@ type NewsFormValues = {
   id?: string;
   title: string;
   body: string;
-  categoryId: string;
   status: PublishStatus;
   publishedAt: string;
   currentEyecatchUrl?: string | null;
 };
 
 export function AdminNewsForm({
-  categories,
   mode,
   initialValues,
 }: {
-  categories: Array<{ id: string; name: string }>;
   mode: "create" | "edit";
   initialValues: NewsFormValues;
 }) {
@@ -68,17 +65,6 @@ export function AdminNewsForm({
           <label className="admin-field">
             <span>タイトル</span>
             <input type="text" name="title" required defaultValue={initialValues.title} />
-          </label>
-          <label className="admin-field">
-            <span>カテゴリ</span>
-            <select name="categoryId" defaultValue={initialValues.categoryId}>
-              <option value="">未設定</option>
-              {categories.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
           </label>
           <label className="admin-field">
             <span>本文</span>

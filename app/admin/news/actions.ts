@@ -17,7 +17,6 @@ type ParsedNewsPayload =
       ok: true;
       title: string;
       body: string;
-      categoryId: string;
       status: PublishStatus;
       publishedAt: Date | null;
     }
@@ -47,7 +46,7 @@ export async function createNewsPost(
         title: payload.title,
         excerpt: null,
         body: payload.body,
-        categoryId: payload.categoryId || null,
+        categoryId: null,
         eyecatchAssetId,
         status: payload.status,
         publishedAt: payload.publishedAt,
@@ -107,7 +106,7 @@ export async function updateNewsPost(
         title: payload.title,
         excerpt: null,
         body: payload.body,
-        categoryId: payload.categoryId || null,
+        categoryId: null,
         eyecatchAssetId,
         status: payload.status,
         publishedAt: payload.publishedAt,
@@ -173,16 +172,11 @@ export async function deleteNewsPost(
 function parseNewsPayload(formData: FormData): ParsedNewsPayload {
   const title = sanitizePlainText(String(formData.get("title") ?? ""), 120);
   const body = sanitizeMultilineText(String(formData.get("body") ?? ""), 12000);
-  const categoryId = sanitizePlainText(String(formData.get("categoryId") ?? ""), 64);
   const status = String(formData.get("status") ?? "DRAFT") as PublishStatus;
   const publishedAtText = sanitizePlainText(String(formData.get("publishedAt") ?? ""), 32);
 
   if (!title || !body || !["DRAFT", "PUBLISHED", "ARCHIVED"].includes(status)) {
     return { ok: false, error: { status: "error", message: "ニュース内容を確認してください。" } };
-  }
-
-  if (categoryId && !isValidUuid(categoryId)) {
-    return { ok: false, error: { status: "error", message: "カテゴリを確認してください。" } };
   }
 
   const publishedAt =
@@ -196,7 +190,6 @@ function parseNewsPayload(formData: FormData): ParsedNewsPayload {
     ok: true,
     title,
     body,
-    categoryId,
     status,
     publishedAt,
   };

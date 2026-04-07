@@ -14,18 +14,12 @@ export default async function AdminNewsEditPage({
   const scope = await requireOwner();
   const { newsId } = await params;
 
-  const [categories, post] = await Promise.all([
-    prisma.newsCategory.findMany({
-      orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
-      select: { id: true, name: true },
-    }),
-    prisma.newsPost.findUnique({
+  const post = await prisma.newsPost.findUnique({
       where: { id: newsId },
       select: {
         id: true,
         title: true,
         body: true,
-        categoryId: true,
         status: true,
         publishedAt: true,
         eyecatchAsset: {
@@ -34,8 +28,7 @@ export default async function AdminNewsEditPage({
           },
         },
       },
-    }),
-  ]);
+    });
 
   if (!post) {
     notFound();
@@ -47,12 +40,10 @@ export default async function AdminNewsEditPage({
     <AdminLayoutShell currentPath="/admin/news" title="ニュース管理" kicker="News" scope={scope}>
       <AdminNewsForm
         mode="edit"
-        categories={categories}
         initialValues={{
           id: post.id,
           title: post.title,
           body: post.body,
-          categoryId: post.categoryId ?? "",
           status: post.status,
           publishedAt: formatDateTimeLocal(post.publishedAt),
           currentEyecatchUrl,

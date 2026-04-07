@@ -187,7 +187,7 @@ async function getLatestNews(limit: number) {
       excerpt: buildNewsExcerpt(post.body, 96),
       body: post.body,
       publishedAtLabel: formatDate(post.publishedAt),
-      categoryName: post.category?.name || "お知らせ",
+      categoryName: "お知らせ",
       imageUrl: await resolveAssetUrl(post.eyecatchAsset?.storageKey),
     })));
   } catch {

@@ -293,15 +293,16 @@ button {
 }
 
 .news-modal__image {
-  width: 100%;
+  width: min(100%, 520px);
   aspect-ratio: 16 / 9;
   margin-bottom: 18px;
+  margin-inline: auto;
 }
 
 .news-list-item__image {
-  width: 100%;
+  width: min(100%, 360px);
   aspect-ratio: 16 / 9;
-  margin-bottom: 18px;
+  margin-bottom: 14px;
 }
 
 .news-modal__image img,

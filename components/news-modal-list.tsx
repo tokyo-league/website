@@ -41,7 +41,7 @@ export function NewsModalList({ items }: { items: NewsItem[] }) {
               <span>{item.categoryName}</span>
             </p>
             <h2>{item.title}</h2>
-            <p>{item.excerpt}</p>
+            <p>{normalizeNewsText(item.excerpt)}</p>
             <button type="button" className="button button--ghost news-modal-trigger" onClick={() => setOpenId(item.id)}>
               詳細を見る
             </button>
@@ -61,13 +61,26 @@ export function NewsModalList({ items }: { items: NewsItem[] }) {
             </p>
             <h2>{activeItem.title}</h2>
             <div className="news-modal__body">
-              {activeItem.body.split(/\n{2,}/).map((paragraph) => (
+              {normalizeNewsText(activeItem.body)
+                .split(/\n{2,}/)
+                .map((paragraph) => (
                 <p key={paragraph}>{paragraph}</p>
-              ))}
+                ))}
             </div>
           </div>
         </div>
       ) : null}
     </>
   );
+}
+
+function normalizeNewsText(value: string) {
+  return value
+    .replace(/\[&hellip;\]/gi, "…")
+    .replace(/\[\.\.\.\]/g, "…")
+    .replace(/\[…\]/g, "…")
+    .replace(/&hellip;/gi, "…")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }

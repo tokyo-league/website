@@ -12,6 +12,7 @@ import {
   updateDivisionResultImage,
   updateMatch,
 } from "@/app/admin/results/actions";
+import { ConfirmForm } from "@/components/confirm-form";
 
 const initialState: ResultActionState = {
   status: "idle",
@@ -535,13 +536,13 @@ function ExistingMatchEditor({
           </button>
         </div>
       </form>
-      <form action={deleteAction}>
+      <ConfirmForm action={deleteAction} message="この試合結果を削除します。よろしいですか？">
         <input type="hidden" name="matchId" value={match.id} />
         <input type="hidden" name="divisionId" value={divisionId} />
         <button type="submit" className="button button--ghost" disabled={deletePending}>
           {deletePending ? "削除中..." : "削除"}
         </button>
-      </form>
+      </ConfirmForm>
     </div>
   );
 }
@@ -677,13 +678,13 @@ function ExistingStandingEditor({
           {standing.goalDifference >= 0 ? `+${standing.goalDifference}` : standing.goalDifference}
         </p>
       </div>
-      <form action={deleteAction}>
+      <ConfirmForm action={deleteAction} message="この順位表の行を削除します。よろしいですか？">
         <input type="hidden" name="standingId" value={standing.id} />
         <input type="hidden" name="divisionId" value={divisionId} />
         <button type="submit" className="button button--ghost" disabled={deletePending}>
           {deletePending ? "削除中..." : "削除"}
         </button>
-      </form>
+      </ConfirmForm>
     </div>
   );
 }

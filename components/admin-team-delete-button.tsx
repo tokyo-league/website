@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useState } from "react";
 import { deleteTeam, type TeamActionState } from "@/app/admin/teams/actions";
+import { ConfirmForm } from "@/components/confirm-form";
 
 const initialTeamActionState: TeamActionState = {
   status: "idle",
@@ -20,12 +21,12 @@ export function AdminTeamDeleteButton({ teamId }: { teamId: string }) {
 
   return (
     <div className="admin-inline-actions">
-      <form action={action}>
+      <ConfirmForm action={action} message="このチームを削除します。よろしいですか？">
         <input type="hidden" name="teamId" value={teamId} />
         <button type="submit" className="button button--ghost" disabled={pending}>
           {pending ? "削除中..." : "削除"}
         </button>
-      </form>
+      </ConfirmForm>
       {message ? <span className="admin-inline-message">{message}</span> : null}
     </div>
   );

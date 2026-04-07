@@ -1,10 +1,12 @@
 import Link from "next/link";
+import { unstable_noStore as noStore } from "next/cache";
 import { AdminLayoutShell } from "@/components/admin-layout-shell";
 import { AdminNewsDeleteButton } from "@/components/admin-news-delete-button";
 import { requireOwner } from "@/lib/admin-access";
 import { prisma } from "@/lib/prisma";
 
 export default async function AdminNewsPage() {
+  noStore();
   const scope = await requireOwner();
   const posts = await prisma.newsPost.findMany({
     include: {

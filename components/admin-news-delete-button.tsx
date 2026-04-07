@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useState } from "react";
 import { deleteNewsPost, type NewsActionState } from "@/app/admin/news/actions";
+import { ConfirmForm } from "@/components/confirm-form";
 
 const initialNewsActionState: NewsActionState = {
   status: "idle",
@@ -20,12 +21,12 @@ export function AdminNewsDeleteButton({ newsId }: { newsId: string }) {
 
   return (
     <div className="admin-inline-actions">
-      <form action={action}>
+      <ConfirmForm action={action} message="このニュースを削除します。よろしいですか？">
         <input type="hidden" name="newsId" value={newsId} />
         <button type="submit" className="button button--ghost" disabled={pending}>
           {pending ? "削除中..." : "削除"}
         </button>
-      </form>
+      </ConfirmForm>
       {message ? <span className="admin-inline-message">{message}</span> : null}
     </div>
   );

@@ -8,6 +8,7 @@ import {
   deleteDivisionAssignment,
   type AssignmentActionState,
 } from "@/app/admin/assignments/actions";
+import { ConfirmForm } from "@/components/confirm-form";
 
 const initialAssignmentActionState: AssignmentActionState = {
   status: "idle",
@@ -244,12 +245,12 @@ function AssignmentDeleteRow({
         {assignment.competitionName} / {assignment.divisionName}
       </span>
       <span>{assignment.permissionLabel}</span>
-      <form action={formAction}>
+      <ConfirmForm action={formAction} message="この担当リーグ割当を解除します。よろしいですか？">
         <input type="hidden" name="assignmentId" value={assignment.id} />
         <button type="submit" className="button button--ghost" disabled={pending}>
           {pending ? "解除中..." : "解除"}
         </button>
-      </form>
+      </ConfirmForm>
     </div>
   );
 }
@@ -282,12 +283,12 @@ function AdminDeleteRow({
       <span>{user.role === "OWNER" ? "Owner" : "Editor"}</span>
       <span>{assignmentCount}件</span>
       {deletable ? (
-        <form action={formAction}>
+        <ConfirmForm action={formAction} message="この担当者を削除します。よろしいですか？">
           <input type="hidden" name="userId" value={user.id} />
           <button type="submit" className="button button--ghost" disabled={pending}>
             {pending ? "削除中..." : "削除"}
           </button>
-        </form>
+        </ConfirmForm>
       ) : (
         <span>{isCurrentUser ? "ログイン中" : "削除不可"}</span>
       )}

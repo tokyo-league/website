@@ -62,6 +62,12 @@ const teamAliases = new Map([
   ["東加平sss", "東加平キッカーズ"],
 ]);
 
+const divisionImageOverrides = new Map([
+  ["tokyo-league-101/b-league", "/site-assets/results/Bリーグ-3.jpg"],
+  ["tokyo-league-101/e-league", "/site-assets/results/Eリーグ-4.jpg"],
+  ["tokyo-league-101/f-league", "/site-assets/results/Fリーグ-6.jpg"],
+]);
+
 const owner = await prisma.user.findFirst({
   where: { role: "OWNER" },
   orderBy: { createdAt: "asc" },
@@ -196,28 +202,32 @@ async function importLeagueHistory(categories) {
       const html = await fetchText(post.link);
       const parsed = parseLeaguePage(html);
       const name = sanitizeText(parsed.title || post.title?.rendered || "");
+      const divisionSlug = slugify(name || `division-${index + 1}`);
+      const correctedResultImagePath =
+        divisionImageOverrides.get(`${competition.slug}/${divisionSlug}`) ?? resolveLocalAsset(parsed.resultImageSrc);
+
       const division = await prisma.division.upsert({
         where: {
           competitionId_slug: {
             competitionId: competition.id,
-            slug: slugify(name || `division-${index + 1}`),
+            slug: divisionSlug,
           },
         },
         update: {
           name,
           description: parsed.note || null,
           sourceUrl: post.link,
-          resultImagePath: resolveLocalAsset(parsed.resultImageSrc),
+          resultImagePath: correctedResultImagePath,
           sortOrder: index + 1,
           status: PublishStatus.PUBLISHED,
         },
         create: {
           competitionId: competition.id,
           name,
-          slug: slugify(name || `division-${index + 1}`),
+          slug: divisionSlug,
           description: parsed.note || null,
           sourceUrl: post.link,
-          resultImagePath: resolveLocalAsset(parsed.resultImageSrc),
+          resultImagePath: correctedResultImagePath,
           sortOrder: index + 1,
           status: PublishStatus.PUBLISHED,
         },

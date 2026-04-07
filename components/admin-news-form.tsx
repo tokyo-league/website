@@ -17,11 +17,11 @@ const initialState: NewsActionState = {
 type NewsFormValues = {
   id?: string;
   title: string;
-  excerpt: string;
   body: string;
   categoryId: string;
   status: PublishStatus;
   publishedAt: string;
+  currentEyecatchUrl?: string | null;
 };
 
 export function AdminNewsForm({
@@ -81,15 +81,16 @@ export function AdminNewsForm({
             </select>
           </label>
           <label className="admin-field">
-            <span>概要</span>
-            <textarea name="excerpt" rows={3} defaultValue={initialValues.excerpt} />
-          </label>
-          <label className="admin-field">
             <span>本文</span>
             <textarea name="body" rows={8} required defaultValue={initialValues.body} />
           </label>
           <label className="admin-field">
             <span>アイキャッチ画像</span>
+            {initialValues.currentEyecatchUrl ? (
+              <div className="admin-image-preview admin-image-preview--news">
+                <img src={initialValues.currentEyecatchUrl} alt="現在のアイキャッチ画像" />
+              </div>
+            ) : null}
             <div className="upload-field">
               <input
                 id={inputId}

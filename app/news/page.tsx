@@ -4,6 +4,7 @@ import { PublishStatus } from "@prisma/client";
 import { NewsModalList } from "@/components/news-modal-list";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { resolveAssetUrl } from "@/lib/asset-url";
 import { buildNewsExcerpt } from "@/lib/news-text";
 import { prisma } from "@/lib/prisma";
 import { downloadItems, newsItems as fallbackNewsItems, siteAssets } from "@/lib/site-data";
@@ -73,18 +74,24 @@ async function getPublishedNews() {
       },
       include: {
         category: true,
+        eyecatchAsset: {
+          select: {
+            storageKey: true,
+          },
+        },
       },
       orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
     });
 
-    return posts.map((post) => ({
+    return Promise.all(posts.map(async (post) => ({
       id: post.id,
       title: post.title,
-      excerpt: buildNewsExcerpt(post.excerpt || post.body, 120),
+      excerpt: buildNewsExcerpt(post.body, 120),
       body: post.body,
       publishedAtLabel: formatDate(post.publishedAt),
       categoryName: post.category?.name || "お知らせ",
-    }));
+      imageUrl: await resolveAssetUrl(post.eyecatchAsset?.storageKey),
+    })));
   } catch {
     return fallbackNewsItems.map((item, index) => ({
       id: `fallback-${index + 1}`,
@@ -93,6 +100,7 @@ async function getPublishedNews() {
       body: item.excerpt,
       publishedAtLabel: item.date,
       categoryName: item.category,
+      imageUrl: null,
     }));
   }
 }

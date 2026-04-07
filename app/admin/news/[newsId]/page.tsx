@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { AdminLayoutShell } from "@/components/admin-layout-shell";
 import { AdminNewsForm } from "@/components/admin-news-form";
 import { requireOwner } from "@/lib/admin-access";
+import { resolveAssetUrl } from "@/lib/asset-url";
 import { formatDateTimeLocal } from "@/lib/news-datetime";
 import { prisma } from "@/lib/prisma";
 
@@ -23,11 +24,15 @@ export default async function AdminNewsEditPage({
       select: {
         id: true,
         title: true,
-        excerpt: true,
         body: true,
         categoryId: true,
         status: true,
         publishedAt: true,
+        eyecatchAsset: {
+          select: {
+            storageKey: true,
+          },
+        },
       },
     }),
   ]);
@@ -35,6 +40,8 @@ export default async function AdminNewsEditPage({
   if (!post) {
     notFound();
   }
+
+  const currentEyecatchUrl = await resolveAssetUrl(post.eyecatchAsset?.storageKey);
 
   return (
     <AdminLayoutShell currentPath="/admin/news" title="ニュース管理" kicker="News" scope={scope}>
@@ -44,11 +51,11 @@ export default async function AdminNewsEditPage({
         initialValues={{
           id: post.id,
           title: post.title,
-          excerpt: post.excerpt ?? "",
           body: post.body,
           categoryId: post.categoryId ?? "",
           status: post.status,
           publishedAt: formatDateTimeLocal(post.publishedAt),
+          currentEyecatchUrl,
         }}
       />
     </AdminLayoutShell>

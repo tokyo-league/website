@@ -17,11 +17,11 @@ export default async function AdminNewsNewPage() {
         categories={categories}
         initialValues={{
           title: "",
-          excerpt: "",
           body: "",
           categoryId: "",
           status: "DRAFT",
           publishedAt: "",
+          currentEyecatchUrl: null,
         }}
       />
     </AdminLayoutShell>

@@ -11,6 +11,18 @@ export function sanitizePlainText(value: string, maxLength: number) {
     .slice(0, maxLength);
 }
 
+export function sanitizeMultilineText(value: string, maxLength: number) {
+  return value
+    .replace(/[\u0000-\u0008\u000B-\u001F\u007F]/g, "")
+    .replace(/\r\n/g, "\n")
+    .split("\n")
+    .map((line) => line.trim())
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim()
+    .slice(0, maxLength);
+}
+
 export function normalizeEmail(value: string) {
   return sanitizePlainText(value, 255).toLowerCase();
 }

@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { AssetKind, PublishStatus } from "@prisma/client";
 import { requireOwner } from "@/lib/admin-access";
 import { prisma } from "@/lib/prisma";
-import { ensureSlug, isValidUuid, sanitizePlainText } from "@/lib/security";
+import { ensureSlug, isValidUuid, sanitizeMultilineText, sanitizePlainText } from "@/lib/security";
 
 export type NewsActionState = {
   status: "idle" | "success" | "error";
@@ -16,7 +16,6 @@ type ParsedNewsPayload =
   | {
       ok: true;
       title: string;
-      excerpt: string;
       body: string;
       categoryId: string;
       status: PublishStatus;
@@ -46,7 +45,7 @@ export async function createNewsPost(
       data: {
         slug,
         title: payload.title,
-        excerpt: payload.excerpt || null,
+        excerpt: null,
         body: payload.body,
         categoryId: payload.categoryId || null,
         eyecatchAssetId,
@@ -106,7 +105,7 @@ export async function updateNewsPost(
       where: { id: newsId },
       data: {
         title: payload.title,
-        excerpt: payload.excerpt || null,
+        excerpt: null,
         body: payload.body,
         categoryId: payload.categoryId || null,
         eyecatchAssetId,
@@ -173,8 +172,7 @@ export async function deleteNewsPost(
 
 function parseNewsPayload(formData: FormData): ParsedNewsPayload {
   const title = sanitizePlainText(String(formData.get("title") ?? ""), 120);
-  const excerpt = sanitizePlainText(String(formData.get("excerpt") ?? ""), 240);
-  const body = sanitizePlainText(String(formData.get("body") ?? ""), 12000);
+  const body = sanitizeMultilineText(String(formData.get("body") ?? ""), 12000);
   const categoryId = sanitizePlainText(String(formData.get("categoryId") ?? ""), 64);
   const status = String(formData.get("status") ?? "DRAFT") as PublishStatus;
   const publishedAtText = sanitizePlainText(String(formData.get("publishedAt") ?? ""), 32);
@@ -197,7 +195,6 @@ function parseNewsPayload(formData: FormData): ParsedNewsPayload {
   return {
     ok: true,
     title,
-    excerpt,
     body,
     categoryId,
     status,
@@ -241,7 +238,7 @@ async function uploadEyecatchAsset(fileValue: FormDataEntryValue | null, userId:
     data: {
       kind: AssetKind.IMAGE,
       title: fileValue.name,
-      storageKey: blob.pathname,
+      storageKey: blob.url,
       originalFilename: fileValue.name,
       mimeType: fileValue.type || "application/octet-stream",
       fileSize: BigInt(fileValue.size),
@@ -256,6 +253,7 @@ async function uploadEyecatchAsset(fileValue: FormDataEntryValue | null, userId:
 function revalidateNewsPaths() {
   revalidatePath("/admin/news");
   revalidatePath("/news");
+  revalidatePath("/");
 }
 
 function parseDateTimeAsJst(value: string) {

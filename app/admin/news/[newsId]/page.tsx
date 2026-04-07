@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import { AdminLayoutShell } from "@/components/admin-layout-shell";
-import { AdminNewsForm, formatDateTimeLocal } from "@/components/admin-news-form";
+import { AdminNewsForm } from "@/components/admin-news-form";
 import { requireOwner } from "@/lib/admin-access";
+import { formatDateTimeLocal } from "@/lib/news-datetime";
 import { prisma } from "@/lib/prisma";
 
 export default async function AdminNewsEditPage({

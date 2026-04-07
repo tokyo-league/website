@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { normalizeNewsText } from "@/lib/news-text";
 
 type NewsItem = {
   id: string;
@@ -72,15 +73,4 @@ export function NewsModalList({ items }: { items: NewsItem[] }) {
       ) : null}
     </>
   );
-}
-
-function normalizeNewsText(value: string) {
-  return value
-    .replace(/\[&hellip;\]/gi, "…")
-    .replace(/\[\.\.\.\]/g, "…")
-    .replace(/\[…\]/g, "…")
-    .replace(/&hellip;/gi, "…")
-    .replace(/&nbsp;/gi, " ")
-    .replace(/\s+/g, " ")
-    .trim();
 }

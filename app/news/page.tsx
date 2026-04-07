@@ -4,6 +4,7 @@ import { PublishStatus } from "@prisma/client";
 import { NewsModalList } from "@/components/news-modal-list";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { buildNewsExcerpt } from "@/lib/news-text";
 import { prisma } from "@/lib/prisma";
 import { downloadItems, newsItems as fallbackNewsItems, siteAssets } from "@/lib/site-data";
 
@@ -79,7 +80,7 @@ async function getPublishedNews() {
     return posts.map((post) => ({
       id: post.id,
       title: post.title,
-      excerpt: post.excerpt || post.body.slice(0, 160),
+      excerpt: buildNewsExcerpt(post.excerpt || post.body, 120),
       body: post.body,
       publishedAtLabel: formatDate(post.publishedAt),
       categoryName: post.category?.name || "お知らせ",
@@ -88,7 +89,7 @@ async function getPublishedNews() {
     return fallbackNewsItems.map((item, index) => ({
       id: `fallback-${index + 1}`,
       title: item.title,
-      excerpt: item.excerpt,
+      excerpt: buildNewsExcerpt(item.excerpt, 120),
       body: item.excerpt,
       publishedAtLabel: item.date,
       categoryName: item.category,

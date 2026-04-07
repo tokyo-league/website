@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { PublishStatus } from "@prisma/client";
 import { NewsModalList } from "@/components/news-modal-list";
+import { buildNewsExcerpt } from "@/lib/news-text";
 import { prisma } from "@/lib/prisma";
 import { divisionCards, newsItems as fallbackNewsItems, siteAssets, teams as fallbackTeams } from "@/lib/site-data";
 
@@ -177,7 +178,7 @@ async function getLatestNews(limit: number) {
     return posts.map((post) => ({
       id: post.id,
       title: post.title,
-      excerpt: post.excerpt || post.body.slice(0, 160),
+      excerpt: buildNewsExcerpt(post.excerpt || post.body, 96),
       body: post.body,
       publishedAtLabel: formatDate(post.publishedAt),
       categoryName: post.category?.name || "お知らせ",
@@ -186,7 +187,7 @@ async function getLatestNews(limit: number) {
     return fallbackNewsItems.slice(0, limit).map((item, index) => ({
       id: `fallback-news-${index + 1}`,
       title: item.title,
-      excerpt: item.excerpt,
+      excerpt: buildNewsExcerpt(item.excerpt, 96),
       body: item.excerpt,
       publishedAtLabel: item.date,
       categoryName: item.category,

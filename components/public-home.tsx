@@ -1,10 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { PublishStatus } from "@prisma/client";
+import { NewsModalList } from "@/components/news-modal-list";
 import { prisma } from "@/lib/prisma";
-import { divisionCards, newsItems, siteAssets, teams as fallbackTeams } from "@/lib/site-data";
+import { divisionCards, newsItems as fallbackNewsItems, siteAssets, teams as fallbackTeams } from "@/lib/site-data";
 
 export async function PublicHome() {
+  const latestNews = await getLatestNews(3);
   const featuredTeams = await getRandomFeaturedTeams(3);
 
   return (
@@ -72,18 +74,7 @@ export async function PublicHome() {
               </div>
               <Link href="/news">一覧へ</Link>
             </div>
-            <div className="list-stack">
-              {newsItems.map((item) => (
-                <article key={item.title} className="list-row">
-                  <p className="list-row__meta">
-                    <span>{item.date}</span>
-                    <span>{item.category}</span>
-                  </p>
-                  <h3>{item.title}</h3>
-                  <p>{item.excerpt}</p>
-                </article>
-              ))}
-            </div>
+            <NewsModalList items={latestNews} />
           </article>
         </div>
       </section>
@@ -170,6 +161,39 @@ export async function PublicHome() {
   );
 }
 
+async function getLatestNews(limit: number) {
+  try {
+    const posts = await prisma.newsPost.findMany({
+      where: {
+        status: PublishStatus.PUBLISHED,
+      },
+      include: {
+        category: true,
+      },
+      orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
+      take: limit,
+    });
+
+    return posts.map((post) => ({
+      id: post.id,
+      title: post.title,
+      excerpt: post.excerpt || post.body.slice(0, 160),
+      body: post.body,
+      publishedAtLabel: formatDate(post.publishedAt),
+      categoryName: post.category?.name || "お知らせ",
+    }));
+  } catch {
+    return fallbackNewsItems.slice(0, limit).map((item, index) => ({
+      id: `fallback-news-${index + 1}`,
+      title: item.title,
+      excerpt: item.excerpt,
+      body: item.excerpt,
+      publishedAtLabel: item.date,
+      categoryName: item.category,
+    }));
+  }
+}
+
 async function getRandomFeaturedTeams(limit: number) {
   try {
     const teams = await prisma.team.findMany({
@@ -200,4 +224,17 @@ async function getRandomFeaturedTeams(limit: number) {
       sortOrder: index,
     }));
   }
+}
+
+function formatDate(value: Date | null) {
+  if (!value) {
+    return "-";
+  }
+
+  return value.toLocaleDateString("ja-JP", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    timeZone: "Asia/Tokyo",
+  });
 }

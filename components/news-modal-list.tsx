@@ -35,7 +35,7 @@ export function NewsModalList({ items }: { items: NewsItem[] }) {
     <>
       <div className="list-stack">
         {items.map((item) => (
-          <article key={item.id} className="list-row list-row--large">
+          <article key={item.id} className="list-row list-row--large news-list-item">
             <p className="list-row__meta">
               <span>{item.publishedAtLabel}</span>
               <span>{item.categoryName}</span>

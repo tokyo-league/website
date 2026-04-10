@@ -181,15 +181,21 @@ export default async function DivisionDetailPage({
               {division.matches.length > 0 ? (
                 <div className="list-stack">
                   {division.matches.map((match) => (
-                    <article key={match.id} className="list-row">
+                    <article key={match.id} className="list-row division-match-row">
                       <p className="list-row__meta">
                         <span>{formatDate(match.matchDate)}</span>
                         <span>{match.venue?.name || "会場未設定"}</span>
                         <span>{match.status === "PLAYED" ? "試合終了" : "日程"}</span>
                       </p>
-                      <h3>
-                        {match.homeTeam.name} {match.homeScore ?? "-"} - {match.awayScore ?? "-"} {match.awayTeam.name}
-                      </h3>
+                      <div className="division-match-line" aria-label={`${match.homeTeam.name} ${match.homeScore ?? "-"}対${match.awayScore ?? "-"} ${match.awayTeam.name}`}>
+                        <span className="division-match-line__team">{match.homeTeam.name}</span>
+                        <span className="division-match-line__score" aria-hidden="true">
+                          <strong>{match.homeScore ?? "-"}</strong>
+                          <span>-</span>
+                          <strong>{match.awayScore ?? "-"}</strong>
+                        </span>
+                        <span className="division-match-line__team division-match-line__team--away">{match.awayTeam.name}</span>
+                      </div>
                       {match.note ? <p>{match.note}</p> : null}
                     </article>
                   ))}

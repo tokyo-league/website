@@ -670,6 +670,59 @@ button {
   letter-spacing: -0.01em;
 }
 
+.division-match-row {
+  gap: 6px;
+  padding: 12px 0;
+}
+
+.division-match-line {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+}
+
+.division-match-line__team {
+  min-width: 0;
+  font-size: 14px;
+  line-height: 1.35;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+}
+
+.division-match-line__team--away {
+  text-align: right;
+}
+
+.division-match-line__score {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 14px;
+  border: 1px solid rgba(29, 29, 31, 0.1);
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(245, 242, 234, 0.96) 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.division-match-line__score strong {
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.division-match-line__score span {
+  color: var(--muted);
+  font-size: 14px;
+}
+
 .list-row p:last-child {
   margin: 10px 0 0;
   color: var(--muted);
@@ -1786,8 +1839,31 @@ button {
     gap: 8px;
   }
 
-  .division-team-row h3 {
-    font-size: 15px;
+  .division-team-row.list-row h3 {
+    font-size: 12px;
+  }
+
+  .division-match-line {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .division-match-line__team {
+    font-size: 13px;
+  }
+
+  .division-match-line__team--away {
+    text-align: left;
+  }
+
+  .division-match-line__score {
+    min-height: 38px;
+    padding: 0 12px;
+    font-size: 14px;
+  }
+
+  .division-match-line__score strong {
+    font-size: 20px;
   }
 
   .division-logo-board__grid {

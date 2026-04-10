@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { normalizeDivisionSlug } from "@/lib/league-slug";
 import { prisma } from "@/lib/prisma";
 import { siteAssets } from "@/lib/site-data";
 
@@ -37,6 +38,7 @@ export default async function CompetitionDetailPage({
   }
 
   const isImageResult = Boolean(competition.resultFilePath?.match(/\.(png|jpe?g|webp)$/i));
+  const sortedDivisions = [...competition.divisions].sort(compareDivisions);
 
   return (
     <>
@@ -83,7 +85,7 @@ export default async function CompetitionDetailPage({
                 </div>
               </div>
               <div className="competition-card-grid">
-                {competition.divisions.map((division) => (
+                {sortedDivisions.map((division) => (
                   <article key={division.id} className="card competition-card">
                     <p className="section-kicker">{competition.name}</p>
                     <h2>{division.name}</h2>
@@ -152,4 +154,33 @@ function defaultCompetitionSummary(type: "LEAGUE" | "CUP" | "OTHER") {
   }
 
   return "大会情報を掲載しています。";
+}
+
+function compareDivisions(
+  a: { name: string; slug: string; sortOrder: number },
+  b: { name: string; slug: string; sortOrder: number },
+) {
+  const aRank = getDivisionRank(a);
+  const bRank = getDivisionRank(b);
+
+  if (aRank !== bRank) {
+    return aRank - bRank;
+  }
+
+  if (a.sortOrder !== b.sortOrder) {
+    return a.sortOrder - b.sortOrder;
+  }
+
+  return a.name.localeCompare(b.name, "ja");
+}
+
+function getDivisionRank(division: { name: string; slug: string }) {
+  const normalized = normalizeDivisionSlug(division.slug || division.name);
+  const match = normalized.match(/^([a-z])/i);
+
+  if (!match) {
+    return Number.MAX_SAFE_INTEGER;
+  }
+
+  return match[1].toUpperCase().charCodeAt(0) - 65;
 }

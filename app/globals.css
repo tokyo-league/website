@@ -332,6 +332,31 @@ button {
 
 .news-modal-trigger {
   margin-top: 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid rgba(31, 78, 163, 0.18);
+  border-radius: 999px;
+  background: rgba(31, 78, 163, 0.08);
+  color: #1f4ea3;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    transform 0.18s ease;
+}
+
+.news-modal-trigger:hover {
+  background: rgba(31, 78, 163, 0.14);
+  border-color: rgba(31, 78, 163, 0.28);
+  transform: translateY(-1px);
+}
+
+.news-modal-trigger span:last-child {
+  font-size: 14px;
 }
 
 .news-list-item h2 {

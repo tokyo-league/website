@@ -51,8 +51,9 @@ export function NewsModalList({ items }: { items: NewsItem[] }) {
             </p>
             <h2>{item.title}</h2>
             <p>{renderTextWithLinks(normalizeNewsText(item.excerpt))}</p>
-            <button type="button" className="button button--ghost news-modal-trigger" onClick={() => setOpenId(item.id)}>
-              詳細を見る
+            <button type="button" className="news-modal-trigger" onClick={() => setOpenId(item.id)}>
+              <span>詳細を見る</span>
+              <span aria-hidden="true">→</span>
             </button>
           </article>
         ))}

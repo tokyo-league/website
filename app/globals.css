@@ -132,24 +132,53 @@ button {
 
 .site-header__menu-button {
   display: none;
+  position: relative;
   align-items: center;
   justify-content: center;
+  flex-direction: column;
+  gap: 4px;
   width: 46px;
   height: 46px;
   padding: 0;
   border: 1px solid var(--line-strong);
-  border-radius: 14px;
+  border-radius: 999px;
   background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.06);
   cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .site-header__menu-button span {
   display: block;
   width: 18px;
   height: 2px;
-  margin: 2px 0;
   border-radius: 999px;
   background: #1d1d1f;
+  transform-origin: center;
+  transition: transform 0.2s ease, opacity 0.2s ease, width 0.2s ease;
+}
+
+.site-header__menu-button span:nth-child(2) {
+  width: 22px;
+}
+
+.site-header__menu-button:hover {
+  border-color: rgba(0, 0, 0, 0.22);
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.08);
+}
+
+.site-header__menu-button.is-open span:first-child {
+  transform: translateY(6px) rotate(45deg);
+  width: 20px;
+}
+
+.site-header__menu-button.is-open span:nth-child(2) {
+  opacity: 0;
+}
+
+.site-header__menu-button.is-open span:last-child {
+  transform: translateY(-6px) rotate(-45deg);
+  width: 20px;
 }
 
 .home-intro,
@@ -698,9 +727,10 @@ button {
 .division-match-line__score {
   display: inline-flex;
   align-items: center;
+  justify-self: center;
   gap: 8px;
-  min-height: 42px;
-  padding: 0 14px;
+  min-height: 40px;
+  padding: 0 12px;
   border: 1px solid rgba(29, 29, 31, 0.1);
   border-radius: 999px;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(245, 242, 234, 0.96) 100%);
@@ -1857,8 +1887,9 @@ button {
   }
 
   .division-match-line__score {
-    min-height: 38px;
-    padding: 0 12px;
+    justify-self: start;
+    min-height: 36px;
+    padding: 0 10px;
     font-size: 14px;
   }
 

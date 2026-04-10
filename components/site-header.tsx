@@ -23,7 +23,7 @@ export function SiteHeader() {
         </Link>
         <button
           type="button"
-          className="site-header__menu-button"
+          className={`site-header__menu-button ${isOpen ? "is-open" : ""}`}
           aria-expanded={isOpen}
           aria-controls="site-header-nav"
           aria-label={isOpen ? "メニューを閉じる" : "メニューを開く"}

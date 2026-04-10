@@ -1,8 +1,32 @@
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { downloadItems } from "@/lib/site-data";
+import { resolveAssetUrl } from "@/lib/asset-url";
+import { formatDownloadCategory } from "@/lib/downloads";
+import { prisma } from "@/lib/prisma";
 
-export default function DownloadsPage() {
+export const dynamic = "force-dynamic";
+
+export default async function DownloadsPage() {
+  const downloads = await prisma.download
+    .findMany({
+      where: { status: "PUBLISHED" },
+      include: { asset: true },
+      orderBy: [{ sortOrder: "asc" }, { publishedAt: "desc" }, { createdAt: "desc" }],
+    })
+    .catch(() => []);
+
+  const items = await Promise.all(
+    downloads.map(async (item) => ({
+      id: item.id,
+      title: item.title,
+      category: formatDownloadCategory(item.category),
+      description: item.description,
+      updatedAt: formatDate(item.publishedAt ?? item.updatedAt),
+      href: await resolveAssetUrl(item.asset.storageKey),
+      fileName: item.asset.originalFilename,
+    })),
+  );
+
   return (
     <>
       <SiteHeader />
@@ -18,16 +42,36 @@ export default function DownloadsPage() {
         <section className="section-block">
           <div className="container narrow">
             <div className="list-stack">
-              {downloadItems.map((item) => (
-                <article key={item.title} className="list-row list-row--large">
-                  <p className="list-row__meta">
-                    <span>{item.category}</span>
-                    <span>{item.updatedAt}</span>
-                  </p>
-                  <h2>{item.title}</h2>
-                  <p>{item.description}</p>
+              {items.length > 0 ? (
+                items.map((item) => (
+                  <article key={item.id} className="list-row list-row--large">
+                    <p className="list-row__meta">
+                      <span>{item.category}</span>
+                      <span>{item.updatedAt}</span>
+                    </p>
+                    <h2>{item.title}</h2>
+                    {item.description ? <p>{item.description}</p> : null}
+                    {item.href ? (
+                      <div className="page-intro__actions">
+                        <a
+                          href={item.href}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="button"
+                          download={item.fileName ?? undefined}
+                        >
+                          資料をダウンロード
+                        </a>
+                      </div>
+                    ) : null}
+                  </article>
+                ))
+              ) : (
+                <article className="list-row list-row--large">
+                  <h2>公開資料は準備中です</h2>
+                  <p>公開設定された資料が表示されます。</p>
                 </article>
-              ))}
+              )}
             </div>
           </div>
         </section>
@@ -35,4 +79,12 @@ export default function DownloadsPage() {
       <SiteFooter />
     </>
   );
+}
+
+function formatDate(value: Date) {
+  return new Intl.DateTimeFormat("ja-JP", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(value);
 }

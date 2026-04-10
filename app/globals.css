@@ -1474,6 +1474,20 @@ button {
   color: #b33a27;
 }
 
+.admin-field__hint {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.admin-field__hint--link {
+  display: inline-flex;
+  width: fit-content;
+  color: #2454b8;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .admin-standings-table {
   display: grid;
   gap: 8px;

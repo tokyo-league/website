@@ -82,12 +82,137 @@ export async function createDownload(
   }
 }
 
-async function createUniqueDownloadSlug(title: string) {
+export async function updateDownload(
+  _prevState: DownloadActionState,
+  formData: FormData,
+): Promise<DownloadActionState> {
+  try {
+    const scope = await requireOwner();
+    const downloadId = sanitizePlainText(String(formData.get("downloadId") ?? ""), 64);
+    const title = sanitizePlainText(String(formData.get("title") ?? ""), 140);
+    const category = String(formData.get("category") ?? "DOCUMENT") as DownloadCategory;
+    const description = sanitizePlainText(String(formData.get("description") ?? ""), 400);
+    const status = String(formData.get("status") ?? "DRAFT") as PublishStatus;
+    const publishedAtText = sanitizePlainText(String(formData.get("publishedAt") ?? ""), 32);
+    const sortOrderText = sanitizePlainText(String(formData.get("sortOrder") ?? "0"), 12);
+    const sortOrder = Number.parseInt(sortOrderText || "0", 10);
+
+    if (
+      !downloadId ||
+      !title ||
+      !["REGULATION", "GUIDELINE", "DOCUMENT", "OTHER"].includes(category) ||
+      !["DRAFT", "PUBLISHED", "ARCHIVED"].includes(status) ||
+      Number.isNaN(sortOrder)
+    ) {
+      return { status: "error", message: "資料内容を確認してください。" };
+    }
+
+    const existing = await prisma.download.findUnique({
+      where: { id: downloadId },
+      include: { asset: true },
+    });
+
+    if (!existing) {
+      return { status: "error", message: "対象の資料が見つかりません。" };
+    }
+
+    const file = formData.get("file");
+    const uploadedAsset = await uploadDownloadAsset(file, scope.admin.id, title);
+
+    const publishedAt =
+      status === "PUBLISHED" ? (publishedAtText ? new Date(publishedAtText) : existing.publishedAt ?? new Date()) : null;
+
+    if (publishedAtText && publishedAt && Number.isNaN(publishedAt.getTime())) {
+      return { status: "error", message: "公開日を確認してください。" };
+    }
+
+    await prisma.download.update({
+      where: { id: downloadId },
+      data: {
+        title,
+        slug: await createUniqueDownloadSlug(title, downloadId),
+        category,
+        description: description || null,
+        assetId: uploadedAsset?.id ?? existing.assetId,
+        publishedAt,
+        status,
+        sortOrder,
+        updatedById: scope.admin.id,
+      },
+    });
+
+    if (uploadedAsset && existing.assetId !== uploadedAsset.id) {
+      await prisma.asset.delete({ where: { id: existing.assetId } }).catch(() => undefined);
+    }
+
+    revalidateDownloads();
+
+    return {
+      status: "success",
+      message: `資料「${title}」を更新しました。`,
+    };
+  } catch (error) {
+    console.error("updateDownload failed", error);
+    return {
+      status: "error",
+      message: error instanceof Error ? error.message : "資料の更新に失敗しました。",
+    };
+  }
+}
+
+export async function deleteDownload(
+  _prevState: DownloadActionState,
+  formData: FormData,
+): Promise<DownloadActionState> {
+  try {
+    await requireOwner();
+    const downloadId = sanitizePlainText(String(formData.get("downloadId") ?? ""), 64);
+
+    if (!downloadId) {
+      return { status: "error", message: "対象の資料が見つかりません。" };
+    }
+
+    const existing = await prisma.download.findUnique({
+      where: { id: downloadId },
+      include: { asset: true },
+    });
+
+    if (!existing) {
+      return { status: "error", message: "対象の資料が見つかりません。" };
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.download.delete({ where: { id: downloadId } });
+      await tx.asset.delete({ where: { id: existing.assetId } }).catch(() => undefined);
+    });
+
+    revalidateDownloads();
+
+    return {
+      status: "success",
+      message: `資料「${existing.title}」を削除しました。`,
+    };
+  } catch (error) {
+    console.error("deleteDownload failed", error);
+    return {
+      status: "error",
+      message: error instanceof Error ? error.message : "資料の削除に失敗しました。",
+    };
+  }
+}
+
+async function createUniqueDownloadSlug(title: string, currentId?: string) {
   const base = ensureSlug(title, "download", 80);
   let slug = base;
   let suffix = 2;
 
-  while (await prisma.download.findUnique({ where: { slug }, select: { id: true } })) {
+  while (true) {
+    const existing = await prisma.download.findUnique({ where: { slug }, select: { id: true } });
+
+    if (!existing || existing.id === currentId) {
+      break;
+    }
+
     slug = `${base}-${suffix}`;
     suffix += 1;
   }
@@ -131,6 +256,12 @@ async function uploadDownloadAsset(fileValue: FormDataEntryValue | null, userId:
   });
 
   return asset;
+}
+
+function revalidateDownloads() {
+  revalidatePath("/admin/downloads");
+  revalidatePath("/admin/downloads/[downloadId]", "page");
+  revalidatePath("/downloads");
 }
 
 function inferMimeType(ext: string) {

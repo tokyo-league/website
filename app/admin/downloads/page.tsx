@@ -1,5 +1,8 @@
+import Link from "next/link";
 import { AdminLayoutShell } from "@/components/admin-layout-shell";
+import { AdminDownloadDeleteButton } from "@/components/admin-download-delete-button";
 import { AdminDownloadForm } from "@/components/admin-download-form";
+import { formatDownloadCategory } from "@/lib/downloads";
 import { requireOwner } from "@/lib/admin-access";
 import { prisma } from "@/lib/prisma";
 
@@ -26,24 +29,26 @@ export default async function AdminDownloadsPage() {
           <div className="admin-table__row admin-table__row--head">
             <span>カテゴリ</span>
             <span>タイトル</span>
+            <span>公開状態</span>
             <span>更新日</span>
+            <span>操作</span>
           </div>
           {downloads.map((item) => (
             <div key={item.id} className="admin-table__row">
-              <span>{formatCategory(item.category)}</span>
+              <span>{formatDownloadCategory(item.category)}</span>
               <strong>{item.title}</strong>
+              <span>{item.status === "PUBLISHED" ? "公開" : item.status === "ARCHIVED" ? "非公開" : "下書き"}</span>
               <span>{item.updatedAt.toISOString().slice(0, 10)}</span>
+              <div className="admin-inline-actions">
+                <Link href={`/admin/downloads/${item.id}`} className="button button--ghost">
+                  編集
+                </Link>
+                <AdminDownloadDeleteButton downloadId={item.id} />
+              </div>
             </div>
           ))}
         </div>
       </article>
     </AdminLayoutShell>
   );
-}
-
-function formatCategory(category: "REGULATION" | "GUIDELINE" | "DOCUMENT" | "OTHER") {
-  if (category === "REGULATION") return "規約";
-  if (category === "GUIDELINE") return "ガイドライン";
-  if (category === "OTHER") return "その他";
-  return "資料";
 }

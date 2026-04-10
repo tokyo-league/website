@@ -403,9 +403,43 @@ button {
   color: #14346d;
 }
 
+.division-team-row {
+  gap: 6px;
+  padding-block: 14px;
+}
+
 .division-team-row h3 {
-  font-size: 20px;
-  line-height: 1.35;
+  font-size: 16px;
+  line-height: 1.3;
+  font-weight: 600;
+}
+
+.division-logo-board {
+  min-height: 260px;
+  padding: 22px;
+}
+
+.division-logo-board__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  align-content: center;
+  height: 100%;
+}
+
+.division-logo-board__item {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border: 1px solid rgba(29, 29, 31, 0.08);
+  border-radius: 20px;
+  background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.96), rgba(244, 245, 240, 0.98));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+.division-logo-board__item img {
+  object-fit: contain;
+  padding: 14px;
 }
 
 .page-intro__visual--teams img,
@@ -1614,7 +1648,6 @@ button {
 }
 
 @media (max-width: 960px) {
-  .site-header__inner,
   .site-footer__inner,
   .card__header,
   .section-heading,
@@ -1649,8 +1682,11 @@ button {
   }
 
   .site-header__inner {
+    flex-direction: row;
+    justify-content: space-between;
     gap: 14px;
     align-items: center;
+    flex-wrap: wrap;
   }
 
   .site-header__logo {
@@ -1668,6 +1704,7 @@ button {
     flex-direction: column;
     gap: 8px;
     padding-top: 6px;
+    order: 3;
   }
 
   .site-header__nav.is-open {
@@ -1689,6 +1726,16 @@ button {
   .page-intro--teams .page-intro__inner,
   .page-intro--feature .page-intro__inner {
     grid-template-columns: 1fr;
+  }
+
+  .division-logo-board {
+    min-height: 0;
+    padding: 18px;
+  }
+
+  .division-logo-board__grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
   }
 
   .about-overview__row,
@@ -1720,6 +1767,7 @@ button {
     gap: 10px;
     font-size: 12px;
     letter-spacing: 0.06em;
+    max-width: calc(100% - 60px);
   }
 
   .site-header__logo img {
@@ -1732,7 +1780,15 @@ button {
   }
 
   .division-team-row h3 {
-    font-size: 18px;
+    font-size: 15px;
+  }
+
+  .division-logo-board__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .division-logo-board__item {
+    border-radius: 16px;
   }
 
   .home-intro,

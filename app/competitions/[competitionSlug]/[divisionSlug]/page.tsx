@@ -1,12 +1,11 @@
-import Image from "next/image";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { ResultImageLightbox } from "@/components/result-image-lightbox";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { normalizeDivisionSlug } from "@/lib/league-slug";
 import { prisma } from "@/lib/prisma";
-import { siteAssets } from "@/lib/site-data";
 
 export const dynamic = "force-dynamic";
 
@@ -57,6 +56,9 @@ export default async function DivisionDetailPage({
     notFound();
   }
 
+  const resultImageSrc = division.resultImagePath || "/site-assets/results/Fリーグ-6.jpg";
+  const logoTeams = division.teams.filter((assignment) => assignment.team.logoPath).slice(0, 8);
+
   return (
     <>
       <SiteHeader />
@@ -80,14 +82,22 @@ export default async function DivisionDetailPage({
                 ) : null}
               </div>
             </div>
-            <div className="page-intro__visual">
-              <Image
-                src={division.resultImagePath || siteAssets.heroResult}
-                alt={`${division.name} 試合結果`}
-                fill
-                sizes="(max-width: 960px) 100vw, 32vw"
-              />
-            </div>
+            {logoTeams.length > 0 ? (
+              <div className="page-intro__visual division-logo-board">
+                <div className="division-logo-board__grid">
+                  {logoTeams.map((assignment) => (
+                    <div key={assignment.id} className="division-logo-board__item">
+                      <Image
+                        src={assignment.team.logoPath!}
+                        alt={assignment.team.name}
+                        fill
+                        sizes="(max-width: 960px) 25vw, 120px"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
           </div>
         </section>
 
@@ -101,7 +111,7 @@ export default async function DivisionDetailPage({
                 </div>
               </div>
               <ResultImageLightbox
-                src={division.resultImagePath || siteAssets.heroResult}
+                src={resultImageSrc}
                 alt={`${division.name} 試合結果画像`}
               />
             </article>

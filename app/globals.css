@@ -130,6 +130,28 @@ button {
   white-space: nowrap;
 }
 
+.site-header__menu-button {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.94);
+  cursor: pointer;
+}
+
+.site-header__menu-button span {
+  display: block;
+  width: 18px;
+  height: 2px;
+  margin: 2px 0;
+  border-radius: 999px;
+  background: #1d1d1f;
+}
+
 .home-intro,
 .page-intro {
   padding: 28px 0 12px;
@@ -379,6 +401,11 @@ button {
 
 .news-inline-link:hover {
   color: #14346d;
+}
+
+.division-team-row h3 {
+  font-size: 20px;
+  line-height: 1.35;
 }
 
 .page-intro__visual--teams img,
@@ -1623,27 +1650,40 @@ button {
 
   .site-header__inner {
     gap: 14px;
+    align-items: center;
   }
 
   .site-header__logo {
-    width: 100%;
+    width: auto;
+    flex: 1;
+  }
+
+  .site-header__menu-button {
+    display: inline-flex;
   }
 
   .site-header__nav {
+    display: none;
     width: 100%;
-    justify-content: flex-start;
-    gap: 10px;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 6px;
+  }
+
+  .site-header__nav.is-open {
+    display: flex;
   }
 
   .site-header__nav a {
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    min-height: 36px;
-    padding: 0 12px;
+    width: 100%;
+    min-height: 44px;
+    padding: 0 14px;
     border: 1px solid var(--line);
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.92);
-    font-size: 13px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.96);
+    font-size: 14px;
   }
 
   .page-intro--teams .page-intro__inner,
@@ -1688,9 +1728,11 @@ button {
   }
 
   .site-header__nav {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
+  }
+
+  .division-team-row h3 {
+    font-size: 18px;
   }
 
   .home-intro,

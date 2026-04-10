@@ -115,7 +115,7 @@ export default async function DivisionDetailPage({
               </div>
               <div className="list-stack">
                 {division.teams.map((assignment) => (
-                  <article key={assignment.id} className="list-row">
+                  <article key={assignment.id} className="list-row division-team-row">
                     <p className="list-row__meta">
                       <span>{assignment.sortOrder}</span>
                       <span>{assignment.team.region || "東京"}</span>

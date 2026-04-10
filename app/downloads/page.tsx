@@ -1,7 +1,6 @@
-import Link from "next/link";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { downloadItems, newsItems } from "@/lib/site-data";
+import { downloadItems } from "@/lib/site-data";
 
 export default function DownloadsPage() {
   return (
@@ -30,32 +29,6 @@ export default function DownloadsPage() {
                 </article>
               ))}
             </div>
-          </div>
-        </section>
-
-        <section className="section-block">
-          <div className="container narrow">
-            <article className="card">
-              <div className="card__header">
-                <div>
-                  <p className="section-kicker">Related News</p>
-                  <h2>資料に関するお知らせ</h2>
-                </div>
-                <Link href="/news">ニュース一覧へ</Link>
-              </div>
-              <div className="list-stack">
-                {newsItems.slice(0, 2).map((item) => (
-                  <article key={item.title} className="list-row">
-                    <p className="list-row__meta">
-                      <span>{item.date}</span>
-                      <span>{item.category}</span>
-                    </p>
-                    <h3>{item.title}</h3>
-                    <p>{item.excerpt}</p>
-                  </article>
-                ))}
-              </div>
-            </article>
           </div>
         </section>
       </main>

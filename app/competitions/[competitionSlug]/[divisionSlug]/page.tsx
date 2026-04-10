@@ -196,7 +196,7 @@ export default async function DivisionDetailPage({
                         </span>
                         <span className="division-match-line__team division-match-line__team--away">{match.awayTeam.name}</span>
                       </div>
-                      {match.note ? <p>{match.note}</p> : null}
+                      {match.note ? <p className="division-match-note">{match.note}</p> : null}
                     </article>
                   ))}
                 </div>

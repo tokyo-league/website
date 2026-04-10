@@ -759,6 +759,13 @@ button {
   line-height: 1.8;
 }
 
+.division-match-note {
+  margin: 6px 0 0;
+  color: #80858d;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
 .list-row--large {
   padding: 22px 0;
 }
@@ -1895,6 +1902,10 @@ button {
 
   .division-match-line__score strong {
     font-size: 20px;
+  }
+
+  .division-match-note {
+    font-size: 10px;
   }
 
   .division-logo-board__grid {

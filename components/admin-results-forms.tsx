@@ -661,7 +661,7 @@ function BulkStandingEditor({
         </div>
         {rows.map((row) => (
           <div key={row.teamId} className="admin-standings-table__row">
-            <strong className="admin-standings-table__team">{row.teamName}</strong>
+            <span className="admin-standings-table__team">{row.teamName}</span>
             <input type="number" min="1" value={row.rank} onChange={(event) => updateRow(row.teamId, "rank", event.target.value)} />
             <input type="number" min="0" value={row.played} onChange={(event) => updateRow(row.teamId, "played", event.target.value)} />
             <input type="number" min="0" value={row.won} onChange={(event) => updateRow(row.teamId, "won", event.target.value)} />

@@ -1515,7 +1515,7 @@ button {
   background: #fbfcfe;
 }
 
-.admin-standings-table__row .admin-standings-table__team {
+.admin-standings-table__team {
   display: block;
   margin-top: 0;
   font-size: 11px;

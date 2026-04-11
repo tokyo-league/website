@@ -1519,6 +1519,13 @@ button {
   line-height: 1.5;
 }
 
+.admin-standings-table__team {
+  font-size: 13px;
+  line-height: 1.35;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
 .admin-standings-table__row input {
   min-height: 42px;
   padding: 0 12px;
@@ -1543,6 +1550,12 @@ button {
   border: 1px solid rgba(17, 24, 39, 0.08);
   border-radius: 18px;
   background: #fbfcfe;
+}
+
+.admin-standing-summary__team {
+  font-size: 14px;
+  line-height: 1.35;
+  font-weight: 600;
 }
 
 .admin-asset-preview {

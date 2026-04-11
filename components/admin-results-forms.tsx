@@ -631,7 +631,7 @@ function BulkStandingEditor({
         </div>
         {rows.map((row) => (
           <div key={row.teamId} className="admin-standings-table__row">
-            <strong>{row.teamName}</strong>
+            <strong className="admin-standings-table__team">{row.teamName}</strong>
             <input type="number" min="1" value={row.rank} onChange={(event) => updateRow(row.teamId, "rank", event.target.value)} />
             <input type="number" min="0" value={row.played} onChange={(event) => updateRow(row.teamId, "played", event.target.value)} />
             <input type="number" min="0" value={row.won} onChange={(event) => updateRow(row.teamId, "won", event.target.value)} />
@@ -670,7 +670,7 @@ function ExistingStandingEditor({
   return (
     <div className="admin-item-card">
       <div className="admin-item-card__summary">
-        <strong>
+        <strong className="admin-standing-summary__team">
           {standing.rank}位 {standing.teamName}
         </strong>
         <p>

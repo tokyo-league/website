@@ -6,6 +6,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { normalizeDivisionSlug } from "@/lib/league-slug";
 import { prisma } from "@/lib/prisma";
+import { e2eMockCompetition, isE2ETestMode } from "@/lib/test-mode";
 
 export const dynamic = "force-dynamic";
 
@@ -15,40 +16,52 @@ export default async function DivisionDetailPage({
   params: Promise<{ competitionSlug: string; divisionSlug: string }>;
 }) {
   const { competitionSlug, divisionSlug } = await params;
-  const normalizedDivisionSlug = normalizeDivisionSlug(decodeURIComponent(divisionSlug));
-  const competition = await prisma.competition.findUnique({
-    where: { slug: competitionSlug },
-    include: {
-      season: true,
-      divisions: {
-        where: {
-          OR: [{ slug: divisionSlug }, { slug: normalizedDivisionSlug }, { name: decodeURIComponent(divisionSlug) }],
-        },
-        include: {
-          teams: {
-            include: {
-              team: true,
+  const requestedDivisionSlug = decodeURIComponent(divisionSlug);
+  const normalizedDivisionSlug = normalizeDivisionSlug(requestedDivisionSlug);
+  const competition =
+    isE2ETestMode() && competitionSlug === e2eMockCompetition.slug
+      ? {
+          ...e2eMockCompetition,
+          divisions: e2eMockCompetition.divisions.filter(
+            (division) =>
+              division.slug === divisionSlug ||
+              division.slug === normalizedDivisionSlug ||
+              division.name === requestedDivisionSlug,
+          ),
+        }
+      : await prisma.competition.findUnique({
+          where: { slug: competitionSlug },
+          include: {
+            season: true,
+            divisions: {
+              where: {
+                OR: [{ slug: divisionSlug }, { slug: normalizedDivisionSlug }, { name: requestedDivisionSlug }],
+              },
+              include: {
+                teams: {
+                  include: {
+                    team: true,
+                  },
+                  orderBy: { sortOrder: "asc" },
+                },
+                standings: {
+                  include: {
+                    team: true,
+                  },
+                  orderBy: { rank: "asc" },
+                },
+                matches: {
+                  include: {
+                    venue: true,
+                    homeTeam: true,
+                    awayTeam: true,
+                  },
+                  orderBy: [{ matchDate: "desc" }, { sortOrder: "asc" }],
+                },
+              },
             },
-            orderBy: { sortOrder: "asc" },
           },
-          standings: {
-            include: {
-              team: true,
-            },
-            orderBy: { rank: "asc" },
-          },
-          matches: {
-            include: {
-              venue: true,
-              homeTeam: true,
-              awayTeam: true,
-            },
-            orderBy: [{ matchDate: "desc" }, { sortOrder: "asc" }],
-          },
-        },
-      },
-    },
-  });
+        });
 
   const division = competition?.divisions[0];
 

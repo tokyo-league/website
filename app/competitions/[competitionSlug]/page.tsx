@@ -6,6 +6,7 @@ import { SiteHeader } from "@/components/site-header";
 import { normalizeDivisionSlug } from "@/lib/league-slug";
 import { prisma } from "@/lib/prisma";
 import { siteAssets } from "@/lib/site-data";
+import { e2eMockCompetition, isE2ETestMode } from "@/lib/test-mode";
 
 export const dynamic = "force-dynamic";
 
@@ -15,23 +16,25 @@ export default async function CompetitionDetailPage({
   params: Promise<{ competitionSlug: string }>;
 }) {
   const { competitionSlug } = await params;
-  const competition = await prisma.competition.findUnique({
-    where: { slug: competitionSlug },
-    include: {
-      season: true,
-      divisions: {
+  const competition = isE2ETestMode() && competitionSlug === e2eMockCompetition.slug
+    ? e2eMockCompetition
+    : await prisma.competition.findUnique({
+        where: { slug: competitionSlug },
         include: {
-          teams: {
+          season: true,
+          divisions: {
             include: {
-              team: true,
+              teams: {
+                include: {
+                  team: true,
+                },
+                orderBy: { sortOrder: "asc" },
+              },
             },
-            orderBy: { sortOrder: "asc" },
+            orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
           },
         },
-        orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
-      },
-    },
-  });
+      });
 
   if (!competition) {
     notFound();

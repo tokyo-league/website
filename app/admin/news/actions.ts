@@ -6,6 +6,7 @@ import { AssetKind, PublishStatus } from "@prisma/client";
 import { requireOwner } from "@/lib/admin-access";
 import { prisma } from "@/lib/prisma";
 import { ensureSlug, isValidUuid, sanitizeMultilineText, sanitizePlainText } from "@/lib/security";
+import { isE2ETestMode } from "@/lib/test-mode";
 
 export type NewsActionState = {
   status: "idle" | "success" | "error";
@@ -35,6 +36,15 @@ export async function createNewsPost(
 
     if (!payload.ok) {
       return payload.error;
+    }
+
+    if (isE2ETestMode()) {
+      revalidateNewsPaths();
+
+      return {
+        status: "success",
+        message: `ニュース「${payload.title}」を作成しました。`,
+      };
     }
 
     const slug = await createUniqueNewsSlug(payload.title);

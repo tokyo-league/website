@@ -7,6 +7,7 @@ import { PublishStatus } from "@prisma/client";
 import { requireOwner } from "@/lib/admin-access";
 import { prisma } from "@/lib/prisma";
 import { ensureSlug, isValidUuid, sanitizePlainText } from "@/lib/security";
+import { isE2ETestMode } from "@/lib/test-mode";
 
 export type TeamActionState = {
   status: "idle" | "success" | "error";
@@ -40,6 +41,15 @@ export async function createTeam(
       return {
         status: "error",
         message: "チーム名を入力してください。",
+      };
+    }
+
+    if (isE2ETestMode()) {
+      revalidatePath("/admin/teams");
+
+      return {
+        status: "success",
+        message: `${payload.name} を追加しました。`,
       };
     }
 

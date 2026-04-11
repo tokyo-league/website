@@ -2,6 +2,7 @@ import { defineConfig, devices } from "@playwright/test";
 
 const port = 3100;
 const baseURL = `http://127.0.0.1:${port}`;
+const nodeBinPath = "/Users/kazuhiro/.nvm/versions/node/v24.14.0/bin";
 
 export default defineConfig({
   testDir: "./tests/e2e",
@@ -14,7 +15,12 @@ export default defineConfig({
     trace: "on-first-retry",
   },
   webServer: {
-    command: `E2E_TEST_MODE=1 AUTH_SECRET=e2e-secret npm run dev -- --hostname 127.0.0.1 --port ${port}`,
+    command: `PATH=${nodeBinPath}:$PATH npm run dev -- --hostname 127.0.0.1 --port ${port}`,
+    env: {
+      ...process.env,
+      E2E_TEST_MODE: "1",
+      AUTH_SECRET: "e2e-secret",
+    },
     url: baseURL,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

@@ -2,52 +2,62 @@ import { AdminLayoutShell } from "@/components/admin-layout-shell";
 import { AdminResultsForms } from "@/components/admin-results-forms";
 import { getAdminScope } from "@/lib/admin-access";
 import { prisma } from "@/lib/prisma";
+import { e2eMockCompetition, isE2ETestMode } from "@/lib/test-mode";
 
 export default async function AdminResultsPage() {
   const scope = await getAdminScope();
 
-  const divisions = await prisma.division.findMany({
-    where:
-      scope.admin.role === "OWNER"
-        ? undefined
-        : {
-            id: {
-              in: scope.accessibleDivisions.map((division) => division.id),
+  const divisions = isE2ETestMode()
+    ? e2eMockCompetition.divisions.map((division) => ({
+        ...division,
+        competition: {
+          name: e2eMockCompetition.name,
+          edition: e2eMockCompetition.edition,
+          season: e2eMockCompetition.season,
+        },
+      }))
+    : await prisma.division.findMany({
+        where:
+          scope.admin.role === "OWNER"
+            ? undefined
+            : {
+                id: {
+                  in: scope.accessibleDivisions.map((division) => division.id),
+                },
+              },
+        include: {
+          competition: {
+            include: {
+              season: true,
             },
           },
-    include: {
-      competition: {
-        include: {
-          season: true,
+          teams: {
+            include: {
+              team: true,
+            },
+            orderBy: { sortOrder: "asc" },
+          },
+          matches: {
+            include: {
+              venue: true,
+              homeTeam: true,
+              awayTeam: true,
+            },
+            orderBy: [{ matchDate: "desc" }, { createdAt: "desc" }],
+          },
+          standings: {
+            include: {
+              team: true,
+            },
+            orderBy: [{ rank: "asc" }, { team: { sortOrder: "asc" } }],
+          },
         },
-      },
-      teams: {
-        include: {
-          team: true,
-        },
-        orderBy: { sortOrder: "asc" },
-      },
-      matches: {
-        include: {
-          venue: true,
-          homeTeam: true,
-          awayTeam: true,
-        },
-        orderBy: [{ matchDate: "desc" }, { createdAt: "desc" }],
-      },
-      standings: {
-        include: {
-          team: true,
-        },
-        orderBy: [{ rank: "asc" }, { team: { sortOrder: "asc" } }],
-      },
-    },
-    orderBy: [
-      { competition: { season: { year: "desc" } } },
-      { competition: { edition: "desc" } },
-      { sortOrder: "asc" },
-    ],
-  });
+        orderBy: [
+          { competition: { season: { year: "desc" } } },
+          { competition: { edition: "desc" } },
+          { sortOrder: "asc" },
+        ],
+      });
 
   return (
     <AdminLayoutShell currentPath="/admin/results" title="結果管理" kicker="Results" scope={scope}>
@@ -84,24 +94,24 @@ export default async function AdminResultsPage() {
           matches: division.matches.map((match) => ({
             id: match.id,
             matchDate: match.matchDate.toISOString().slice(0, 10),
-            homeTeamId: match.homeTeamId,
-            awayTeamId: match.awayTeamId,
-            homeScore: match.homeScore,
-            awayScore: match.awayScore,
+            homeTeamId: "homeTeamId" in match ? match.homeTeamId : "",
+            awayTeamId: "awayTeamId" in match ? match.awayTeamId : "",
+            homeScore: match.homeScore ?? null,
+            awayScore: match.awayScore ?? null,
             venueName: match.venue?.name ?? "",
             note: match.note ?? "",
           })),
           standings: division.standings.map((standing) => ({
             id: standing.id,
-            teamId: standing.teamId,
+            teamId: "teamId" in standing ? standing.teamId : standing.team.name,
             teamName: standing.team.name,
             rank: standing.rank,
             played: standing.played,
-            won: standing.won,
-            drawn: standing.drawn,
-            lost: standing.lost,
-            goalsFor: standing.goalsFor,
-            goalsAgainst: standing.goalsAgainst,
+            won: "won" in standing ? standing.won : 0,
+            drawn: "drawn" in standing ? standing.drawn : 0,
+            lost: "lost" in standing ? standing.lost : 0,
+            goalsFor: "goalsFor" in standing ? standing.goalsFor : 0,
+            goalsAgainst: "goalsAgainst" in standing ? standing.goalsAgainst : 0,
             goalDifference: standing.goalDifference,
             points: standing.points,
           })),

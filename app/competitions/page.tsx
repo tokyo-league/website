@@ -4,26 +4,29 @@ import { SiteHeader } from "@/components/site-header";
 import { prisma } from "@/lib/prisma";
 import { siteAssets } from "@/lib/site-data";
 import Image from "next/image";
+import { e2eMockCompetition, isE2ETestMode } from "@/lib/test-mode";
 
 export const dynamic = "force-dynamic";
 
 export default async function CompetitionsPage() {
-  const competitions = await prisma.competition.findMany({
-    include: {
-      season: true,
-      divisions: {
-        where: {
-          status: "PUBLISHED",
+  const competitions = isE2ETestMode()
+    ? [e2eMockCompetition]
+    : await prisma.competition.findMany({
+        include: {
+          season: true,
+          divisions: {
+            where: {
+              status: "PUBLISHED",
+            },
+            orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+          },
         },
-        orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
-      },
-    },
-    orderBy: [{ season: { year: "desc" } }, { edition: "desc" }, { createdAt: "desc" }],
-  });
+        orderBy: [{ season: { year: "desc" } }, { edition: "desc" }, { createdAt: "desc" }],
+      });
 
   const latestSeasonYear = competitions[0]?.season.year ?? null;
   const currentCompetitions = competitions.filter((competition) => competition.season.year === latestSeasonYear);
-  const archiveGroups = new Map<number, typeof competitions>();
+  const archiveGroups = new Map<number, Array<(typeof competitions)[number]>>();
 
   for (const competition of competitions) {
     const list = archiveGroups.get(competition.season.year) ?? [];

@@ -69,7 +69,7 @@ export default async function DivisionDetailPage({
     notFound();
   }
 
-  const resultImageSrc = division.resultImagePath || "/site-assets/results/Fリーグ-6.jpg";
+  const resultImageSrc = division.resultImagePath;
   const logoTeams = division.teams.filter((assignment) => assignment.team.logoPath).slice(0, 8);
 
   return (
@@ -123,10 +123,14 @@ export default async function DivisionDetailPage({
                   <h2>試合結果画像</h2>
                 </div>
               </div>
-              <ResultImageLightbox
-                src={resultImageSrc}
-                alt={`${division.name} 試合結果画像`}
-              />
+              {resultImageSrc ? (
+                <ResultImageLightbox
+                  src={resultImageSrc}
+                  alt={`${division.name} 試合結果画像`}
+                />
+              ) : (
+                <p className="admin-muted">試合結果画像はまだ登録されていません。</p>
+              )}
             </article>
 
             <article className="card">

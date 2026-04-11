@@ -71,10 +71,12 @@ export function AdminResultsForms({
     new Set(divisions.filter((division) => division.seasonYear === selectedSeasonYear).map((division) => division.competitionName)),
   );
   const [selectedCompetitionName, setSelectedCompetitionName] = useState(competitionsForSeason[0] ?? "");
-  const filteredDivisions = divisions.filter(
-    (division) =>
-      division.seasonYear === selectedSeasonYear && division.competitionName === selectedCompetitionName,
-  );
+  const filteredDivisions = divisions
+    .filter(
+      (division) =>
+        division.seasonYear === selectedSeasonYear && division.competitionName === selectedCompetitionName,
+    )
+    .sort(compareDivisionOptions);
   const [selectedDivisionId, setSelectedDivisionId] = useState(filteredDivisions[0]?.id ?? divisions[0]?.id ?? "");
 
   useEffect(() => {
@@ -459,6 +461,34 @@ export function AdminResultsForms({
       </article>
     </>
   );
+}
+
+function compareDivisionOptions(
+  a: Pick<DivisionOption, "divisionName">,
+  b: Pick<DivisionOption, "divisionName">,
+) {
+  const aRank = getDivisionRank(a.divisionName);
+  const bRank = getDivisionRank(b.divisionName);
+
+  if (aRank !== bRank) {
+    return aRank - bRank;
+  }
+
+  return a.divisionName.localeCompare(b.divisionName, "ja");
+}
+
+function getDivisionRank(name: string) {
+  const normalized = name.normalize("NFKC").trim().toLowerCase();
+  const match =
+    normalized.match(/^([a-z])\s*(?:リーグ|グループ)$/) ??
+    normalized.match(/^([a-z])-league$/) ??
+    normalized.match(/^([a-z])/);
+
+  if (!match) {
+    return Number.MAX_SAFE_INTEGER;
+  }
+
+  return match[1].toUpperCase().charCodeAt(0) - 65;
 }
 
 function ExistingMatchEditor({

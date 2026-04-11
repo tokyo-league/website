@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { isE2ETestMode } from "@/lib/test-mode";
 
 const LOGIN_PATH = "/login?callbackUrl=/admin";
 
@@ -22,6 +23,33 @@ export type AdminScope = {
 };
 
 export async function getAdminScope(): Promise<AdminScope> {
+  if (isE2ETestMode()) {
+    return {
+      admin: {
+        id: "e2e-owner",
+        email: "e2e@example.com",
+        name: "E2E Owner",
+        role: "OWNER",
+      },
+      accessibleDivisions: [
+        {
+          id: "e2e-division-a",
+          name: "Aリーグ",
+          competitionName: "第103回 東京リーグ",
+          permissions: ["担当リーグ編集"],
+        },
+        {
+          id: "e2e-division-b",
+          name: "Bリーグ",
+          competitionName: "第103回 東京リーグ",
+          permissions: ["担当リーグ編集"],
+        },
+      ],
+      canManageAssignments: true,
+      canManageGlobalContent: true,
+    };
+  }
+
   const session = await auth();
 
   if (!session?.user?.email) {

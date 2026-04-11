@@ -5,6 +5,8 @@
 .next
 node_modules
 coverage
+playwright-report
+test-results
 *.log
 website/
 *.tsbuildinfo

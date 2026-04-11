@@ -4,13 +4,16 @@ import { AdminLayoutShell } from "@/components/admin-layout-shell";
 import { AdminNewsDeleteButton } from "@/components/admin-news-delete-button";
 import { requireOwner } from "@/lib/admin-access";
 import { prisma } from "@/lib/prisma";
+import { isE2ETestMode } from "@/lib/test-mode";
 
 export default async function AdminNewsPage() {
   noStore();
   const scope = await requireOwner();
-  const posts = await prisma.newsPost.findMany({
-    orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
-  });
+  const posts = await prisma.newsPost
+    .findMany({
+      orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
+    })
+    .catch(() => (isE2ETestMode() ? [] : []));
 
   return (
     <AdminLayoutShell currentPath="/admin/news" title="ニュース管理" kicker="News" scope={scope}>

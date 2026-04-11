@@ -1515,11 +1515,9 @@ button {
   background: #fbfcfe;
 }
 
-.admin-standings-table__row strong {
-  line-height: 1.5;
-}
-
-.admin-standings-table__team {
+.admin-standings-table__row .admin-standings-table__team {
+  display: block;
+  margin-top: 0;
   font-size: 11px;
   line-height: 1.35;
   font-weight: 600;

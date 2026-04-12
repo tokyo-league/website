@@ -215,10 +215,6 @@ export function AdminCompetitionForms({
               <span>リーグ名</span>
               <input type="text" name="name" placeholder="Aリーグ" required />
             </label>
-            <label className="admin-field">
-              <span>表示順</span>
-              <input type="number" name="sortOrder" min="0" placeholder="1" />
-            </label>
             <p className="admin-muted">URL用の識別子はリーグ名から自動生成されます。</p>
             <button type="submit" className="button" disabled={divisionPending}>
               {divisionPending ? "保存中..." : "リーグを保存"}
@@ -264,6 +260,7 @@ export function AdminCompetitionForms({
               <span>表示順</span>
               <input type="number" name="sortOrder" min="0" placeholder="1" />
             </label>
+            <p className="admin-muted">未入力の場合は末尾へ自動で追加します。</p>
             <button type="submit" className="button" disabled={teamAssignmentPending}>
               {teamAssignmentPending ? "追加中..." : "所属チームを追加"}
             </button>

@@ -27,6 +27,9 @@ export default async function AdminCompetitionsPage() {
       orderBy: [{ competition: { season: { year: "desc" } } }, { competition: { sortOrder: "asc" } }, { sortOrder: "asc" }],
     }),
     prisma.team.findMany({
+      where: {
+        status: "PUBLISHED",
+      },
       orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
     }),
     prisma.divisionTeam.findMany({

@@ -132,7 +132,6 @@ export async function createDivision(
   const name = sanitizePlainText(String(formData.get("name") ?? ""), 80);
   const slugInput = sanitizePlainText(String(formData.get("slug") ?? ""), 80);
   const slug = slugInput ? normalizeSlug(slugInput, 80) : normalizeDivisionSlug(name);
-  const sortOrder = parseInteger(String(formData.get("sortOrder") ?? "0"));
 
   if (!isValidUuid(competitionId) || !name || !slug || !isValidSlug(slug)) {
     return {
@@ -142,12 +141,14 @@ export async function createDivision(
   }
 
   try {
+    const sortOrder = await getNextDivisionSortOrder(competitionId, name);
+
     await prisma.division.create({
       data: {
         competitionId,
         name,
         slug,
-        sortOrder: sortOrder ?? 0,
+        sortOrder,
         status: PublishStatus.DRAFT,
       },
     });
@@ -175,7 +176,7 @@ export async function assignTeamToDivision(
 
   const divisionId = sanitizePlainText(String(formData.get("divisionId") ?? ""), 64);
   const teamId = sanitizePlainText(String(formData.get("teamId") ?? ""), 64);
-  const sortOrder = parseInteger(String(formData.get("sortOrder") ?? "0"));
+  const sortOrderInput = parseInteger(String(formData.get("sortOrder") ?? ""));
 
   if (!isValidUuid(divisionId) || !isValidUuid(teamId)) {
     return {
@@ -192,11 +193,13 @@ export async function assignTeamToDivision(
   });
 
   if (!existing) {
+    const sortOrder = sortOrderInput ?? (await getNextDivisionTeamSortOrder(divisionId));
+
     await prisma.divisionTeam.create({
       data: {
         divisionId,
         teamId,
-        sortOrder: sortOrder ?? 0,
+        sortOrder,
       },
     });
   }
@@ -236,4 +239,30 @@ export async function removeTeamFromDivision(
     status: "success",
     message: "リーグ所属チームを解除しました。",
   };
+}
+
+async function getNextDivisionSortOrder(competitionId: string, divisionName: string) {
+  const letterMatch = divisionName.trim().match(/^([A-Z])/i);
+
+  if (letterMatch) {
+    return letterMatch[1].toUpperCase().charCodeAt(0) - 64;
+  }
+
+  const lastDivision = await prisma.division.findFirst({
+    where: { competitionId },
+    orderBy: [{ sortOrder: "desc" }],
+    select: { sortOrder: true },
+  });
+
+  return (lastDivision?.sortOrder ?? 0) + 1;
+}
+
+async function getNextDivisionTeamSortOrder(divisionId: string) {
+  const lastAssignment = await prisma.divisionTeam.findFirst({
+    where: { divisionId },
+    orderBy: [{ sortOrder: "desc" }],
+    select: { sortOrder: true },
+  });
+
+  return (lastAssignment?.sortOrder ?? 0) + 1;
 }

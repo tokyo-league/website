@@ -68,54 +68,58 @@ export default async function TeamsPage() {
 
         <section className="section-block">
           <div className="container team-grid">
-            {teams.map((team) => (
-              <article key={team.id} className="team-card">
-                <div className="team-card__image">
-                  <Image
-                    src={team.photoPath || siteAssets.teamsHero}
-                    alt={team.name}
-                    fill
-                    sizes="(max-width: 720px) 100vw, (max-width: 960px) 50vw, 33vw"
-                  />
-                  {team.logoPath ? (
-                    <div className="team-card__logo">
-                      <Image src={team.logoPath} alt={`${team.name} ロゴ`} width={72} height={72} />
-                    </div>
-                  ) : null}
-                </div>
-                <div className="team-card__body">
-                  <p className="section-kicker">{team.region || "東京"}</p>
-                  <h2>{team.name}</h2>
-                  {team.profile ? <p>{team.profile}</p> : null}
-                  <dl className="team-card__meta">
-                    <div>
-                      <dt>結成</dt>
-                      <dd>{team.founded || "未設定"}</dd>
-                    </div>
-                    <div>
-                      <dt>代表者</dt>
-                      <dd>{team.representativeName || "未設定"}</dd>
-                    </div>
-                    <div>
-                      <dt>監督</dt>
-                      <dd>{team.headCoachName || "未設定"}</dd>
-                    </div>
-                    <div>
-                      <dt>URL</dt>
-                      <dd>
-                        {team.websiteUrl ? (
-                          <a href={team.websiteUrl} target="_blank" rel="noreferrer">
-                            公式サイトを見る
-                          </a>
-                        ) : (
-                          "未設定"
-                        )}
-                      </dd>
-                    </div>
-                  </dl>
-                </div>
-              </article>
-            ))}
+            {teams.map((team) => {
+              const hasTeamLogo = Boolean(team.logoPath && team.logoPath !== siteAssets.logo);
+
+              return (
+                <article key={team.id} className="team-card">
+                  <div className="team-card__image">
+                    <Image
+                      src={team.photoPath || siteAssets.teamsHero}
+                      alt={team.name}
+                      fill
+                      sizes="(max-width: 720px) 100vw, (max-width: 960px) 50vw, 33vw"
+                    />
+                    {hasTeamLogo ? (
+                      <div className="team-card__logo">
+                        <Image src={team.logoPath!} alt={`${team.name} ロゴ`} width={72} height={72} />
+                      </div>
+                    ) : null}
+                  </div>
+                  <div className="team-card__body">
+                    <p className="section-kicker">{team.region || "東京"}</p>
+                    <h2>{team.name}</h2>
+                    {team.profile ? <p>{team.profile}</p> : null}
+                    <dl className="team-card__meta">
+                      <div>
+                        <dt>結成</dt>
+                        <dd>{team.founded || "未設定"}</dd>
+                      </div>
+                      <div>
+                        <dt>代表者</dt>
+                        <dd>{team.representativeName || "未設定"}</dd>
+                      </div>
+                      <div>
+                        <dt>監督</dt>
+                        <dd>{team.headCoachName || "未設定"}</dd>
+                      </div>
+                      <div>
+                        <dt>URL</dt>
+                        <dd>
+                          {team.websiteUrl ? (
+                            <a href={team.websiteUrl} target="_blank" rel="noreferrer">
+                              公式サイトを見る
+                            </a>
+                          ) : (
+                            "未設定"
+                          )}
+                        </dd>
+                      </div>
+                    </dl>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         </section>
       </main>

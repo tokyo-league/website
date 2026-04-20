@@ -69,7 +69,7 @@ export default async function TeamsPage() {
         <section className="section-block">
           <div className="container team-grid">
             {teams.map((team) => {
-              const hasTeamLogo = Boolean(team.logoPath && team.logoPath !== siteAssets.logo);
+              const hasTeamLogo = isDisplayableTeamLogo(team.logoPath);
 
               return (
                 <article key={team.id} className="team-card">
@@ -126,4 +126,22 @@ export default async function TeamsPage() {
       <SiteFooter />
     </>
   );
+}
+
+function isDisplayableTeamLogo(logoPath: string | null) {
+  if (!logoPath || logoPath === siteAssets.logo) {
+    return false;
+  }
+
+  const normalizedPath = logoPath.toLowerCase();
+
+  if (normalizedPath.includes("/teams/photos/")) {
+    return false;
+  }
+
+  if (normalizedPath.includes("ロゴグレー")) {
+    return false;
+  }
+
+  return true;
 }

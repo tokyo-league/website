@@ -12,63 +12,59 @@ export async function PublicHome() {
   const featuredTeams = await getRandomFeaturedTeams(3);
 
   return (
-    <main>
-      <section className="home-intro">
+    <main className="page-main">
+      <section className="home-hero">
         <div className="container">
-          <div className="home-intro__panel">
-            <div>
-              <p className="section-kicker">2026 Season</p>
-              <h1>第103回 東京リーグ</h1>
+          <div className="home-hero__panel">
+            <div className="home-hero__content">
+              <div className="home-hero__title-block">
+                <p className="section-kicker">TOKYO Junior Soccer League</p>
+                <h1>第103回 東京リーグ</h1>
+                <p className="home-hero__lead">
+                  東京少年サッカー連盟 東京リーグの試合情報、ニュース、参加チーム情報を掲載しています。
+                </p>
+              </div>
+              <div className="home-intro__links">
+                <Link href="/competitions" className="button">
+                  試合情報
+                </Link>
+                <Link href="/news" className="button button--ghost">
+                  ニュース
+                </Link>
+                <Link href="/teams" className="button button--ghost">
+                  参加チーム
+                </Link>
+              </div>
+              <article className="home-about-link-card">
+                <div>
+                  <p className="section-kicker">About</p>
+                  <h2>東京リーグについて</h2>
+                  <p>組織概要、規約、運営方針などの基本情報をまとめています。</p>
+                </div>
+                <Link href="/about" className="button button--ghost">
+                  説明を見る
+                </Link>
+              </article>
             </div>
-            <div className="home-intro__links">
-              <Link href="/competitions" className="button">
-                試合情報
-              </Link>
-              <Link href="/news" className="button button--ghost">
-                ニュース
-              </Link>
-              <Link href="/teams" className="button button--ghost">
-                参加チーム
-              </Link>
+            <div className="home-hero__media">
+              <Image
+                src={siteAssets.competitionMainVisual}
+                alt="東京リーグ メインビジュアル"
+                fill
+                sizes="(max-width: 960px) 100vw, 52vw"
+              />
+              <div className="home-hero__media-caption">
+                <span>Tokyo League</span>
+                <strong>Match & News</strong>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       <section className="section-block">
-        <div className="container home-grid">
-          <article className="card">
-            <div className="card__header">
-              <div>
-                <p className="section-kicker">Competition</p>
-                <h2>試合情報</h2>
-              </div>
-              <Link href="/competitions">大会詳細へ</Link>
-            </div>
-            <div className="result-feature">
-              <div className="result-feature__image">
-                <Image
-                  src={siteAssets.heroResult}
-                  alt="東京リーグの試合結果画像"
-                  fill
-                  sizes="(max-width: 960px) 100vw, 42vw"
-                />
-              </div>
-              <div className="result-feature__copy">
-                <h3>第103回 東京リーグ Aリーグ</h3>
-                <p>現行の結果画像を活かしつつ、リーグ別ページへ遷移できる導線を整理します。</p>
-                <div className="mini-meta">
-                  {divisionCards.map((division) => (
-                    <span key={division.name}>
-                      {division.name} / 最終更新 {division.updatedAt}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </article>
-
-          <article className="card">
+        <div className="container home-primary-layout">
+          <article className="card home-news-card">
             <div className="card__header">
               <div>
                 <p className="section-kicker">News</p>
@@ -78,12 +74,51 @@ export async function PublicHome() {
             </div>
             <NewsModalList items={latestNews} />
           </article>
+
+          <article className="card home-results-card">
+            <div className="card__header">
+              <div>
+                <p className="section-kicker">Competition</p>
+                <h2>試合結果</h2>
+              </div>
+              <Link href="/competitions">大会詳細へ</Link>
+            </div>
+            <div className="home-results-feature">
+              <div className="home-results-feature__image">
+                <Image
+                  src={siteAssets.heroResult}
+                  alt="東京リーグの試合結果"
+                  fill
+                  sizes="(max-width: 960px) 100vw, 42vw"
+                />
+              </div>
+              <div className="home-results-feature__body">
+                <p className="home-results-feature__eyebrow">開催中のリーグ結果</p>
+                <p className="home-results-feature__title">リーグ別の結果画像と詳細ページを確認できます。</p>
+                <div className="mini-meta">
+                  {divisionCards.map((division) => (
+                    <span key={division.name}>
+                      {division.name} / 更新 {division.updatedAt}
+                    </span>
+                  ))}
+                </div>
+                <div className="button-row home-results-feature__actions">
+                  <Link href="/competitions" className="button">
+                    試合結果を見る
+                  </Link>
+                  <Link href="/downloads" className="button button--ghost">
+                    要項を見る
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </article>
         </div>
       </section>
 
       <section className="section-block">
         <div className="container text-section-stack">
-          <article className="card">
+          <article className="card home-teams-card">
             <div className="card__header">
               <div>
                 <p className="section-kicker">Teams</p>
@@ -104,7 +139,7 @@ export async function PublicHome() {
                       />
                     </div>
                     <div className="home-team-card__copy">
-                      <h3>{team.name}</h3>
+                      <p className="home-team-card__title">{team.name}</p>
                       <p>{team.region || "東京都内"}</p>
                     </div>
                   </article>
@@ -122,7 +157,7 @@ export async function PublicHome() {
                     />
                   </div>
                   <div className="home-team-card__copy">
-                    <h3>参加チーム紹介</h3>
+                    <p className="home-team-card__title">参加チーム紹介</p>
                     <p>東京都内</p>
                   </div>
                 </article>
@@ -136,7 +171,7 @@ export async function PublicHome() {
                     />
                   </div>
                   <div className="home-team-card__copy">
-                    <h3>参加チーム紹介</h3>
+                    <p className="home-team-card__title">参加チーム紹介</p>
                     <p>東京都内</p>
                   </div>
                 </article>
@@ -150,7 +185,7 @@ export async function PublicHome() {
                     />
                   </div>
                   <div className="home-team-card__copy">
-                    <h3>参加チーム紹介</h3>
+                    <p className="home-team-card__title">参加チーム紹介</p>
                     <p>東京都内</p>
                   </div>
                 </article>

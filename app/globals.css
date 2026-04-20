@@ -740,6 +740,12 @@ button {
   letter-spacing: -0.03em;
 }
 
+.home-news-card .news-list-item h2 {
+  font-size: clamp(15px, 1.35vw, 19px);
+  line-height: 1.4;
+  letter-spacing: -0.02em;
+}
+
 .list-stack {
   display: grid;
 }

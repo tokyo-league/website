@@ -523,8 +523,8 @@ button {
 }
 
 .news-list-item h2 {
-  font-size: clamp(16px, 1.7vw, 22px);
-  line-height: 1.35;
+  font-size: clamp(15px, 1.35vw, 19px);
+  line-height: 1.4;
   letter-spacing: -0.02em;
 }
 

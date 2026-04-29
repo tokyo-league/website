@@ -60,8 +60,6 @@ export default async function TeamsPage() {
           <div className="container">
             <div className="team-summary">
               <span>掲載チーム {teams.length}</span>
-              <span>チーム紹介ページの写真を使用</span>
-              <span>公開中チームのみ表示</span>
             </div>
           </div>
         </section>

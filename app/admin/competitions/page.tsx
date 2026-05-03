@@ -7,12 +7,25 @@ export default async function AdminCompetitionsPage() {
   const scope = await getAdminScope();
   const [seasons, competitions, divisions, teams, divisionTeams] = await Promise.all([
     prisma.season.findMany({
+      include: {
+        _count: {
+          select: {
+            competitions: true,
+          },
+        },
+      },
       orderBy: [{ year: "desc" }],
     }),
     prisma.competition.findMany({
       include: {
         season: true,
-        divisions: true,
+        _count: {
+          select: {
+            divisions: true,
+            files: true,
+            newsPosts: true,
+          },
+        },
       },
       orderBy: [{ season: { year: "desc" } }, { sortOrder: "asc" }, { createdAt: "asc" }],
     }),
@@ -21,6 +34,14 @@ export default async function AdminCompetitionsPage() {
         competition: {
           include: {
             season: true,
+          },
+        },
+        _count: {
+          select: {
+            teams: true,
+            matches: true,
+            standings: true,
+            editorAssignments: true,
           },
         },
       },
@@ -68,17 +89,39 @@ export default async function AdminCompetitionsPage() {
             year: season.year,
             label: season.label,
             isCurrent: season.isCurrent,
+            competitionCount: season._count.competitions,
           }))}
           competitions={competitions.map((competition) => ({
             id: competition.id,
+            seasonId: competition.seasonId,
             name: competition.name,
+            slug: competition.slug,
             seasonLabel: competition.season.label,
             competitionType: competition.competitionType,
+            edition: competition.edition,
+            summary: competition.summary ?? "",
+            startDate: formatDateInput(competition.startDate),
+            endDate: formatDateInput(competition.endDate),
+            publishedAt: formatDateInput(competition.publishedAt),
+            status: competition.status,
+            sortOrder: competition.sortOrder,
+            divisionCount: competition._count.divisions,
+            fileCount: competition._count.files,
+            newsPostCount: competition._count.newsPosts,
           }))}
           divisions={divisions.map((division) => ({
             id: division.id,
+            competitionId: division.competitionId,
             name: division.name,
+            slug: division.slug,
             competitionLabel: `${division.competition.season.label} / ${division.competition.name}`,
+            description: division.description ?? "",
+            status: division.status,
+            sortOrder: division.sortOrder,
+            teamCount: division._count.teams,
+            matchCount: division._count.matches,
+            standingCount: division._count.standings,
+            assignmentCount: division._count.editorAssignments,
           }))}
           teams={teams.map((team) => ({
             id: team.id,
@@ -134,7 +177,7 @@ export default async function AdminCompetitionsPage() {
                 <span>{competition.name}</span>
                 <span>{competitionTypeLabel[competition.competitionType]}</span>
                 <span>{competitionStatusLabel[competition.status]}</span>
-                <span>{competition.divisions.length}件</span>
+                <span>{competition._count.divisions}件</span>
               </div>
             ))
           ) : (
@@ -154,6 +197,24 @@ const competitionTypeLabel = {
   CUP: "5年生FES 山藤杯向け",
   OTHER: "その他",
 } as const;
+
+function formatDateInput(date: Date | null) {
+  if (!date) {
+    return "";
+  }
+
+  const parts = new Intl.DateTimeFormat("ja-JP", {
+    timeZone: "Asia/Tokyo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(date);
+  const year = parts.find((part) => part.type === "year")?.value;
+  const month = parts.find((part) => part.type === "month")?.value;
+  const day = parts.find((part) => part.type === "day")?.value;
+
+  return year && month && day ? `${year}-${month}-${day}` : "";
+}
 
 const competitionStatusLabel = {
   DRAFT: "下書き",

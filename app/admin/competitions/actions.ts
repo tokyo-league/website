@@ -64,6 +64,111 @@ export async function createSeason(
   };
 }
 
+export async function updateSeason(
+  _prevState: CompetitionActionState,
+  formData: FormData,
+): Promise<CompetitionActionState> {
+  await requireOwner();
+
+  const seasonId = sanitizePlainText(String(formData.get("seasonId") ?? ""), 64);
+  const year = parseInteger(String(formData.get("year") ?? ""));
+  const label = sanitizePlainText(String(formData.get("label") ?? ""), 40);
+  const isCurrent = String(formData.get("isCurrent") ?? "") === "on";
+
+  if (!isValidUuid(seasonId) || !year || year < 2000 || year > 2100 || !label) {
+    return {
+      status: "error",
+      message: "年度と表示名を確認してください。",
+    };
+  }
+
+  try {
+    await prisma.$transaction(async (tx) => {
+      if (isCurrent) {
+        await tx.season.updateMany({
+          where: { id: { not: seasonId } },
+          data: { isCurrent: false },
+        });
+      }
+
+      await tx.season.update({
+        where: { id: seasonId },
+        data: {
+          year,
+          label,
+          isCurrent,
+        },
+      });
+    });
+  } catch {
+    return {
+      status: "error",
+      message: "同じ年度が既に存在する可能性があります。",
+    };
+  }
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/competitions");
+  revalidatePath("/admin/results");
+
+  return {
+    status: "success",
+    message: `${label} を更新しました。`,
+  };
+}
+
+export async function deleteSeason(
+  _prevState: CompetitionActionState,
+  formData: FormData,
+): Promise<CompetitionActionState> {
+  await requireOwner();
+
+  const seasonId = sanitizePlainText(String(formData.get("seasonId") ?? ""), 64);
+
+  if (!isValidUuid(seasonId)) {
+    return {
+      status: "error",
+      message: "削除対象の年度が見つかりませんでした。",
+    };
+  }
+
+  const season = await prisma.season.findUnique({
+    where: { id: seasonId },
+    include: {
+      _count: {
+        select: {
+          competitions: true,
+        },
+      },
+    },
+  });
+
+  if (!season) {
+    return {
+      status: "error",
+      message: "削除対象の年度が見つかりませんでした。",
+    };
+  }
+
+  if (season._count.competitions > 0) {
+    return {
+      status: "error",
+      message: "大会が紐づいているため年度を削除できません。",
+    };
+  }
+
+  await prisma.season.delete({
+    where: { id: seasonId },
+  });
+
+  revalidatePath("/admin/competitions");
+
+  return {
+    status: "success",
+    message: `${season.label} を削除しました。`,
+  };
+}
+
 export async function createCompetition(
   _prevState: CompetitionActionState,
   formData: FormData,
@@ -77,7 +182,14 @@ export async function createCompetition(
   const type = String(formData.get("competitionType") ?? "LEAGUE") as CompetitionType;
   const edition = parseInteger(String(formData.get("edition") ?? ""));
   const summary = sanitizePlainText(String(formData.get("summary") ?? ""), 200);
+  const startDateText = sanitizePlainText(String(formData.get("startDate") ?? ""), 20);
+  const endDateText = sanitizePlainText(String(formData.get("endDate") ?? ""), 20);
+  const publishedAtText = sanitizePlainText(String(formData.get("publishedAt") ?? ""), 20);
+  const sortOrder = parseInteger(String(formData.get("sortOrder") ?? "0"));
   const status = String(formData.get("status") ?? "DRAFT") as CompetitionStatus;
+  const startDate = parseDateInput(startDateText, "date");
+  const endDate = parseDateInput(endDateText, "date");
+  const publishedAt = status === "PUBLISHED" ? parseDateInput(publishedAtText, "jstDateTime") ?? new Date() : null;
 
   if (
     !isValidUuid(seasonId) ||
@@ -85,11 +197,22 @@ export async function createCompetition(
     !slug ||
     !isValidSlug(slug) ||
     !["LEAGUE", "CUP", "OTHER"].includes(type) ||
-    !["DRAFT", "PUBLISHED", "CLOSED"].includes(status)
+    !["DRAFT", "PUBLISHED", "CLOSED"].includes(status) ||
+    Number.isNaN(sortOrder ?? Number.NaN) ||
+    isInvalidDateValue(startDate) ||
+    isInvalidDateValue(endDate) ||
+    isInvalidDateValue(publishedAt)
   ) {
     return {
       status: "error",
       message: "大会情報の入力内容を確認してください。",
+    };
+  }
+
+  if (startDate && endDate && startDate > endDate) {
+    return {
+      status: "error",
+      message: "大会期間の開始日と終了日を確認してください。",
     };
   }
 
@@ -102,6 +225,10 @@ export async function createCompetition(
         competitionType: type,
         edition: edition ?? undefined,
         summary: summary || null,
+        startDate,
+        endDate,
+        publishedAt,
+        sortOrder: sortOrder ?? 0,
         status,
         createdById: scope.admin.id,
         updatedById: scope.admin.id,
@@ -122,6 +249,145 @@ export async function createCompetition(
   };
 }
 
+export async function updateCompetition(
+  _prevState: CompetitionActionState,
+  formData: FormData,
+): Promise<CompetitionActionState> {
+  const scope = await requireOwner();
+
+  const competitionId = sanitizePlainText(String(formData.get("competitionId") ?? ""), 64);
+  const seasonId = sanitizePlainText(String(formData.get("seasonId") ?? ""), 64);
+  const name = sanitizePlainText(String(formData.get("name") ?? ""), 80);
+  const slug = normalizeSlug(String(formData.get("slug") ?? ""), 80);
+  const type = String(formData.get("competitionType") ?? "LEAGUE") as CompetitionType;
+  const edition = parseInteger(String(formData.get("edition") ?? ""));
+  const summary = sanitizePlainText(String(formData.get("summary") ?? ""), 200);
+  const startDateText = sanitizePlainText(String(formData.get("startDate") ?? ""), 20);
+  const endDateText = sanitizePlainText(String(formData.get("endDate") ?? ""), 20);
+  const publishedAtText = sanitizePlainText(String(formData.get("publishedAt") ?? ""), 20);
+  const sortOrder = parseInteger(String(formData.get("sortOrder") ?? "0"));
+  const status = String(formData.get("status") ?? "DRAFT") as CompetitionStatus;
+  const startDate = parseDateInput(startDateText, "date");
+  const endDate = parseDateInput(endDateText, "date");
+  const publishedAt = status === "PUBLISHED" ? parseDateInput(publishedAtText, "jstDateTime") ?? new Date() : null;
+
+  if (
+    !isValidUuid(competitionId) ||
+    !isValidUuid(seasonId) ||
+    !name ||
+    !slug ||
+    !isValidSlug(slug) ||
+    !["LEAGUE", "CUP", "OTHER"].includes(type) ||
+    !["DRAFT", "PUBLISHED", "CLOSED"].includes(status) ||
+    Number.isNaN(sortOrder ?? Number.NaN) ||
+    isInvalidDateValue(startDate) ||
+    isInvalidDateValue(endDate) ||
+    isInvalidDateValue(publishedAt)
+  ) {
+    return {
+      status: "error",
+      message: "大会情報の入力内容を確認してください。",
+    };
+  }
+
+  if (startDate && endDate && startDate > endDate) {
+    return {
+      status: "error",
+      message: "大会期間の開始日と終了日を確認してください。",
+    };
+  }
+
+  try {
+    await prisma.competition.update({
+      where: { id: competitionId },
+      data: {
+        seasonId,
+        name,
+        slug,
+        competitionType: type,
+        edition: edition ?? null,
+        summary: summary || null,
+        startDate,
+        endDate,
+        publishedAt,
+        sortOrder: sortOrder ?? 0,
+        status,
+        updatedById: scope.admin.id,
+      },
+    });
+  } catch {
+    return {
+      status: "error",
+      message: "同じスラッグの大会が既に存在する可能性があります。",
+    };
+  }
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/competitions");
+  revalidatePath("/admin/results");
+
+  return {
+    status: "success",
+    message: `${name} を更新しました。`,
+  };
+}
+
+export async function deleteCompetition(
+  _prevState: CompetitionActionState,
+  formData: FormData,
+): Promise<CompetitionActionState> {
+  await requireOwner();
+
+  const competitionId = sanitizePlainText(String(formData.get("competitionId") ?? ""), 64);
+
+  if (!isValidUuid(competitionId)) {
+    return {
+      status: "error",
+      message: "削除対象の大会が見つかりませんでした。",
+    };
+  }
+
+  const competition = await prisma.competition.findUnique({
+    where: { id: competitionId },
+    include: {
+      _count: {
+        select: {
+          divisions: true,
+          files: true,
+          newsPosts: true,
+        },
+      },
+    },
+  });
+
+  if (!competition) {
+    return {
+      status: "error",
+      message: "削除対象の大会が見つかりませんでした。",
+    };
+  }
+
+  const referenceCount = competition._count.divisions + competition._count.files + competition._count.newsPosts;
+
+  if (referenceCount > 0) {
+    return {
+      status: "error",
+      message: "リーグ、関連ファイル、ニュースが紐づいているため大会を削除できません。",
+    };
+  }
+
+  await prisma.competition.delete({
+    where: { id: competitionId },
+  });
+
+  revalidatePath("/admin/competitions");
+
+  return {
+    status: "success",
+    message: `${competition.name} を削除しました。`,
+  };
+}
+
 export async function createDivision(
   _prevState: CompetitionActionState,
   formData: FormData,
@@ -132,8 +398,17 @@ export async function createDivision(
   const name = sanitizePlainText(String(formData.get("name") ?? ""), 80);
   const slugInput = sanitizePlainText(String(formData.get("slug") ?? ""), 80);
   const slug = slugInput ? normalizeSlug(slugInput, 80) : normalizeDivisionSlug(name);
+  const description = sanitizePlainText(String(formData.get("description") ?? ""), 400);
+  const sortOrderInput = parseInteger(String(formData.get("sortOrder") ?? ""));
+  const status = String(formData.get("status") ?? "DRAFT") as PublishStatus;
 
-  if (!isValidUuid(competitionId) || !name || !slug || !isValidSlug(slug)) {
+  if (
+    !isValidUuid(competitionId) ||
+    !name ||
+    !slug ||
+    !isValidSlug(slug) ||
+    !["DRAFT", "PUBLISHED", "ARCHIVED"].includes(status)
+  ) {
     return {
       status: "error",
       message: "リーグ情報の入力内容を確認してください。",
@@ -141,15 +416,16 @@ export async function createDivision(
   }
 
   try {
-    const sortOrder = await getNextDivisionSortOrder(competitionId, name);
+    const sortOrder = sortOrderInput ?? (await getNextDivisionSortOrder(competitionId, name));
 
     await prisma.division.create({
       data: {
         competitionId,
         name,
         slug,
+        description: description || null,
         sortOrder,
-        status: PublishStatus.DRAFT,
+        status,
       },
     });
   } catch {
@@ -165,6 +441,126 @@ export async function createDivision(
   return {
     status: "success",
     message: `${name} を追加しました。`,
+  };
+}
+
+export async function updateDivision(
+  _prevState: CompetitionActionState,
+  formData: FormData,
+): Promise<CompetitionActionState> {
+  await requireOwner();
+
+  const divisionId = sanitizePlainText(String(formData.get("divisionId") ?? ""), 64);
+  const competitionId = sanitizePlainText(String(formData.get("competitionId") ?? ""), 64);
+  const name = sanitizePlainText(String(formData.get("name") ?? ""), 80);
+  const slug = normalizeSlug(String(formData.get("slug") ?? ""), 80);
+  const description = sanitizePlainText(String(formData.get("description") ?? ""), 400);
+  const sortOrder = parseInteger(String(formData.get("sortOrder") ?? "0"));
+  const status = String(formData.get("status") ?? "DRAFT") as PublishStatus;
+
+  if (
+    !isValidUuid(divisionId) ||
+    !isValidUuid(competitionId) ||
+    !name ||
+    !slug ||
+    !isValidSlug(slug) ||
+    !["DRAFT", "PUBLISHED", "ARCHIVED"].includes(status) ||
+    Number.isNaN(sortOrder ?? Number.NaN)
+  ) {
+    return {
+      status: "error",
+      message: "リーグ情報の入力内容を確認してください。",
+    };
+  }
+
+  try {
+    await prisma.division.update({
+      where: { id: divisionId },
+      data: {
+        competitionId,
+        name,
+        slug,
+        description: description || null,
+        sortOrder: sortOrder ?? 0,
+        status,
+      },
+    });
+  } catch {
+    return {
+      status: "error",
+      message: "同じ大会内に同じスラッグのリーグが存在する可能性があります。",
+    };
+  }
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/competitions");
+  revalidatePath("/admin/results");
+  revalidatePath("/admin/assignments");
+
+  return {
+    status: "success",
+    message: `${name} を更新しました。`,
+  };
+}
+
+export async function deleteDivision(
+  _prevState: CompetitionActionState,
+  formData: FormData,
+): Promise<CompetitionActionState> {
+  await requireOwner();
+
+  const divisionId = sanitizePlainText(String(formData.get("divisionId") ?? ""), 64);
+
+  if (!isValidUuid(divisionId)) {
+    return {
+      status: "error",
+      message: "削除対象のリーグが見つかりませんでした。",
+    };
+  }
+
+  const division = await prisma.division.findUnique({
+    where: { id: divisionId },
+    include: {
+      _count: {
+        select: {
+          teams: true,
+          matches: true,
+          standings: true,
+          editorAssignments: true,
+        },
+      },
+    },
+  });
+
+  if (!division) {
+    return {
+      status: "error",
+      message: "削除対象のリーグが見つかりませんでした。",
+    };
+  }
+
+  const referenceCount =
+    division._count.teams + division._count.matches + division._count.standings + division._count.editorAssignments;
+
+  if (referenceCount > 0) {
+    return {
+      status: "error",
+      message: "所属チーム、試合、順位表、担当割当が紐づいているためリーグを削除できません。",
+    };
+  }
+
+  await prisma.division.delete({
+    where: { id: divisionId },
+  });
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/competitions");
+  revalidatePath("/admin/results");
+  revalidatePath("/admin/assignments");
+
+  return {
+    status: "success",
+    message: `${division.name} を削除しました。`,
   };
 }
 
@@ -265,4 +661,28 @@ async function getNextDivisionTeamSortOrder(divisionId: string) {
   });
 
   return (lastAssignment?.sortOrder ?? 0) + 1;
+}
+
+function parseDateInput(value: string, mode: "date" | "jstDateTime") {
+  if (!value) {
+    return null;
+  }
+
+  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+
+  if (!match) {
+    return new Date(Number.NaN);
+  }
+
+  const [, year, month, day] = match;
+
+  if (mode === "jstDateTime") {
+    return new Date(Date.UTC(Number(year), Number(month) - 1, Number(day), -9, 0, 0));
+  }
+
+  return new Date(Date.UTC(Number(year), Number(month) - 1, Number(day), 0, 0, 0));
+}
+
+function isInvalidDateValue(value: Date | null) {
+  return value instanceof Date && Number.isNaN(value.getTime());
 }

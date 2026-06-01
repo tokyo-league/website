@@ -1,6 +1,6 @@
 # セットアップメモ
 
-最終更新: 2026-03-22 JST
+最終更新: 2026-06-01 JST
 
 ## 現在の構成
 
@@ -21,15 +21,16 @@
 
 - 実行ラッパーが `.env.local` -> `.env.dev` -> `.env` の順で読み込む
 - Next.js 本体は通常どおり `.env.local` を優先する
+- 本番デプロイと運用開始の詳細は `docs/production-runbook.md` を参照する
 
-## 今後の導入順
+## 本番導入の要点
 
-1. Prisma migration の作成
-2. `admins` 初期データ投入
-3. Google Cloud Console で OAuth クライアント作成
-4. 管理画面の大会・リーグ・チーム CRUD
-5. 試合結果 / 順位表 CRUD
-6. ニュース CRUD
+1. Vercel Production環境に必須環境変数を設定する
+2. Google Cloud Consoleで本番ドメインのOAuth Clientを設定する
+3. `npx prisma migrate deploy` でDB schemaを反映する
+4. `SEED_ADMIN_EMAIL` を指定して `npm run prisma:seed-admin` を実行する
+5. `/admin` でOwnerログインとEditor割当を確認する
+6. `docs/delivery-checklist.md` の納品前確認を消化する
 
 ## 備考
 

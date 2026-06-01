@@ -6,6 +6,8 @@
 
 1. [公開画面ワイヤー案](./docs/site-wireframes.md)
 2. [データ設計・管理画面仕様](./docs/data-model-and-admin-spec.md)
+3. [納品チェックリスト](./docs/delivery-checklist.md)
+4. [本番デプロイ・運用開始Runbook](./docs/production-runbook.md)
 
 ## 現在の決定事項
 
@@ -14,9 +16,10 @@
 - 運用の主対象はニュースと試合結果
 - 配信基盤は Vercel を想定する
 
-## 次に決めること
+## 納品関連コマンド
 
-- 実装スタック
-- 認証方式
-- ストレージ構成
-- 初回移行対象コンテンツの範囲
+- `npm run build`: 本番ビルド
+- `npm run test:e2e`: 公開サイト・管理者ツール・セキュリティヘッダーのE2E確認
+- `npm run docs:spec`: 仕様書PDF生成
+- `npm run docs:admin`: 管理者ツール説明書PDF生成
+- `npm run docs:admin:qa`: 管理者ツール説明書のQA確認画像生成

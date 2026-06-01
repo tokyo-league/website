@@ -101,7 +101,7 @@ export function AdminTeamForm({
             一覧へ戻る
           </Link>
         </div>
-        <form action={formAction} className="admin-form-stack" encType="multipart/form-data">
+        <form action={formAction} className="admin-form-stack">
           {mode === "edit" && initialValues.id ? <input type="hidden" name="teamId" value={initialValues.id} /> : null}
           {initialValues.logoPath ? <input type="hidden" name="logoPath" value={initialValues.logoPath} /> : null}
           {initialValues.photoPath ? <input type="hidden" name="photoPath" value={initialValues.photoPath} /> : null}

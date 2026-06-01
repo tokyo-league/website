@@ -9,6 +9,8 @@ import { buildNewsExcerpt } from "@/lib/news-text";
 import { prisma } from "@/lib/prisma";
 import { downloadItems, newsItems as fallbackNewsItems, siteAssets } from "@/lib/site-data";
 
+export const dynamic = "force-dynamic";
+
 export default async function NewsPage() {
   const posts = await getPublishedNews();
 

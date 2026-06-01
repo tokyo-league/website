@@ -60,7 +60,7 @@ export function AdminNewsForm({
             <h3>{mode === "create" ? "ニュースを新規作成" : "ニュースを編集"}</h3>
           </div>
         </div>
-        <form action={formAction} className="admin-form-stack" encType="multipart/form-data">
+        <form action={formAction} className="admin-form-stack">
           {mode === "edit" && initialValues.id ? <input type="hidden" name="newsId" value={initialValues.id} /> : null}
           <label className="admin-field">
             <span>タイトル</span>

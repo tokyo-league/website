@@ -70,7 +70,7 @@ export function AdminDownloadForm({ mode = "create", initialValues }: AdminDownl
             <h3>{heading}</h3>
           </div>
         </div>
-        <form action={formAction} className="admin-form-stack" encType="multipart/form-data">
+        <form action={formAction} className="admin-form-stack">
           {mode === "edit" && initialValues ? <input type="hidden" name="downloadId" value={initialValues.id} /> : null}
           <label className="admin-field">
             <span>タイトル</span>

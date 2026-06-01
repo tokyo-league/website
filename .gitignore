@@ -11,3 +11,11 @@ test-results
 website/
 *.tsbuildinfo
 .swift-module-cache/
+
+# Imported source material and generated previews kept outside commits
+downloads/
+tmp/
+docs/output/*.html
+docs/admin-manual/output/*.html
+docs/admin-manual/output/*.png
+docs/admin-manual/output/qa-pages/

@@ -1,6 +1,6 @@
 # 東京リーグ データ設計・管理画面仕様
 
-最終更新: 2026-03-22 JST
+最終更新: 2026-06-01 JST
 
 ## 設計方針
 
@@ -605,6 +605,54 @@
 - 試合結果で同一チーム対戦は不可
 - 順位表の順位重複は不可
 - PDFや画像の拡張子と MIME type を検証する
+
+## 非機能要件: セキュリティ
+
+納品時点で最低限満たすセキュリティ基準は以下とする。
+
+### 認証・認可
+
+- 管理画面は Google OIDC + NextAuth による認証を必須とする
+- `User` テーブルに事前登録されたメールアドレスのみログイン可能とする
+- 管理者ロールは `OWNER` / `EDITOR` の2段階とする
+- `OWNER` は全管理機能を利用可能とし、`EDITOR` は割り当て済みリーグの結果更新に限定する
+- サーバーアクションは画面表示だけに依存せず、実行時にも `requireOwner` / `getAdminScope` で権限確認する
+- E2Eテスト用バイパスは `E2E_TEST_MODE=1` の明示時だけ有効とし、本番環境では設定しない
+
+### 入力・アップロード
+
+- 文字列入力は制御文字を除去し、用途ごとに最大文字数を設ける
+- ID類は UUID 形式、slug は英数字とハイフンのみ許可する
+- 公開日時や大会日付は日本時間として扱い、表示・入力の基準を統一する
+- 画像アップロードは画像 MIME type とサイズ上限を検証する
+- 資料アップロードは PDF / Excel / Word の許可拡張子とサイズ上限を検証する
+- ファイル名は保存前に安全な文字へ正規化し、Blob保存時はランダムサフィックスを付与する
+
+### HTTPレスポンスヘッダー
+
+全ルートで以下のセキュリティヘッダーを付与する。
+
+| header | 方針 |
+| --- | --- |
+| Content-Security-Policy | `default-src 'self'` を基準に、Google認証・Vercel Blob・既存サイト画像のみ許可する |
+| Referrer-Policy | `strict-origin-when-cross-origin` |
+| X-Content-Type-Options | `nosniff` |
+| X-Frame-Options | `SAMEORIGIN` |
+| X-Permitted-Cross-Domain-Policies | `none` |
+| Permissions-Policy | camera / microphone / geolocation / payment / usb を無効化 |
+| Strict-Transport-Security | HTTPS本番環境で長期HSTSを有効化 |
+
+### 秘密情報・環境変数
+
+- `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `DATABASE_URL`, `DIRECT_URL`, `BLOB_READ_WRITE_TOKEN` は環境変数で管理し、リポジトリへコミットしない
+- 初期管理者の登録は `SEED_ADMIN_EMAIL` を使った明示的なシード実行、またはDB管理画面での登録に限定する
+- 本番環境のGoogle OAuthリダイレクトURIはデプロイドメインに限定する
+
+### 運用・監査
+
+- 管理データは `createdById` / `updatedById` と `createdAt` / `updatedAt` を保持する
+- 削除操作は参照中データを壊さないよう、関連データの存在確認を行う
+- 納品後の改善候補として、監査ログ一覧、管理者招待フロー、レート制限、CSPレポート収集を追加検討する
 
 ## 初期実装の範囲
 

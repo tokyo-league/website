@@ -54,6 +54,7 @@ test("チーム作成フローが完了できる", async ({ page }) => {
 
   await expect(page.getByRole("heading", { name: "チーム管理" })).toBeVisible();
   await page.getByLabel("チーム名").fill("E2E FC");
+  await page.getByLabel("Instagram URL").fill("@e2e_fc");
   await page.getByRole("button", { name: "チームを保存" }).click();
 
   await expect(page.getByText("E2E FC を追加しました。")).toBeVisible();

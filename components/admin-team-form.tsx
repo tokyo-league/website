@@ -34,6 +34,7 @@ type TeamFormValues = {
   representativeName: string;
   headCoachName: string;
   websiteUrl: string;
+  instagramUrl: string;
   logoPath: string;
   photoPath: string;
   status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
@@ -212,8 +213,18 @@ export function AdminTeamForm({
             <input type="text" name="headCoachName" defaultValue={initialValues.headCoachName} />
           </label>
           <label className="admin-field">
-            <span>URL</span>
+            <span>公式サイトURL</span>
             <input type="url" name="websiteUrl" defaultValue={initialValues.websiteUrl} />
+          </label>
+          <label className="admin-field">
+            <span>Instagram URL</span>
+            <input
+              type="text"
+              name="instagramUrl"
+              placeholder="https://www.instagram.com/team_account/"
+              defaultValue={initialValues.instagramUrl}
+            />
+            <small className="admin-field__help">URL、@アカウント名、アカウント名のみの入力に対応します。</small>
           </label>
           <label className="admin-field">
             <span>状態</span>

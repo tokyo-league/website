@@ -34,6 +34,7 @@ export default async function AdminTeamEditPage({
           representativeName: team.representativeName ?? "",
           headCoachName: team.headCoachName ?? "",
           websiteUrl: team.websiteUrl ?? "",
+          instagramUrl: team.instagramUrl ?? "",
           logoPath: team.logoPath ?? "",
           photoPath: team.photoPath ?? "",
           status: team.status,

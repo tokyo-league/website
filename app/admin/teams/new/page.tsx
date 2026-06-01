@@ -18,6 +18,7 @@ export default async function AdminTeamNewPage() {
           representativeName: "",
           headCoachName: "",
           websiteUrl: "",
+          instagramUrl: "",
           logoPath: "",
           photoPath: "",
           status: "PUBLISHED",

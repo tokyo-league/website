@@ -21,6 +21,7 @@ export default async function TeamsPage() {
       representativeName: true,
       headCoachName: true,
       websiteUrl: true,
+      instagramUrl: true,
       logoPath: true,
       photoPath: true,
       profile: true,
@@ -102,11 +103,23 @@ export default async function TeamsPage() {
                         <dd>{team.headCoachName || "未設定"}</dd>
                       </div>
                       <div>
-                        <dt>URL</dt>
+                        <dt>公式サイト</dt>
                         <dd>
                           {team.websiteUrl ? (
                             <a href={team.websiteUrl} target="_blank" rel="noreferrer">
                               公式サイトを見る
+                            </a>
+                          ) : (
+                            "未設定"
+                          )}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt>Instagram</dt>
+                        <dd>
+                          {team.instagramUrl ? (
+                            <a href={team.instagramUrl} target="_blank" rel="noreferrer">
+                              Instagramを見る
                             </a>
                           ) : (
                             "未設定"

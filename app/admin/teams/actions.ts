@@ -28,6 +28,8 @@ const IMAGE_RULES = {
   },
 } as const;
 
+class TeamInputError extends Error {}
+
 export async function createTeam(
   _prevState: TeamActionState,
   formData: FormData,
@@ -63,11 +65,13 @@ export async function createTeam(
       message: `${payload.name} を追加しました。`,
     };
   } catch (error) {
-    console.error("createTeam failed", error);
+    if (!(error instanceof TeamInputError)) {
+      console.error("createTeam failed", error);
+    }
 
     return {
       status: "error",
-      message: "チーム保存に失敗しました。入力内容またはサーバーログを確認してください。",
+      message: error instanceof TeamInputError ? error.message : "チーム保存に失敗しました。入力内容またはサーバーログを確認してください。",
     };
   }
 }
@@ -123,11 +127,13 @@ export async function updateTeam(
       message: `${payload.name} を更新しました。`,
     };
   } catch (error) {
-    console.error("updateTeam failed", error);
+    if (!(error instanceof TeamInputError)) {
+      console.error("updateTeam failed", error);
+    }
 
     return {
       status: "error",
-      message: "チーム情報の更新に失敗しました。",
+      message: error instanceof TeamInputError ? error.message : "チーム情報の更新に失敗しました。",
     };
   }
 }
@@ -207,6 +213,7 @@ async function getTeamPayload(formData: FormData) {
   const representativeName = sanitizePlainText(String(formData.get("representativeName") ?? ""), 80);
   const headCoachName = sanitizePlainText(String(formData.get("headCoachName") ?? ""), 80);
   const websiteUrl = sanitizePlainText(String(formData.get("websiteUrl") ?? ""), 255);
+  const instagramUrl = normalizeInstagramUrl(String(formData.get("instagramUrl") ?? ""));
   const logoPath = sanitizePlainText(String(formData.get("logoPath") ?? ""), 255);
   const photoPath = sanitizePlainText(String(formData.get("photoPath") ?? ""), 255);
   const uploadedLogoPath = await uploadTeamImage(formData.get("logoFile"), "logos");
@@ -224,11 +231,62 @@ async function getTeamPayload(formData: FormData) {
     representativeName: representativeName || null,
     headCoachName: headCoachName || null,
     websiteUrl: websiteUrl && websiteUrl !== "ー" && websiteUrl !== "-" ? websiteUrl : null,
+    instagramUrl,
     logoPath: uploadedLogoPath ?? (logoPath || null),
     photoPath: uploadedPhotoPath ?? (photoPath || null),
     status: ["DRAFT", "PUBLISHED", "ARCHIVED"].includes(status) ? status : PublishStatus.PUBLISHED,
     sortOrder: Number.isFinite(sortOrder) ? sortOrder : 0,
   };
+}
+
+function normalizeInstagramUrl(value: string) {
+  const input = sanitizePlainText(value, 255);
+
+  if (!input || input === "ー" || input === "-") {
+    return null;
+  }
+
+  if (input.startsWith("@")) {
+    return instagramHandleToUrl(input.slice(1));
+  }
+
+  if (!/^https?:\/\//i.test(input)) {
+    return instagramHandleToUrl(input);
+  }
+
+  try {
+    const url = new URL(input);
+    const hostname = url.hostname.toLowerCase();
+
+    if (hostname !== "instagram.com" && hostname !== "www.instagram.com") {
+      throw new TeamInputError("Instagram URL は instagram.com のURLを入力してください。");
+    }
+
+    const handle = url.pathname.split("/").filter(Boolean)[0];
+
+    return instagramHandleToUrl(handle);
+  } catch (error) {
+    if (error instanceof TeamInputError) {
+      throw error;
+    }
+
+    throw new TeamInputError("Instagram URL を確認してください。");
+  }
+}
+
+function instagramHandleToUrl(handle: string | undefined) {
+  const normalizedHandle = sanitizePlainText(handle ?? "", 80).replace(/^@+/, "");
+  const reservedPaths = new Set(["accounts", "explore", "p", "reel", "stories", "tv"]);
+
+  if (!/^[a-zA-Z0-9._]{1,30}$/.test(normalizedHandle)) {
+    throw new TeamInputError("Instagramアカウント名は英数字、ピリオド、アンダースコアで入力してください。");
+  }
+
+  if (reservedPaths.has(normalizedHandle.toLowerCase())) {
+    throw new TeamInputError("Instagram URL はプロフィールページのURLを入力してください。");
+  }
+
+  return `https://www.instagram.com/${normalizedHandle}/`;
 }
 
 async function uploadTeamImage(fileValue: FormDataEntryValue | null, folder: "logos" | "photos") {

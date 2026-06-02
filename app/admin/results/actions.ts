@@ -284,9 +284,16 @@ export async function deleteStanding(
     return { status: "error", message: "このリーグを編集する権限がありません。" };
   }
 
-  await prisma.standing.delete({
-    where: { id: standingId },
+  const result = await prisma.standing.deleteMany({
+    where: {
+      id: standingId,
+      divisionId,
+    },
   });
+
+  if (result.count === 0) {
+    return { status: "error", message: "削除対象の順位表行が見つかりませんでした。" };
+  }
 
   revalidatePath("/admin/results");
 

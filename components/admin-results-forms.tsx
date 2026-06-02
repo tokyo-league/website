@@ -448,13 +448,12 @@ export function AdminResultsForms({
         ) : (
           <div className="admin-standings-summary">
             {selectedDivision.standings.map((standing) => (
-              <div key={standing.id} className="admin-standings-summary__row">
-                <span>{standing.rank}位</span>
-                <strong>{standing.teamName}</strong>
-                <span>{standing.points} pt</span>
-                <span>{standing.played}試合</span>
-                <span>得失点差 {standing.goalDifference >= 0 ? `+${standing.goalDifference}` : standing.goalDifference}</span>
-              </div>
+              <ExistingStandingEditor
+                key={standing.id}
+                divisionId={selectedDivision.id}
+                standing={standing}
+                onToast={setToast}
+              />
             ))}
           </div>
         )}

@@ -40,6 +40,15 @@ test("資料管理ページが表示できる", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "公開資料一覧" })).toBeVisible();
 });
 
+test("担当リーグ割当で担当者編集UIが表示できる", async ({ page }) => {
+  await page.goto("/admin/assignments");
+
+  await expect(page.getByRole("heading", { name: "担当リーグ割当" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "登録済み担当者" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "担当者を更新" }).first()).toBeVisible();
+  await expect(page.getByLabel("ロール").first()).toBeVisible();
+});
+
 test("ニュース作成フローが完了できる", async ({ page }) => {
   await page.goto("/admin/news/new");
 

@@ -9,6 +9,7 @@ const pages = [
   { slug: "login", path: "/login", label: "ログイン画面" },
   { slug: "dashboard", path: "/admin", label: "ダッシュボード" },
   { slug: "competitions", path: "/admin/competitions", label: "大会管理" },
+  { slug: "assignments-users", path: "/admin/assignments", label: "担当者編集", scrollY: 840 },
   { slug: "results-top", path: "/admin/results", label: "結果管理 上部", scrollY: 260 },
   { slug: "results-middle", path: "/admin/results", label: "結果管理 入力欄", scrollY: 760 },
   { slug: "results-standings", path: "/admin/results", label: "結果管理 順位表", scrollY: 1580 },

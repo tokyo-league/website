@@ -1,6 +1,6 @@
 # 東京リーグ リニューアル納品チェックリスト
 
-最終更新: 2026-06-01 JST
+最終更新: 2026-06-02 JST
 
 ## 納品物
 
@@ -10,7 +10,7 @@
 | 管理者ツール | `app/admin/`, `components/admin-*`, `lib/admin-access.ts` | `npm run test:e2e` | E2Eモードで検証済み |
 | 仕様書PDF | `docs/output/tokyo-league-renewal-spec.pdf` | `npm run docs:spec` | 生成済み |
 | 管理者ツール説明書PDF | `docs/admin-manual/output/tokyo-league-admin-manual.pdf` | `npm run docs:admin` | 生成済み |
-| 管理者説明書QA画像 | `docs/admin-manual/output/qa-pages/` | `npm run docs:admin:qa` | 17ページ生成済み |
+| 管理者説明書QA画像 | `docs/admin-manual/output/qa-pages/` | `npm run docs:admin:qa` | 19ページ生成済み |
 | 本番デプロイRunbook | `docs/production-runbook.md` | 手順確認 | 作成済み |
 
 ## 非機能要件: セキュリティ
@@ -28,7 +28,7 @@
 
 ## 直近の検証結果
 
-- `npm run test:e2e`: 11件成功
+- `npm run test:e2e`: 12件成功
 - `npm run build`: 成功。公開トップとニュース一覧は動的レンダリング化し、ビルド時のDB接続エラーログなし
 - `npm run docs:spec`: 成功
 - `npm run docs:admin`: 成功

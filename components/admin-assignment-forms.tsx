@@ -6,6 +6,7 @@ import {
   createDivisionAssignment,
   deleteAdminUser,
   deleteDivisionAssignment,
+  updateAdminUser,
   type AssignmentActionState,
 } from "@/app/admin/assignments/actions";
 import { ConfirmForm } from "@/components/confirm-form";
@@ -193,17 +194,10 @@ export function AdminAssignmentForms({
             <h3>登録済み担当者</h3>
           </div>
         </div>
-        <div className="admin-table">
-          <div className="admin-table__row admin-table__row--head admin-table__row--five">
-            <span>表示名</span>
-            <span>メール</span>
-            <span>ロール</span>
-            <span>担当リーグ数</span>
-            <span>操作</span>
-          </div>
+        <div className="admin-item-list">
           {users.length > 0 ? (
             users.map((user) => (
-              <AdminDeleteRow
+              <AdminUserEditor
                 key={user.id}
                 user={user}
                 assignmentCount={assignments.filter((assignment) => assignment.userEmail === user.email).length}
@@ -255,7 +249,7 @@ function AssignmentDeleteRow({
   );
 }
 
-function AdminDeleteRow({
+function AdminUserEditor({
   user,
   assignmentCount,
   isCurrentUser,
@@ -266,32 +260,76 @@ function AdminDeleteRow({
   isCurrentUser: boolean;
   onDone: (state: AssignmentActionState) => void;
 }) {
-  const [state, formAction, pending] = useActionState(deleteAdminUser, initialAssignmentActionState);
+  const [updateState, updateAction, updatePending] = useActionState(updateAdminUser, initialAssignmentActionState);
+  const [deleteState, deleteAction, deletePending] = useActionState(deleteAdminUser, initialAssignmentActionState);
 
   useEffect(() => {
-    if (state.status !== "idle") {
-      onDone(state);
+    if (updateState.status !== "idle") {
+      onDone(updateState);
     }
-  }, [onDone, state]);
+  }, [onDone, updateState]);
+
+  useEffect(() => {
+    if (deleteState.status !== "idle") {
+      onDone(deleteState);
+    }
+  }, [deleteState, onDone]);
 
   const deletable = user.role !== "OWNER" && !isCurrentUser;
+  const roleLabel = user.role === "OWNER" ? "Owner" : "Editor";
 
   return (
-    <div className="admin-table__row admin-table__row--five">
-      <strong>{user.name}</strong>
-      <span>{user.email}</span>
-      <span>{user.role === "OWNER" ? "Owner" : "Editor"}</span>
-      <span>{assignmentCount}件</span>
-      {deletable ? (
-        <ConfirmForm action={formAction} message="この担当者を削除します。よろしいですか？">
-          <input type="hidden" name="userId" value={user.id} />
-          <button type="submit" className="button button--ghost" disabled={pending}>
-            {pending ? "削除中..." : "削除"}
+    <div className="admin-item-card">
+      <div className="admin-item-card__summary">
+        <strong>{user.name}</strong>
+        <p>
+          {user.email} / {roleLabel} / 担当リーグ {assignmentCount}件
+        </p>
+      </div>
+
+      <ConfirmForm
+        action={updateAction}
+        className="admin-form-stack"
+        message="この担当者情報を更新します。ロール変更を含む場合は権限範囲が変わります。よろしいですか？"
+      >
+        <input type="hidden" name="userId" value={user.id} />
+        <div className="admin-form-preview__grid admin-form-preview__grid--three">
+          <label className="admin-field">
+            <span>表示名</span>
+            <input type="text" name="name" defaultValue={user.name} required />
+          </label>
+          <label className="admin-field">
+            <span>メール</span>
+            <input type="email" value={user.email} readOnly />
+          </label>
+          <label className="admin-field">
+            <span>ロール</span>
+            <select name="role" defaultValue={user.role}>
+              <option value="EDITOR">Editor</option>
+              <option value="OWNER">Owner</option>
+            </select>
+          </label>
+        </div>
+        <div className="admin-item-card__actions">
+          <button type="submit" className="button" disabled={updatePending}>
+            {updatePending ? "更新中..." : "担当者を更新"}
           </button>
-        </ConfirmForm>
-      ) : (
-        <span>{isCurrentUser ? "ログイン中" : "削除不可"}</span>
-      )}
+          {isCurrentUser ? <span className="admin-inline-message">ログイン中Ownerのロール変更はできません。</span> : null}
+        </div>
+      </ConfirmForm>
+
+      <div className="admin-item-card__actions">
+        {deletable ? (
+          <ConfirmForm action={deleteAction} message="この担当者を削除します。よろしいですか？">
+            <input type="hidden" name="userId" value={user.id} />
+            <button type="submit" className="button button--ghost" disabled={deletePending}>
+              {deletePending ? "削除中..." : "削除"}
+            </button>
+          </ConfirmForm>
+        ) : (
+          <span className="admin-inline-message">{isCurrentUser ? "ログイン中のため削除不可" : "Ownerは削除不可"}</span>
+        )}
+      </div>
     </div>
   );
 }

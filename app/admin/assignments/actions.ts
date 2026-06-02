@@ -15,7 +15,7 @@ export async function createAdminUser(
   _prevState: AssignmentActionState,
   formData: FormData,
 ): Promise<AssignmentActionState> {
-  await requireOwner();
+  const scope = await requireOwner();
 
   const email = normalizeEmail(String(formData.get("email") ?? ""));
   const name = sanitizePlainText(String(formData.get("name") ?? ""), 80);
@@ -28,24 +28,106 @@ export async function createAdminUser(
     };
   }
 
-  await prisma.user.upsert({
-    where: { email },
-    update: {
-      name,
-      role,
-    },
-    create: {
-      email,
-      name,
-      role,
-    },
+  const existing = await prisma.user.findUnique({ where: { email } });
+
+  if (existing) {
+    const validation = await validateAdminRoleChange(existing.id, existing.role, role, scope.admin.id);
+
+    if (validation) {
+      return validation;
+    }
+  }
+
+  await prisma.$transaction(async (tx) => {
+    const user = await tx.user.upsert({
+      where: { email },
+      update: {
+        name,
+        role,
+      },
+      create: {
+        email,
+        name,
+        role,
+      },
+    });
+
+    if (role === "OWNER") {
+      await tx.divisionEditorAssignment.deleteMany({
+        where: { userId: user.id },
+      });
+    }
   });
 
+  revalidatePath("/admin");
+  revalidatePath("/admin/competitions");
+  revalidatePath("/admin/results");
   revalidatePath("/admin/assignments");
 
   return {
     status: "success",
     message: `${name} を ${role === "OWNER" ? "Owner" : "Editor"} として保存しました。`,
+  };
+}
+
+export async function updateAdminUser(
+  _prevState: AssignmentActionState,
+  formData: FormData,
+): Promise<AssignmentActionState> {
+  const scope = await requireOwner();
+
+  const userId = sanitizePlainText(String(formData.get("userId") ?? ""), 64);
+  const name = sanitizePlainText(String(formData.get("name") ?? ""), 80);
+  const role = String(formData.get("role") ?? "EDITOR") as AdminRole;
+
+  if (!userId || !isValidUuid(userId) || !name || !["OWNER", "EDITOR"].includes(role)) {
+    return {
+      status: "error",
+      message: "担当者、表示名、ロールを確認してください。",
+    };
+  }
+
+  const existing = await prisma.user.findUnique({
+    where: { id: userId },
+  });
+
+  if (!existing) {
+    return {
+      status: "error",
+      message: "更新対象の担当者が見つかりませんでした。",
+    };
+  }
+
+  const validation = await validateAdminRoleChange(existing.id, existing.role, role, scope.admin.id);
+
+  if (validation) {
+    return validation;
+  }
+
+  await prisma.$transaction(async (tx) => {
+    await tx.user.update({
+      where: { id: userId },
+      data: {
+        name,
+        role,
+      },
+    });
+
+    if (role === "OWNER") {
+      await tx.divisionEditorAssignment.deleteMany({
+        where: { userId },
+      });
+    }
+  });
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/competitions");
+  revalidatePath("/admin/results");
+  revalidatePath("/admin/assignments");
+
+  return {
+    status: "success",
+    message: `${name} を ${role === "OWNER" ? "Owner" : "Editor"} として更新しました。`,
   };
 }
 
@@ -62,6 +144,18 @@ export async function createDivisionAssignment(
     return {
       status: "error",
       message: "担当者とリーグを選択してください。",
+    };
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { role: true },
+  });
+
+  if (!user || user.role !== "EDITOR") {
+    return {
+      status: "error",
+      message: "担当リーグはEditorにのみ割り当てできます。",
     };
   }
 
@@ -214,4 +308,36 @@ export async function deleteAdminUser(
     status: "success",
     message: `${user.name} を削除しました。`,
   };
+}
+
+async function validateAdminRoleChange(
+  targetUserId: string,
+  currentRole: AdminRole,
+  nextRole: AdminRole,
+  currentUserId: string,
+): Promise<AssignmentActionState | null> {
+  if (targetUserId === currentUserId && currentRole !== nextRole) {
+    return {
+      status: "error",
+      message: "ログイン中のOwnerは自分のロールを変更できません。",
+    };
+  }
+
+  if (currentRole === "OWNER" && nextRole === "EDITOR") {
+    const otherOwnerCount = await prisma.user.count({
+      where: {
+        role: "OWNER",
+        id: { not: targetUserId },
+      },
+    });
+
+    if (otherOwnerCount === 0) {
+      return {
+        status: "error",
+        message: "最後のOwnerはEditorへ変更できません。",
+      };
+    }
+  }
+
+  return null;
 }

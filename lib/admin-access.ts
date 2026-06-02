@@ -72,7 +72,7 @@ export async function getAdminScope(): Promise<AdminScope> {
     },
   });
 
-  if (!admin) {
+  if (!admin || !admin.isActive) {
     redirect(LOGIN_PATH);
   }
 

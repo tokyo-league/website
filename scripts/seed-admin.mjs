@@ -14,11 +14,12 @@ if (!email) {
 try {
   const admin = await prisma.user.upsert({
     where: { email },
-    update: { name },
+    update: { name, isActive: true },
     create: {
       email,
       name,
       role: "OWNER",
+      isActive: true,
     },
   });
 

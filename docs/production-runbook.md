@@ -1,6 +1,6 @@
 # 東京リーグ 本番デプロイ・運用開始Runbook
 
-最終更新: 2026-06-01 JST
+最終更新: 2026-06-02 JST
 
 このRunbookは、6/20納品前に本番環境を立ち上げ、公開サイト・管理者ツール・PDF納品物を確認するための手順です。時刻の扱いは日本時間を基準にします。
 
@@ -17,7 +17,7 @@
 | name | environment | 用途 | 備考 |
 | --- | --- | --- | --- |
 | `DATABASE_URL` | Production / Preview / Development | Prismaの通常接続 | Neon pooled接続を設定 |
-| `DIRECT_URL` | Production / Preview / Development | Prisma migration等の直接接続 | Neon direct接続を設定 |
+| `DIRECT_URL` | Production / Preview / Development | Prisma schema反映等の直接接続 | Neon direct接続を設定 |
 | `AUTH_SECRET` | Production / Preview / Development | NextAuth署名鍵 | 長いランダム文字列。環境ごとに分ける |
 | `AUTH_GOOGLE_ID` | Production / Preview / Development | Google OAuth Client ID | 本番ドメイン用OAuthクライアント |
 | `AUTH_GOOGLE_SECRET` | Production / Preview / Development | Google OAuth Client Secret | リポジトリへコミットしない |
@@ -44,10 +44,10 @@
 vercel env pull .env.production.local --environment=production --yes
 set -a && source .env.production.local && set +a
 npm run prisma:generate
-npx prisma migrate deploy
+npm run prisma:push
 ```
 
-Vercel/CI上で実行する場合も、Production用の `DATABASE_URL` と `DIRECT_URL` が読める状態で `npx prisma migrate deploy` を実行します。
+Vercel/CI上で実行する場合も、Production用の `DATABASE_URL` と `DIRECT_URL` が読める状態で `npm run prisma:push` を実行します。現在のリポジトリはPrisma migrationディレクトリを持たないため、納品前のDB反映は `schema.prisma` を正本にした `prisma db push` で行います。
 
 ## 初期Owner登録
 
@@ -94,8 +94,9 @@ https://<production-domain>/api/auth/callback/google
 
 - `/admin` 未ログインアクセスで `/login?callbackUrl=/admin` へ遷移する
 - 登録済みOwnerメールでGoogleログインできる
-- 未登録Googleアカウントでは管理画面へ入れない
+- 未登録または無効化済みGoogleアカウントでは管理画面へ入れない
 - Ownerでニュース、チーム、資料、担当割当を操作できる
+- Ownerで退任者を無効化でき、無効化済み担当者は管理画面へ入れない
 - Editorで割当済みリーグの結果管理だけ操作できる
 - 画像・資料アップロードがVercel Blobへ保存される
 

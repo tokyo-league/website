@@ -21,7 +21,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         where: { email: user.email },
       });
 
-      if (!admin) {
+      if (!admin || !admin.isActive) {
         return false;
       }
 
@@ -52,7 +52,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           where: { email: token.email },
         });
 
-        if (admin) {
+        if (admin?.isActive) {
           token.sub = admin.id;
           token.role = admin.role;
         }

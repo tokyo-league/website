@@ -8,7 +8,7 @@ export default async function AdminAssignmentsPage() {
 
   const [users, divisions, assignments] = await Promise.all([
     prisma.user.findMany({
-      orderBy: [{ role: "asc" }, { name: "asc" }],
+      orderBy: [{ isActive: "desc" }, { role: "asc" }, { name: "asc" }],
     }),
     prisma.division.findMany({
       include: {
@@ -42,6 +42,7 @@ export default async function AdminAssignmentsPage() {
           name: user.name,
           email: user.email,
           role: user.role,
+          isActive: user.isActive,
         }))}
         divisions={divisions.map((division) => ({
           id: division.id,

@@ -1,6 +1,6 @@
 # セットアップメモ
 
-最終更新: 2026-06-01 JST
+最終更新: 2026-06-02 JST
 
 ## 現在の構成
 
@@ -15,7 +15,8 @@
 3. `npm install`
 4. `npm run prisma:generate`
 5. `npm run prisma:validate`
-6. `npm run dev`
+6. `npm run prisma:push`
+7. `npm run dev`
 
 補足:
 
@@ -27,7 +28,7 @@
 
 1. Vercel Production環境に必須環境変数を設定する
 2. Google Cloud Consoleで本番ドメインのOAuth Clientを設定する
-3. `npx prisma migrate deploy` でDB schemaを反映する
+3. `npm run prisma:push` でDB schemaを反映する
 4. `SEED_ADMIN_EMAIL` を指定して `npm run prisma:seed-admin` を実行する
 5. `/admin` でOwnerログインとEditor割当を確認する
 6. `docs/delivery-checklist.md` の納品前確認を消化する
@@ -35,8 +36,8 @@
 ## 備考
 
 - Googleログインのみ実装対象
-- 管理者テーブルに存在しないメールアドレスはログイン不可
-- 管理者への初期登録は現状 `npm run prisma:seed-admin` か DB 直接投入のみで、管理画面UIはまだない
+- 管理者テーブルに存在しない、または無効化済みのメールアドレスはログイン不可
+- 初期Ownerは `npm run prisma:seed-admin` で登録する。追加担当者、表示名・ロール変更、有効/無効切替は管理画面の担当リーグ割当で行う
 - `npm run prisma:seed-admin` 実行時は `SEED_ADMIN_EMAIL` が必要
 - Neon を使う場合、`DATABASE_URL` は pooled 接続、`DIRECT_URL` は direct 接続を使う
 - チーム画像アップロードには Vercel Blob の `BLOB_READ_WRITE_TOKEN` が必要

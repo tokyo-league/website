@@ -6,6 +6,7 @@ import {
   createDivisionAssignment,
   deleteAdminUser,
   deleteDivisionAssignment,
+  toggleAdminUserActive,
   updateAdminUser,
   type AssignmentActionState,
 } from "@/app/admin/assignments/actions";
@@ -21,6 +22,7 @@ type UserOption = {
   name: string;
   email: string;
   role: "OWNER" | "EDITOR";
+  isActive: boolean;
 };
 
 type DivisionOption = {
@@ -129,7 +131,7 @@ export function AdminAssignmentForms({
                   担当者を選択
                 </option>
                 {users
-                  .filter((user) => user.role === "EDITOR")
+                  .filter((user) => user.role === "EDITOR" && user.isActive)
                   .map((user) => (
                     <option key={user.id} value={user.id}>
                       {user.name} / {user.email}
@@ -261,6 +263,7 @@ function AdminUserEditor({
   onDone: (state: AssignmentActionState) => void;
 }) {
   const [updateState, updateAction, updatePending] = useActionState(updateAdminUser, initialAssignmentActionState);
+  const [activeState, activeAction, activePending] = useActionState(toggleAdminUserActive, initialAssignmentActionState);
   const [deleteState, deleteAction, deletePending] = useActionState(deleteAdminUser, initialAssignmentActionState);
 
   useEffect(() => {
@@ -268,6 +271,12 @@ function AdminUserEditor({
       onDone(updateState);
     }
   }, [onDone, updateState]);
+
+  useEffect(() => {
+    if (activeState.status !== "idle") {
+      onDone(activeState);
+    }
+  }, [activeState, onDone]);
 
   useEffect(() => {
     if (deleteState.status !== "idle") {
@@ -283,7 +292,7 @@ function AdminUserEditor({
       <div className="admin-item-card__summary">
         <strong>{user.name}</strong>
         <p>
-          {user.email} / {roleLabel} / 担当リーグ {assignmentCount}件
+          {user.email} / {roleLabel} / {user.isActive ? "有効" : "無効"} / 担当リーグ {assignmentCount}件
         </p>
       </div>
 
@@ -319,6 +328,20 @@ function AdminUserEditor({
       </ConfirmForm>
 
       <div className="admin-item-card__actions">
+        <ConfirmForm
+          action={activeAction}
+          message={
+            user.isActive
+              ? "この担当者を無効化します。無効化すると管理画面へログインできなくなります。よろしいですか？"
+              : "この担当者を有効化します。よろしいですか？"
+          }
+        >
+          <input type="hidden" name="userId" value={user.id} />
+          <input type="hidden" name="isActive" value={String(!user.isActive)} />
+          <button type="submit" className="button button--ghost" disabled={activePending || (isCurrentUser && user.isActive)}>
+            {activePending ? "更新中..." : user.isActive ? "無効化" : "有効化"}
+          </button>
+        </ConfirmForm>
         {deletable ? (
           <ConfirmForm action={deleteAction} message="この担当者を削除します。よろしいですか？">
             <input type="hidden" name="userId" value={user.id} />

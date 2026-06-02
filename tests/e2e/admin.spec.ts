@@ -48,6 +48,7 @@ test("担当リーグ割当で担当者編集UIが表示できる", async ({ pag
   await expect(page.getByRole("heading", { name: "担当リーグ割当" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "登録済み担当者" })).toBeVisible();
   await expect(page.getByRole("button", { name: "担当者を更新" }).first()).toBeVisible();
+  await expect(page.getByRole("button", { name: "無効化" }).first()).toBeVisible();
   await expect(page.getByLabel("ロール").first()).toBeVisible();
 });
 

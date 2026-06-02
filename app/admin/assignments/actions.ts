@@ -44,11 +44,13 @@ export async function createAdminUser(
       update: {
         name,
         role,
+        isActive: true,
       },
       create: {
         email,
         name,
         role,
+        isActive: true,
       },
     });
 
@@ -131,6 +133,81 @@ export async function updateAdminUser(
   };
 }
 
+export async function toggleAdminUserActive(
+  _prevState: AssignmentActionState,
+  formData: FormData,
+): Promise<AssignmentActionState> {
+  const scope = await requireOwner();
+
+  const userId = sanitizePlainText(String(formData.get("userId") ?? ""), 64);
+  const nextActive = String(formData.get("isActive") ?? "") === "true";
+
+  if (!userId || !isValidUuid(userId)) {
+    return {
+      status: "error",
+      message: "対象の担当者が見つかりませんでした。",
+    };
+  }
+
+  if (userId === scope.admin.id && !nextActive) {
+    return {
+      status: "error",
+      message: "ログイン中のOwnerは無効化できません。",
+    };
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+  });
+
+  if (!user) {
+    return {
+      status: "error",
+      message: "対象の担当者が見つかりませんでした。",
+    };
+  }
+
+  if (user.role === "OWNER" && user.isActive && !nextActive) {
+    const otherActiveOwnerCount = await prisma.user.count({
+      where: {
+        role: "OWNER",
+        isActive: true,
+        id: { not: userId },
+      },
+    });
+
+    if (otherActiveOwnerCount === 0) {
+      return {
+        status: "error",
+        message: "最後の有効なOwnerは無効化できません。",
+      };
+    }
+  }
+
+  await prisma.$transaction(async (tx) => {
+    await tx.user.update({
+      where: { id: userId },
+      data: { isActive: nextActive },
+    });
+
+    if (!nextActive) {
+      await tx.session.deleteMany({
+        where: { userId },
+      });
+    }
+  });
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/competitions");
+  revalidatePath("/admin/results");
+  revalidatePath("/admin/assignments");
+
+  return {
+    status: "success",
+    message: `${user.name} を${nextActive ? "有効化" : "無効化"}しました。`,
+  };
+}
+
 export async function createDivisionAssignment(
   _prevState: AssignmentActionState,
   formData: FormData,
@@ -149,13 +226,13 @@ export async function createDivisionAssignment(
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { role: true },
+    select: { role: true, isActive: true },
   });
 
-  if (!user || user.role !== "EDITOR") {
+  if (!user || user.role !== "EDITOR" || !user.isActive) {
     return {
       status: "error",
-      message: "担当リーグはEditorにのみ割り当てできます。",
+      message: "担当リーグは有効なEditorにのみ割り当てできます。",
     };
   }
 
@@ -327,6 +404,7 @@ async function validateAdminRoleChange(
     const otherOwnerCount = await prisma.user.count({
       where: {
         role: "OWNER",
+        isActive: true,
         id: { not: targetUserId },
       },
     });

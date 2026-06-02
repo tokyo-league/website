@@ -21,6 +21,7 @@
 
 - `npm run build`: 本番ビルド
 - `npm run test:e2e`: 公開サイト・管理者ツール・セキュリティヘッダーのE2E確認
+- `npm run prisma:push`: `schema.prisma` をDBへ反映
 - `npm run docs:spec`: 仕様書PDF生成
 - `npm run docs:admin`: 管理者ツール説明書PDF生成
 - `npm run docs:admin:qa`: 管理者ツール説明書のQA確認画像生成

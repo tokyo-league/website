@@ -62,6 +62,7 @@ model User {
   email          String     @unique
   name           String
   role           AdminRole
+  isActive       Boolean    @default(true)
   image          String?
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt

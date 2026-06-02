@@ -13,7 +13,7 @@ export default async function LoginPage() {
         <p className="section-kicker">Admin Sign In</p>
         <h1>管理画面ログイン</h1>
         <p>
-          Googleアカウントでログインし、`admins` テーブルに登録されたメールアドレスのみ管理画面へ入れる構成です。
+          Googleアカウントでログインし、`admins` テーブルに有効登録されたメールアドレスのみ管理画面へ入れる構成です。
         </p>
         <div className="login-actions">
           {session?.user ? (
@@ -28,7 +28,7 @@ export default async function LoginPage() {
           <strong>設定メモ</strong>
           <p>
             `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `DATABASE_URL`
-            を設定した上で、管理者メールアドレスを `admins` テーブルへ登録してください。
+            を設定した上で、有効な管理者メールアドレスを `admins` テーブルへ登録してください。
           </p>
         </div>
       </section>

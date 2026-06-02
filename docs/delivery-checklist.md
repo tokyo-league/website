@@ -17,8 +17,8 @@
 
 | 項目 | 実装・証跡 | 状態 |
 | --- | --- | --- |
-| 管理画面認証 | NextAuth + Google OIDC、DB登録メールのみ許可 | 実装済み |
-| 権限管理 | `OWNER` / `EDITOR`、担当リーグ割当 | 実装済み |
+| 管理画面認証 | NextAuth + Google OIDC、DB有効登録メールのみ許可 | 実装済み |
+| 権限管理 | `OWNER` / `EDITOR`、担当リーグ割当、担当者無効化 | 実装済み |
 | サーバー側認可 | `requireOwner`, `getAdminScope` をサーバーアクションで使用 | 実装済み |
 | 入力サニタイズ | `lib/security.ts` と各管理アクション | 実装済み |
 | アップロード制限 | 画像・資料のMIME type、拡張子、サイズ制限 | 実装済み |

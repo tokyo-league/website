@@ -40,6 +40,7 @@ test("資料管理ページが表示できる", async ({ page }) => {
 
   await expect(page.getByRole("heading", { name: "資料管理" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "公開資料一覧" })).toBeVisible();
+  await expect(page.getByText("公開URL", { exact: true })).toBeVisible();
 });
 
 test("担当リーグ割当で担当者編集UIが表示できる", async ({ page }) => {

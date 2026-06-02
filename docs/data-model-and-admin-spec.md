@@ -1,6 +1,6 @@
 # 東京リーグ データ設計・管理画面仕様
 
-最終更新: 2026-06-01 JST
+最終更新: 2026-06-02 JST
 
 ## 設計方針
 
@@ -176,7 +176,7 @@
 | slug | text | 大会内で一意想定 |
 | description | text nullable | |
 | sort_order | integer | |
-| status | text | `draft`, `published` |
+| status | text | `draft`, `published`, `archived` |
 | last_updated_at | timestamptz nullable | 結果更新日表示用 |
 | created_at | timestamptz | |
 | updated_at | timestamptz | |
@@ -327,7 +327,7 @@
 | description | text nullable | |
 | asset_id | uuid fk assets.id | |
 | published_at | timestamptz nullable | |
-| status | text | `draft`, `published` |
+| status | text | `draft`, `published`, `archived` |
 | sort_order | integer | |
 | created_by | uuid fk admins.id | |
 | updated_by | uuid fk admins.id | |
@@ -536,6 +536,8 @@
 
 - タイトル
 - カテゴリ
+- ファイル名
+- 公開URL確認リンク
 - 公開状態
 - 更新日
 
@@ -634,6 +636,7 @@
 - 公開日時や大会日付は日本時間として扱い、表示・入力の基準を統一する
 - 画像アップロードは画像 MIME type とサイズ上限を検証する
 - 資料アップロードは PDF / Excel / Word の許可拡張子とサイズ上限を検証する
+- 資料一覧ではアップロード済みファイル名と公開URL確認リンクを表示し、公開前後のURL確認を管理画面内で行えるようにする
 - ファイル名は保存前に安全な文字へ正規化し、Blob保存時はランダムサフィックスを付与する
 
 ### HTTPレスポンスヘッダー

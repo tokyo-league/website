@@ -1638,6 +1638,22 @@ button {
   grid-template-columns: 1.1fr 1.2fr 1.2fr 0.9fr auto;
 }
 
+.admin-table__row--downloads {
+  grid-template-columns: 0.8fr minmax(180px, 1.5fr) 0.7fr minmax(140px, 1fr) 0.8fr auto;
+}
+
+.admin-download-file {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.admin-download-file span {
+  color: var(--muted);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
 .admin-empty-state {
   padding: 20px 0;
   color: var(--muted);

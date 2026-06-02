@@ -29,6 +29,8 @@ test("結果管理で年度・大会・リーグ絞り込みと編集UIが表示
   await expect(filterSelects.nth(2)).toHaveValue("e2e-division-a");
   await expect(page.getByRole("heading", { name: "結果画像" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "順位表を作成・更新" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "登録値に戻す" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "入力をクリア" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "登録済み順位表の確認" })).toBeVisible();
   await expect(page.locator(".admin-standings-summary form").getByRole("button", { name: "削除" }).first()).toBeVisible();
 });

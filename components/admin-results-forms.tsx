@@ -589,44 +589,10 @@ function BulkStandingEditor({
   action: (payload: FormData) => void;
   pending: boolean;
 }) {
-  const [rows, setRows] = useState(() =>
-    teams.map((team, index) => {
-      const existing = standings.find((standing) => standing.teamId === team.id);
-
-      return {
-        teamId: team.id,
-        teamName: team.name,
-        rank: existing?.rank ?? index + 1,
-        played: existing?.played ?? 0,
-        won: existing?.won ?? 0,
-        drawn: existing?.drawn ?? 0,
-        lost: existing?.lost ?? 0,
-        goalsFor: existing?.goalsFor ?? 0,
-        goalsAgainst: existing?.goalsAgainst ?? 0,
-        points: existing?.points ?? 0,
-      };
-    }),
-  );
+  const [rows, setRows] = useState(() => buildStandingRows(teams, standings));
 
   useEffect(() => {
-    setRows(
-      teams.map((team, index) => {
-        const existing = standings.find((standing) => standing.teamId === team.id);
-
-        return {
-          teamId: team.id,
-          teamName: team.name,
-          rank: existing?.rank ?? index + 1,
-          played: existing?.played ?? 0,
-          won: existing?.won ?? 0,
-          drawn: existing?.drawn ?? 0,
-          lost: existing?.lost ?? 0,
-          goalsFor: existing?.goalsFor ?? 0,
-          goalsAgainst: existing?.goalsAgainst ?? 0,
-          points: existing?.points ?? 0,
-        };
-      }),
-    );
+    setRows(buildStandingRows(teams, standings));
   }, [teams, standings]);
 
   function updateRow(teamId: string, field: keyof (typeof rows)[number], value: string) {
@@ -640,6 +606,14 @@ function BulkStandingEditor({
           : row,
       ),
     );
+  }
+
+  function resetToSavedRows() {
+    setRows(buildStandingRows(teams, standings));
+  }
+
+  function clearRows() {
+    setRows(buildEmptyStandingRows(teams));
   }
 
   return (
@@ -676,9 +650,49 @@ function BulkStandingEditor({
         <button type="submit" className="button" disabled={pending}>
           {pending ? "保存中..." : "順位表をまとめて保存"}
         </button>
+        <button type="button" className="button button--ghost" onClick={resetToSavedRows} disabled={pending}>
+          登録値に戻す
+        </button>
+        <button type="button" className="button button--ghost" onClick={clearRows} disabled={pending}>
+          入力をクリア
+        </button>
       </div>
     </form>
   );
+}
+
+function buildStandingRows(teams: DivisionOption["teams"], standings: DivisionOption["standings"]) {
+  return teams.map((team, index) => {
+    const existing = standings.find((standing) => standing.teamId === team.id);
+
+    return {
+      teamId: team.id,
+      teamName: team.name,
+      rank: existing?.rank ?? index + 1,
+      played: existing?.played ?? 0,
+      won: existing?.won ?? 0,
+      drawn: existing?.drawn ?? 0,
+      lost: existing?.lost ?? 0,
+      goalsFor: existing?.goalsFor ?? 0,
+      goalsAgainst: existing?.goalsAgainst ?? 0,
+      points: existing?.points ?? 0,
+    };
+  });
+}
+
+function buildEmptyStandingRows(teams: DivisionOption["teams"]) {
+  return teams.map((team, index) => ({
+    teamId: team.id,
+    teamName: team.name,
+    rank: index + 1,
+    played: 0,
+    won: 0,
+    drawn: 0,
+    lost: 0,
+    goalsFor: 0,
+    goalsAgainst: 0,
+    points: 0,
+  }));
 }
 
 function ExistingStandingEditor({

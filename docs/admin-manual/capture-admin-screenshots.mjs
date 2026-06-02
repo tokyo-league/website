@@ -12,7 +12,7 @@ const pages = [
   { slug: "assignments-users", path: "/admin/assignments", label: "担当者編集", scrollY: 840 },
   { slug: "results-top", path: "/admin/results", label: "結果管理 上部", scrollY: 260 },
   { slug: "results-middle", path: "/admin/results", label: "結果管理 入力欄", scrollY: 760 },
-  { slug: "results-standings", path: "/admin/results", label: "結果管理 順位表", scrollY: 1580 },
+  { slug: "results-standings", path: "/admin/results", label: "結果管理 順位表", scrollY: 1780 },
   { slug: "results-registered-standings", path: "/admin/results", label: "結果管理 登録済み順位表", scrollY: 2630 },
   { slug: "news-list", path: "/admin/news", label: "ニュース一覧" },
   { slug: "news-form", path: "/admin/news/new", label: "ニュース作成" },

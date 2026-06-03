@@ -22,14 +22,14 @@
 | サーバー側認可 | `requireOwner`, `getAdminScope` をサーバーアクションで使用 | 実装済み |
 | E2Eバイパス本番無効化 | `lib/test-mode.ts`、`tests/e2e/security.spec.ts` | 実装済み |
 | 入力サニタイズ | `lib/security.ts` と各管理アクション | 実装済み |
-| アップロード制限 | 画像・資料のMIME type、拡張子、サイズ制限 | 実装済み |
+| アップロード制限 | 画像・資料のMIME type、拡張子、ファイル内容、サイズ制限 | 実装済み |
 | HTTPセキュリティヘッダー | `next.config.ts` | 実装済み |
 | ヘッダー回帰テスト | `tests/e2e/security.spec.ts` | E2E通過 |
 | 非機能仕様書記載 | `docs/data-model-and-admin-spec.md` | 記載済み |
 
 ## 直近の検証結果
 
-- `npm run test:e2e`: 13件成功
+- `npm run test:e2e`: 14件成功
 - `npm run build`: 成功。公開トップとニュース一覧は動的レンダリング化し、ビルド時のDB接続エラーログなし
 - `npm run docs:spec`: 成功
 - `npm run docs:admin`: 成功

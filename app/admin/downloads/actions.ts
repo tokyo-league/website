@@ -5,6 +5,7 @@ import { put } from "@vercel/blob";
 import { revalidatePath } from "next/cache";
 import { AssetKind, DownloadCategory, PublishStatus } from "@prisma/client";
 import { requireOwner } from "@/lib/admin-access";
+import { assertDownloadFileAllowed } from "@/lib/download-file-validation";
 import { prisma } from "@/lib/prisma";
 import { ensureSlug, sanitizePlainText } from "@/lib/security";
 
@@ -235,6 +236,13 @@ async function uploadDownloadAsset(fileValue: FormDataEntryValue | null, userId:
   if (!allowedExtensions.has(ext)) {
     throw new Error("資料ファイルは PDF / Excel / Word のみアップロードできます。");
   }
+
+  const fileBuffer = Buffer.from(await fileValue.arrayBuffer());
+  assertDownloadFileAllowed({
+    filename: fileValue.name,
+    mimeType: fileValue.type,
+    buffer: fileBuffer,
+  });
 
   const safeName = sanitizePlainText(fileValue.name, 180).replace(/[^a-zA-Z0-9._-]/g, "-");
   const blob = await put(`downloads/${Date.now()}-${safeName}`, fileValue, {

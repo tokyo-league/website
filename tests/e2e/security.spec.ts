@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { assertDownloadFileAllowed } from "../../lib/download-file-validation";
 import { isE2ETestMode } from "../../lib/test-mode";
 
 const requiredHeaders = [
@@ -59,6 +60,40 @@ test("E2E認証バイパスは本番環境では無効化される", () => {
     restoreEnv("E2E_TEST_MODE", originalE2ETestMode);
     restoreEnv("NODE_ENV", originalNodeEnv);
   }
+});
+
+test("資料アップロードはMIME typeとファイル内容を検証する", () => {
+  expect(() =>
+    assertDownloadFileAllowed({
+      filename: "guide.pdf",
+      mimeType: "application/pdf",
+      buffer: Buffer.from("%PDF-1.7\n"),
+    }),
+  ).not.toThrow();
+
+  expect(() =>
+    assertDownloadFileAllowed({
+      filename: "guide.pdf",
+      mimeType: "text/plain",
+      buffer: Buffer.from("%PDF-1.7\n"),
+    }),
+  ).toThrow("拡張子とMIME typeが一致");
+
+  expect(() =>
+    assertDownloadFileAllowed({
+      filename: "guide.pdf",
+      mimeType: "application/pdf",
+      buffer: Buffer.from("not a pdf"),
+    }),
+  ).toThrow("PDFファイルの内容");
+
+  expect(() =>
+    assertDownloadFileAllowed({
+      filename: "guide.xlsx",
+      mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      buffer: Buffer.from("PK\u0003\u0004[Content_Types].xml xl/workbook.xml", "latin1"),
+    }),
+  ).not.toThrow();
 });
 
 function restoreEnv(key: "E2E_TEST_MODE" | "NODE_ENV", value: string | undefined) {

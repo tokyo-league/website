@@ -58,6 +58,18 @@ test("ログイン画面はnoindexかつno-storeで配信される", async ({ pa
   expect(headers["cache-control"]).toContain("no-store");
 });
 
+test("robots.txtで管理画面と認証APIのクロールを禁止する", async ({ request }) => {
+  const response = await request.get("/robots.txt");
+  const body = await response.text();
+
+  expect(response.ok()).toBe(true);
+  expect(body).toContain("User-Agent: *");
+  expect(body).toContain("Allow: /");
+  expect(body).toContain("Disallow: /admin");
+  expect(body).toContain("Disallow: /login");
+  expect(body).toContain("Disallow: /api/auth");
+});
+
 test("E2E認証バイパスは本番環境では無効化される", () => {
   const originalE2ETestMode = process.env.E2E_TEST_MODE;
   const originalNodeEnv = process.env.NODE_ENV;

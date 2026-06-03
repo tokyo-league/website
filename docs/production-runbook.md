@@ -107,6 +107,7 @@ https://<production-domain>/api/auth/callback/google
 - `X-Content-Type-Options: nosniff` が付与されている
 - `Permissions-Policy` で不要なデバイス権限が無効化されている
 - `/admin` と `/login` に `X-Robots-Tag: noindex, nofollow, noarchive` と `Cache-Control: no-store` が付与されている
+- `/robots.txt` で `/admin`, `/login`, `/api/auth` が `Disallow` されている
 - Vercel Production Environmentに `E2E_TEST_MODE` が存在しない。存在してもproductionではE2Eバイパスが無効化される
 
 ## 納品PDF生成

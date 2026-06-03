@@ -656,6 +656,8 @@
 | X-Robots-Tag | 管理画面、ログイン画面、認証APIは `noindex, nofollow, noarchive` |
 | Cache-Control | 管理画面、ログイン画面、認証APIは `no-store` |
 
+`robots.txt` でも `/admin`, `/login`, `/api/auth` のクロールを禁止する。
+
 ### 秘密情報・環境変数
 
 - `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `DATABASE_URL`, `DIRECT_URL`, `BLOB_READ_WRITE_TOKEN` は環境変数で管理し、リポジトリへコミットしない

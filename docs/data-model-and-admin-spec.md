@@ -1,6 +1,6 @@
 # 東京リーグ データ設計・管理画面仕様
 
-最終更新: 2026-06-02 JST
+最終更新: 2026-06-03 JST
 
 ## 設計方針
 
@@ -627,7 +627,7 @@
 - サーバーアクションは画面表示だけに依存せず、実行時にも `requireOwner` / `getAdminScope` で権限確認する
 - 管理者ロール変更は自己降格とOwner不在を禁止し、権限喪失による運用停止を防ぐ
 - 管理者無効化は自己無効化と有効Owner不在を禁止し、退任者のアクセス遮断と運用継続を両立する
-- E2Eテスト用バイパスは `E2E_TEST_MODE=1` の明示時だけ有効とし、本番環境では設定しない
+- E2Eテスト用バイパスは `E2E_TEST_MODE=1` かつ非production環境でのみ有効とし、本番環境では強制的に無効化する
 
 ### 入力・アップロード
 
@@ -658,6 +658,7 @@
 - `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `DATABASE_URL`, `DIRECT_URL`, `BLOB_READ_WRITE_TOKEN` は環境変数で管理し、リポジトリへコミットしない
 - 初期管理者の登録は `SEED_ADMIN_EMAIL` を使った明示的なシード実行、またはDB管理画面での登録に限定する
 - 本番環境のGoogle OAuthリダイレクトURIはデプロイドメインに限定する
+- Vercel Production Environmentに `E2E_TEST_MODE` を設定しない。誤設定されてもproductionではアプリ側で無効化する
 
 ### 運用・監査
 

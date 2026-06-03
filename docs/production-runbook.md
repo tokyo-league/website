@@ -63,7 +63,7 @@ SEED_ADMIN_EMAIL="owner@example.com" SEED_ADMIN_NAME="東京リーグ管理者" 
 
 - `SEED_ADMIN_EMAIL` はGoogleログインに使うメールアドレスと完全一致させる
 - 初期Owner登録後、`/admin/assignments` からEditorを追加する
-- 本番環境に `E2E_TEST_MODE=1` を設定しない
+- 本番環境に `E2E_TEST_MODE=1` を設定しない。誤設定されても `NODE_ENV=production` ではアプリ側でE2Eバイパスを無効化する
 
 ## Google OAuth設定
 
@@ -106,7 +106,7 @@ https://<production-domain>/api/auth/callback/google
 - `Strict-Transport-Security` が付与されている
 - `X-Content-Type-Options: nosniff` が付与されている
 - `Permissions-Policy` で不要なデバイス権限が無効化されている
-- Vercel Production Environmentに `E2E_TEST_MODE` が存在しない
+- Vercel Production Environmentに `E2E_TEST_MODE` が存在しない。存在してもproductionではE2Eバイパスが無効化される
 
 ## 納品PDF生成
 

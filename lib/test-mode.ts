@@ -1,5 +1,5 @@
 export function isE2ETestMode() {
-  return process.env.E2E_TEST_MODE === "1";
+  return process.env.E2E_TEST_MODE === "1" && process.env.NODE_ENV !== "production";
 }
 
 export const e2eMockCompetition = {

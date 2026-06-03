@@ -1,6 +1,6 @@
 # セットアップメモ
 
-最終更新: 2026-06-02 JST
+最終更新: 2026-06-03 JST
 
 ## 現在の構成
 
@@ -39,6 +39,7 @@
 - 管理者テーブルに存在しない、または無効化済みのメールアドレスはログイン不可
 - 初期Ownerは `npm run prisma:seed-admin` で登録する。追加担当者、表示名・ロール変更、有効/無効切替は管理画面の担当リーグ割当で行う
 - `npm run prisma:seed-admin` 実行時は `SEED_ADMIN_EMAIL` が必要
+- `E2E_TEST_MODE=1` はローカル/E2E用途のみ。本番では設定しない。productionではアプリ側でも無効化する
 - Neon を使う場合、`DATABASE_URL` は pooled 接続、`DIRECT_URL` は direct 接続を使う
 - チーム画像アップロードには Vercel Blob の `BLOB_READ_WRITE_TOKEN` が必要
 - 更新系サーバアクションでは、入力の正規化、形式検証、長さ制限を必須にする

@@ -20,6 +20,7 @@
 | 管理画面認証 | NextAuth + Google OIDC、DB有効登録メールのみ許可 | 実装済み |
 | 権限管理 | `OWNER` / `EDITOR`、担当リーグ割当、担当者無効化 | 実装済み |
 | サーバー側認可 | `requireOwner`, `getAdminScope` をサーバーアクションで使用 | 実装済み |
+| E2Eバイパス本番無効化 | `lib/test-mode.ts`、`tests/e2e/security.spec.ts` | 実装済み |
 | 入力サニタイズ | `lib/security.ts` と各管理アクション | 実装済み |
 | アップロード制限 | 画像・資料のMIME type、拡張子、サイズ制限 | 実装済み |
 | HTTPセキュリティヘッダー | `next.config.ts` | 実装済み |
@@ -28,7 +29,7 @@
 
 ## 直近の検証結果
 
-- `npm run test:e2e`: 12件成功
+- `npm run test:e2e`: 13件成功
 - `npm run build`: 成功。公開トップとニュース一覧は動的レンダリング化し、ビルド時のDB接続エラーログなし
 - `npm run docs:spec`: 成功
 - `npm run docs:admin`: 成功

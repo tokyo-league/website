@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { isE2ETestMode } from "../../lib/test-mode";
 
 const requiredHeaders = [
   ["referrer-policy", "strict-origin-when-cross-origin"],
@@ -40,3 +41,31 @@ test("管理画面にも同じセキュリティヘッダーが付与される",
   expect(headers["x-frame-options"]).toBe("SAMEORIGIN");
   expect(headers["x-content-type-options"]).toBe("nosniff");
 });
+
+test("E2E認証バイパスは本番環境では無効化される", () => {
+  const originalE2ETestMode = process.env.E2E_TEST_MODE;
+  const originalNodeEnv = process.env.NODE_ENV;
+
+  try {
+    process.env.E2E_TEST_MODE = "1";
+    process.env.NODE_ENV = "production";
+
+    expect(isE2ETestMode()).toBe(false);
+
+    process.env.NODE_ENV = "test";
+
+    expect(isE2ETestMode()).toBe(true);
+  } finally {
+    restoreEnv("E2E_TEST_MODE", originalE2ETestMode);
+    restoreEnv("NODE_ENV", originalNodeEnv);
+  }
+});
+
+function restoreEnv(key: "E2E_TEST_MODE" | "NODE_ENV", value: string | undefined) {
+  if (value === undefined) {
+    delete process.env[key];
+    return;
+  }
+
+  process.env[key] = value;
+}

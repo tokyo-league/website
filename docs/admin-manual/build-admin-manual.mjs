@@ -37,6 +37,7 @@ const sections = [
     notes: [
       "認証方式: NextAuth + Google OIDC。セッションはJWT方式です。",
       "必須環境変数: `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `DATABASE_URL`。",
+      "Production環境では必須環境変数の欠落をアプリ起動時に検出します。",
       "初期Ownerは `SEED_ADMIN_EMAIL` を設定して `npm run prisma:seed-admin` で登録できます。",
       "管理画面とログイン画面はnoindex/no-storeで配信します。",
       "サイト上の日時表示・公開日時の扱いは日本時間です。",

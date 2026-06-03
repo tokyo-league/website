@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { assertDownloadFileAllowed } from "../../lib/download-file-validation";
+import { assertProductionEnvReady, getMissingProductionEnv } from "../../lib/env-validation";
 import { assertImageFileAllowed } from "../../lib/image-file-validation";
 import { isE2ETestMode } from "../../lib/test-mode";
 import { normalizeOptionalAssetPath, normalizeOptionalHttpUrl } from "../../lib/url-validation";
@@ -68,6 +69,28 @@ test("robots.txtで管理画面と認証APIのクロールを禁止する", asyn
   expect(body).toContain("Disallow: /admin");
   expect(body).toContain("Disallow: /login");
   expect(body).toContain("Disallow: /api/auth");
+});
+
+test("Production環境では必須環境変数の欠落を検出する", () => {
+  const productionEnv = {
+    NODE_ENV: "production",
+    VERCEL_ENV: "production",
+    AUTH_SECRET: "secret",
+    AUTH_GOOGLE_ID: "google-id",
+    DATABASE_URL: "postgres://example",
+    DIRECT_URL: "postgres://example-direct",
+    BLOB_READ_WRITE_TOKEN: "blob-token",
+  };
+
+  expect(getMissingProductionEnv(productionEnv)).toEqual(["AUTH_GOOGLE_SECRET"]);
+  expect(() => assertProductionEnvReady(productionEnv)).toThrow("AUTH_GOOGLE_SECRET");
+
+  expect(() =>
+    assertProductionEnvReady({
+      NODE_ENV: "production",
+      VERCEL_ENV: "preview",
+    }),
+  ).not.toThrow();
 });
 
 test("E2E認証バイパスは本番環境では無効化される", () => {

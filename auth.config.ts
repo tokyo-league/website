@@ -1,4 +1,7 @@
 import type { NextAuthConfig } from "next-auth";
+import { assertProductionEnvReady } from "@/lib/env-validation";
+
+assertProductionEnvReady();
 
 const hasGoogleCredentials =
   Boolean(process.env.AUTH_GOOGLE_ID) && Boolean(process.env.AUTH_GOOGLE_SECRET);

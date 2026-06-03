@@ -25,6 +25,8 @@
 | `SEED_ADMIN_EMAIL` | Local / one-off command | 初期Owner登録 | 本番常駐は不要。実行時だけ使う |
 | `SEED_ADMIN_NAME` | Local / one-off command | 初期Owner表示名 | 未設定時は `Tokyo League Admin` |
 
+Production環境では `DATABASE_URL`, `DIRECT_URL`, `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `BLOB_READ_WRITE_TOKEN` の欠落をアプリ起動時に検出します。Preview / Development ではローカル検証や画面確認を優先し、未設定時はログイン画面に設定メモを表示します。
+
 ## 初回デプロイ手順
 
 1. Vercel ProjectをGitHubリポジトリに接続する
@@ -108,6 +110,7 @@ https://<production-domain>/api/auth/callback/google
 - `Permissions-Policy` で不要なデバイス権限が無効化されている
 - `/admin` と `/login` に `X-Robots-Tag: noindex, nofollow, noarchive` と `Cache-Control: no-store` が付与されている
 - `/robots.txt` で `/admin`, `/login`, `/api/auth` が `Disallow` されている
+- Production環境で必須環境変数がすべて設定されている
 - Vercel Production Environmentに `E2E_TEST_MODE` が存在しない。存在してもproductionではE2Eバイパスが無効化される
 
 ## 納品PDF生成

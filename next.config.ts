@@ -52,6 +52,17 @@ const securityHeaders = [
   },
 ];
 
+const privateRouteHeaders = [
+  {
+    key: "X-Robots-Tag",
+    value: "noindex, nofollow, noarchive",
+  },
+  {
+    key: "Cache-Control",
+    value: "no-store, no-cache, must-revalidate",
+  },
+];
+
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
@@ -70,6 +81,18 @@ const nextConfig: NextConfig = {
       {
         source: "/:path*",
         headers: securityHeaders,
+      },
+      {
+        source: "/admin/:path*",
+        headers: privateRouteHeaders,
+      },
+      {
+        source: "/login",
+        headers: privateRouteHeaders,
+      },
+      {
+        source: "/api/auth/:path*",
+        headers: privateRouteHeaders,
       },
     ];
   },

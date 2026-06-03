@@ -27,6 +27,7 @@ test("公開ページにセキュリティヘッダーが付与される", async
   expect(csp).toContain("form-action 'self'");
   expect(csp).toContain("https://accounts.google.com");
   expect(csp).toContain("https://*.public.blob.vercel-storage.com");
+  expect(headers["x-robots-tag"]).toBeUndefined();
 
   for (const [header, value] of requiredHeaders) {
     expect(headers[header]).toBe(value);
@@ -43,6 +44,18 @@ test("管理画面にも同じセキュリティヘッダーが付与される",
   expect(headers["content-security-policy"]).toContain("object-src 'none'");
   expect(headers["x-frame-options"]).toBe("SAMEORIGIN");
   expect(headers["x-content-type-options"]).toBe("nosniff");
+  expect(headers["x-robots-tag"]).toBe("noindex, nofollow, noarchive");
+  expect(headers["cache-control"]).toContain("no-store");
+});
+
+test("ログイン画面はnoindexかつno-storeで配信される", async ({ page }) => {
+  const response = await page.goto("/login");
+
+  expect(response).not.toBeNull();
+  const headers = response!.headers();
+
+  expect(headers["x-robots-tag"]).toBe("noindex, nofollow, noarchive");
+  expect(headers["cache-control"]).toContain("no-store");
 });
 
 test("E2E認証バイパスは本番環境では無効化される", () => {

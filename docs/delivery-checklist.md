@@ -25,12 +25,13 @@
 | 外部URL制限 | 公式サイトURL、画像パスは `http` / `https` または安全な相対パスのみ許可 | 実装済み |
 | アップロード制限 | 画像・資料のMIME type、拡張子、ファイル内容、サイズ制限 | 実装済み |
 | HTTPセキュリティヘッダー | `next.config.ts` | 実装済み |
+| 管理画面noindex/no-store | `/admin`, `/login`, `/api/auth/*` に `X-Robots-Tag` と `Cache-Control` | 実装済み |
 | ヘッダー回帰テスト | `tests/e2e/security.spec.ts` | E2E通過 |
 | 非機能仕様書記載 | `docs/data-model-and-admin-spec.md` | 記載済み |
 
 ## 直近の検証結果
 
-- `npm run test:e2e`: 16件成功
+- `npm run test:e2e`: 17件成功
 - `npm run build`: 成功。公開トップとニュース一覧は動的レンダリング化し、ビルド時のDB接続エラーログなし
 - `npm run docs:spec`: 成功
 - `npm run docs:admin`: 成功

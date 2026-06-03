@@ -653,6 +653,8 @@
 | X-Permitted-Cross-Domain-Policies | `none` |
 | Permissions-Policy | camera / microphone / geolocation / payment / usb を無効化 |
 | Strict-Transport-Security | HTTPS本番環境で長期HSTSを有効化 |
+| X-Robots-Tag | 管理画面、ログイン画面、認証APIは `noindex, nofollow, noarchive` |
+| Cache-Control | 管理画面、ログイン画面、認証APIは `no-store` |
 
 ### 秘密情報・環境変数
 

@@ -8,6 +8,7 @@ import { assertImageFileAllowed } from "@/lib/image-file-validation";
 import { prisma } from "@/lib/prisma";
 import { ensureSlug, isValidUuid, sanitizePlainText } from "@/lib/security";
 import { isE2ETestMode } from "@/lib/test-mode";
+import { normalizeOptionalAssetPath, normalizeOptionalHttpUrl } from "@/lib/url-validation";
 
 export type TeamActionState = {
   status: "idle" | "success" | "error";
@@ -212,10 +213,10 @@ async function getTeamPayload(formData: FormData) {
   const region = sanitizePlainText(String(formData.get("region") ?? ""), 40);
   const representativeName = sanitizePlainText(String(formData.get("representativeName") ?? ""), 80);
   const headCoachName = sanitizePlainText(String(formData.get("headCoachName") ?? ""), 80);
-  const websiteUrl = sanitizePlainText(String(formData.get("websiteUrl") ?? ""), 255);
+  const websiteUrl = normalizeTeamHttpUrl(String(formData.get("websiteUrl") ?? ""), "公式サイトURL");
   const instagramUrl = normalizeInstagramUrl(String(formData.get("instagramUrl") ?? ""));
-  const logoPath = sanitizePlainText(String(formData.get("logoPath") ?? ""), 255);
-  const photoPath = sanitizePlainText(String(formData.get("photoPath") ?? ""), 255);
+  const logoPath = normalizeTeamAssetPath(String(formData.get("logoPath") ?? ""), "ロゴ画像URL");
+  const photoPath = normalizeTeamAssetPath(String(formData.get("photoPath") ?? ""), "チーム画像URL");
   const uploadedLogoPath = await uploadTeamImage(formData.get("logoFile"), "logos");
   const uploadedPhotoPath = await uploadTeamImage(formData.get("photoFile"), "photos");
   const sortOrder = Number.parseInt(String(formData.get("sortOrder") ?? "0"), 10);
@@ -230,13 +231,29 @@ async function getTeamPayload(formData: FormData) {
     region: region || null,
     representativeName: representativeName || null,
     headCoachName: headCoachName || null,
-    websiteUrl: websiteUrl && websiteUrl !== "ー" && websiteUrl !== "-" ? websiteUrl : null,
+    websiteUrl,
     instagramUrl,
-    logoPath: uploadedLogoPath ?? (logoPath || null),
-    photoPath: uploadedPhotoPath ?? (photoPath || null),
+    logoPath: uploadedLogoPath ?? logoPath,
+    photoPath: uploadedPhotoPath ?? photoPath,
     status: ["DRAFT", "PUBLISHED", "ARCHIVED"].includes(status) ? status : PublishStatus.PUBLISHED,
     sortOrder: Number.isFinite(sortOrder) ? sortOrder : 0,
   };
+}
+
+function normalizeTeamHttpUrl(value: string, label: string) {
+  try {
+    return normalizeOptionalHttpUrl(value, label);
+  } catch (error) {
+    throw new TeamInputError(error instanceof Error ? error.message : `${label}を確認してください。`);
+  }
+}
+
+function normalizeTeamAssetPath(value: string, label: string) {
+  try {
+    return normalizeOptionalAssetPath(value, label);
+  } catch (error) {
+    throw new TeamInputError(error instanceof Error ? error.message : `${label}を確認してください。`);
+  }
 }
 
 function normalizeInstagramUrl(value: string) {

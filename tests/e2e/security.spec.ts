@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 import { assertDownloadFileAllowed } from "../../lib/download-file-validation";
 import { assertImageFileAllowed } from "../../lib/image-file-validation";
 import { isE2ETestMode } from "../../lib/test-mode";
+import { normalizeOptionalAssetPath, normalizeOptionalHttpUrl } from "../../lib/url-validation";
 
 const requiredHeaders = [
   ["referrer-policy", "strict-origin-when-cross-origin"],
@@ -141,6 +142,22 @@ test("画像アップロードはMIME typeとファイル内容を検証する",
       },
     }),
   ).toThrow("JPG / PNG / WebP");
+});
+
+test("外部URL入力はhttp/httpsのみ許可する", () => {
+  expect(normalizeOptionalHttpUrl("https://example.com/team", "公式サイトURL")).toBe("https://example.com/team");
+  expect(normalizeOptionalHttpUrl("http://example.com/team", "公式サイトURL")).toBe("http://example.com/team");
+  expect(normalizeOptionalHttpUrl("", "公式サイトURL")).toBeNull();
+  expect(() => normalizeOptionalHttpUrl("javascript:alert(1)", "公式サイトURL")).toThrow(
+    "http または https",
+  );
+
+  expect(normalizeOptionalAssetPath("/site-assets/teams/logo.png", "ロゴ画像URL")).toBe(
+    "/site-assets/teams/logo.png",
+  );
+  expect(() => normalizeOptionalAssetPath("//evil.example/logo.png", "ロゴ画像URL")).toThrow(
+    "ロゴ画像URLを確認",
+  );
 });
 
 function restoreEnv(key: "E2E_TEST_MODE" | "NODE_ENV", value: string | undefined) {

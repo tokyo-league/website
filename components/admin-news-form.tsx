@@ -82,7 +82,7 @@ export function AdminNewsForm({
                 id={inputId}
                 type="file"
                 name="eyecatchFile"
-                accept="image/*"
+                accept=".jpg,.jpeg,.png,.webp"
                 className="upload-field__input"
                 onChange={(event) => setFileName(event.target.files?.[0]?.name ?? "")}
               />

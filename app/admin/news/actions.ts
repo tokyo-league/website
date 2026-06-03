@@ -4,6 +4,7 @@ import { put } from "@vercel/blob";
 import { revalidatePath } from "next/cache";
 import { AssetKind, PublishStatus } from "@prisma/client";
 import { requireOwner } from "@/lib/admin-access";
+import { assertImageFileAllowed } from "@/lib/image-file-validation";
 import { prisma } from "@/lib/prisma";
 import { ensureSlug, isValidUuid, sanitizeMultilineText, sanitizePlainText } from "@/lib/security";
 import { isE2ETestMode } from "@/lib/test-mode";
@@ -223,13 +224,17 @@ async function uploadEyecatchAsset(fileValue: FormDataEntryValue | null, userId:
     return null;
   }
 
-  if (!fileValue.type.startsWith("image/")) {
-    throw new Error("アイキャッチ画像は画像ファイルのみアップロードできます。");
-  }
-
-  if (fileValue.size > 10 * 1024 * 1024) {
-    throw new Error("アイキャッチ画像は 10MB 以下にしてください。");
-  }
+  const fileBuffer = Buffer.from(await fileValue.arrayBuffer());
+  assertImageFileAllowed({
+    filename: fileValue.name,
+    mimeType: fileValue.type,
+    size: fileValue.size,
+    buffer: fileBuffer,
+    rules: {
+      label: "アイキャッチ画像",
+      maxSizeBytes: 10 * 1024 * 1024,
+    },
+  });
 
   const safeName = sanitizePlainText(fileValue.name, 160).replace(/[^a-zA-Z0-9._-]/g, "-");
   const blob = await put(`news/${Date.now()}-${safeName}`, fileValue, {

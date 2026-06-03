@@ -272,7 +272,7 @@ function UploadField({
         id={inputId}
         type="file"
         name={name}
-        accept="image/*"
+        accept=".jpg,.jpeg,.png,.webp"
         className="upload-field__input"
         onChange={(event) => onFileChange(event.target.files?.[0] ?? null)}
       />
@@ -319,8 +319,8 @@ async function validateImageFile(file: File | null, kind: "logos" | "photos") {
     return { status: "idle" as const, message: "" };
   }
 
-  if (!file.type.startsWith("image/")) {
-    return { status: "error" as const, message: "画像ファイルのみ選択できます。" };
+  if (!isAllowedImageFile(file)) {
+    return { status: "error" as const, message: "JPG / PNG / WebP のみ選択できます。" };
   }
 
   if (file.size > 5 * 1024 * 1024) {
@@ -350,6 +350,10 @@ async function validateImageFile(file: File | null, kind: "logos" | "photos") {
   }
 
   return { status: "success" as const, message: "" };
+}
+
+function isAllowedImageFile(file: File) {
+  return ["image/jpeg", "image/png", "image/webp"].includes(file.type);
 }
 
 function readImageSize(file: File) {

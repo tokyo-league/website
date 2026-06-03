@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { assertDownloadFileAllowed } from "../../lib/download-file-validation";
+import { assertImageFileAllowed } from "../../lib/image-file-validation";
 import { isE2ETestMode } from "../../lib/test-mode";
 
 const requiredHeaders = [
@@ -94,6 +95,52 @@ test("資料アップロードはMIME typeとファイル内容を検証する",
       buffer: Buffer.from("PK\u0003\u0004[Content_Types].xml xl/workbook.xml", "latin1"),
     }),
   ).not.toThrow();
+});
+
+test("画像アップロードはMIME typeとファイル内容を検証する", () => {
+  const validPng = Buffer.from(
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=",
+    "base64",
+  );
+
+  expect(() =>
+    assertImageFileAllowed({
+      filename: "result.png",
+      mimeType: "image/png",
+      size: validPng.length,
+      buffer: validPng,
+      rules: {
+        label: "結果画像",
+        maxSizeBytes: 10 * 1024 * 1024,
+      },
+    }),
+  ).not.toThrow();
+
+  expect(() =>
+    assertImageFileAllowed({
+      filename: "result.png",
+      mimeType: "image/png",
+      size: 8,
+      buffer: Buffer.from("not-png"),
+      rules: {
+        label: "結果画像",
+        maxSizeBytes: 10 * 1024 * 1024,
+      },
+    }),
+  ).toThrow("結果画像の内容");
+
+  expect(() =>
+    assertImageFileAllowed({
+      filename: "result.svg",
+      mimeType: "image/svg+xml",
+      size: 24,
+      buffer: Buffer.from("<svg><script /></svg>"),
+      rules: {
+        label: "結果画像",
+        maxSizeBytes: 10 * 1024 * 1024,
+      },
+    }),
+  ).toThrow("JPG / PNG / WebP");
 });
 
 function restoreEnv(key: "E2E_TEST_MODE" | "NODE_ENV", value: string | undefined) {

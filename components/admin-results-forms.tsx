@@ -272,8 +272,8 @@ export function AdminResultsForms({
                     return;
                   }
 
-                  if (!file.type.startsWith("image/")) {
-                    setResultUploadError("結果画像は画像ファイルのみ選択できます。");
+                  if (!isAllowedImageFile(file)) {
+                    setResultUploadError("結果画像はJPG / PNG / WebPのみ選択できます。");
                     setResultFileName("");
                     setResultPreview(null);
                     return;
@@ -755,7 +755,7 @@ function UploadField({
         id={name}
         type="file"
         name={name}
-        accept="image/*"
+        accept=".jpg,.jpeg,.png,.webp"
         className="upload-field__input"
         onChange={(event) => onFileChange(event.target.files?.[0] ?? null)}
       />
@@ -793,4 +793,8 @@ function UploadField({
       {errorMessage ? <small className="admin-field__error">{errorMessage}</small> : null}
     </div>
   );
+}
+
+function isAllowedImageFile(file: File) {
+  return ["image/jpeg", "image/png", "image/webp"].includes(file.type);
 }

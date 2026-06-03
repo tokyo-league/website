@@ -2,9 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { put } from "@vercel/blob";
-import { imageSize } from "image-size";
 import { PublishStatus } from "@prisma/client";
 import { requireOwner } from "@/lib/admin-access";
+import { assertImageFileAllowed } from "@/lib/image-file-validation";
 import { prisma } from "@/lib/prisma";
 import { ensureSlug, isValidUuid, sanitizePlainText } from "@/lib/security";
 import { isE2ETestMode } from "@/lib/test-mode";
@@ -294,26 +294,18 @@ async function uploadTeamImage(fileValue: FormDataEntryValue | null, folder: "lo
     return null;
   }
 
-  if (!fileValue.type.startsWith("image/")) {
-    throw new Error("画像ファイルのみアップロードできます。");
-  }
-
-  if (fileValue.size > 5 * 1024 * 1024) {
-    throw new Error("画像サイズは 5MB 以下にしてください。");
-  }
-
-  const dimensions = imageSize(Buffer.from(await fileValue.arrayBuffer()));
-  const width = dimensions.width ?? 0;
-  const height = dimensions.height ?? 0;
   const rules = IMAGE_RULES[folder];
-
-  if (width < rules.minWidth || height < rules.minHeight) {
-    throw new Error(`${rules.label}は ${rules.minWidth}x${rules.minHeight}px 以上にしてください。`);
-  }
-
-  if ("minAspectRatio" in rules && height > 0 && width / height < rules.minAspectRatio) {
-    throw new Error(`${rules.label}は横長画像を指定してください。`);
-  }
+  const fileBuffer = Buffer.from(await fileValue.arrayBuffer());
+  assertImageFileAllowed({
+    filename: fileValue.name,
+    mimeType: fileValue.type,
+    size: fileValue.size,
+    buffer: fileBuffer,
+    rules: {
+      ...rules,
+      maxSizeBytes: 5 * 1024 * 1024,
+    },
+  });
 
   const safeName = sanitizePlainText(fileValue.name, 120).replace(/[^a-zA-Z0-9._-]/g, "-");
   const blob = await put(`teams/${folder}/${Date.now()}-${safeName}`, fileValue, {

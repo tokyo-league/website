@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { put } from "@vercel/blob";
 import { MatchStatus, PublishStatus } from "@prisma/client";
 import { getAdminScope } from "@/lib/admin-access";
+import { assertImageFileAllowed } from "@/lib/image-file-validation";
 import { prisma } from "@/lib/prisma";
 import { isValidUuid, parseInteger, sanitizePlainText } from "@/lib/security";
 
@@ -582,13 +583,17 @@ async function uploadResultImage(fileValue: FormDataEntryValue | null) {
     return null;
   }
 
-  if (!fileValue.type.startsWith("image/")) {
-    throw new Error("結果画像は画像ファイルのみアップロードできます。");
-  }
-
-  if (fileValue.size > 10 * 1024 * 1024) {
-    throw new Error("結果画像は 10MB 以下にしてください。");
-  }
+  const fileBuffer = Buffer.from(await fileValue.arrayBuffer());
+  assertImageFileAllowed({
+    filename: fileValue.name,
+    mimeType: fileValue.type,
+    size: fileValue.size,
+    buffer: fileBuffer,
+    rules: {
+      label: "結果画像",
+      maxSizeBytes: 10 * 1024 * 1024,
+    },
+  });
 
   const safeName = sanitizePlainText(fileValue.name, 120).replace(/[^a-zA-Z0-9._-]/g, "-");
   const blob = await put(`results/${Date.now()}-${safeName}`, fileValue, {

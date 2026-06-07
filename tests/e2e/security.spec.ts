@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 import { applyAdminRecordToJwt, getAdminJwtLookupEmail } from "../../lib/admin-session";
 import { assertDownloadFileAllowed } from "../../lib/download-file-validation";
 import { assertProductionEnvReady, getInvalidProductionEnv, getMissingProductionEnv } from "../../lib/env-validation";
+import { isVerifiedGoogleProfile } from "../../lib/google-profile";
 import { assertImageFileAllowed } from "../../lib/image-file-validation";
 import { checkRateLimit, createRateLimitStore, getRateLimitKey } from "../../lib/rate-limit";
 import { rateLimitedRouteHeaders } from "../../lib/security-headers";
@@ -178,6 +179,13 @@ test("管理者JWTはDB上の有効状態で再検証される", () => {
     }),
   ).toBeNull();
   expect(applyAdminRecordToJwt(token, null)).toBeNull();
+});
+
+test("Googleログインは検証済みメールだけを許可する", () => {
+  expect(isVerifiedGoogleProfile({ email_verified: true })).toBe(true);
+  expect(isVerifiedGoogleProfile({ email_verified: false })).toBe(false);
+  expect(isVerifiedGoogleProfile({})).toBe(false);
+  expect(isVerifiedGoogleProfile(null)).toBe(false);
 });
 
 test("ログイン、管理画面、認証APIのレート制限は上限超過を検出する", () => {

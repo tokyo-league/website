@@ -3,6 +3,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import type { AdminRole } from "@prisma/client";
 import authConfig from "@/auth.config";
 import { applyAdminRecordToJwt, getAdminJwtLookupEmail } from "@/lib/admin-session";
+import { isVerifiedGoogleProfile } from "@/lib/google-profile";
 import { prisma } from "@/lib/prisma";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
@@ -13,8 +14,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
   callbacks: {
     ...authConfig.callbacks,
-    async signIn({ user, account }) {
+    async signIn({ user, account, profile }) {
       if (account?.provider !== "google" || !user.email) {
+        return false;
+      }
+
+      if (!isVerifiedGoogleProfile(profile)) {
         return false;
       }
 

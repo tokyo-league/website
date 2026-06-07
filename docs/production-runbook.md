@@ -155,6 +155,20 @@ npm run docs:admin:qa
 
 - `docs/admin-manual/output/qa-pages/`
 
+納品物の自動チェック:
+
+```bash
+npm run docs:delivery:check
+```
+
+確認内容:
+
+- 仕様書PDFと管理者ツール説明書PDFが生成済みで、極端に小さいファイルではない
+- 管理者ツール説明書のQA画像が19ページ分生成されている
+- Runbookと納品チェックリストが存在する
+- 管理者マニュアルHTMLに古い制限文が残っていない
+- Runbookに本番env安全確認手順が記載されている
+
 ## ロールバック
 
 本番反映後に重大な問題が出た場合:
@@ -171,6 +185,7 @@ npm run docs:admin:qa
 - Vercel Production Deployment URL
 - `npm run build` の成功ログ
 - `npm run test:e2e` の成功ログ
+- `npm run docs:delivery:check` の成功ログ
 - 仕様書PDF
 - 管理者ツール説明書PDF
 - 初期Ownerメールアドレス

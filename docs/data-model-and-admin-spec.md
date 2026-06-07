@@ -667,6 +667,11 @@
 - 本番環境のGoogle OAuthリダイレクトURIはデプロイドメインに限定する
 - Vercel Production Environmentに `E2E_TEST_MODE` を設定しない。誤設定されてもproductionではアプリ側で無効化する
 
+### 納品物検査
+
+- 納品前に `npm run docs:delivery:check` を実行し、仕様書PDF、管理者ツール説明書PDF、QA画像、Runbook、納品チェックリストが揃っていることを確認する
+- 管理者マニュアルHTMLに古い制限事項の文言が残っていないことを自動検査し、実装済み機能と説明書の齟齬を防ぐ
+
 ### 運用・監査
 
 - 管理データは `createdById` / `updatedById` と `createdAt` / `updatedAt` を保持する

@@ -12,6 +12,7 @@
 | 管理者ツール説明書PDF | `docs/admin-manual/output/tokyo-league-admin-manual.pdf` | `npm run docs:admin` | 生成済み |
 | 管理者説明書QA画像 | `docs/admin-manual/output/qa-pages/` | `npm run docs:admin:qa` | 19ページ生成済み |
 | 本番デプロイRunbook | `docs/production-runbook.md` | 手順確認 | 作成済み |
+| 納品物自動チェック | PDF、QA画像、Runbook、古い文言混入 | `npm run docs:delivery:check` | 実装済み |
 
 ## 非機能要件: セキュリティ
 
@@ -39,6 +40,7 @@
 - `npm run docs:spec`: 成功
 - `npm run docs:admin`: 成功
 - `npm run docs:admin:qa`: 成功
+- `npm run docs:delivery:check`: 成功
 
 ## 納品前に残す確認
 
@@ -49,4 +51,5 @@
 - 初期Ownerメールアドレスを確定し、`npm run prisma:seed-admin` またはDB管理画面で登録する
 - Neon DB接続が本番ビルド・実行時に安定していることを確認する
 - PDF納品物のページ欠け、画像欠け、文字切れを最終目視確認する
+- `npm run docs:delivery:check` でPDF、QA画像、Runbook、古い文言混入の自動チェックを通す
 - `docs/production-runbook.md` に沿って本番反映・ロールバック手順を関係者へ共有する

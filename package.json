@@ -16,6 +16,7 @@
     "docs:admin": "node ./docs/admin-manual/build-admin-manual.mjs",
     "docs:admin:screenshots": "node ./docs/admin-manual/capture-admin-screenshots.mjs",
     "docs:admin:qa": "node ./docs/admin-manual/render-manual-qa.mjs",
+    "docs:delivery:check": "node ./scripts/check-delivery-artifacts.mjs",
     "security:prod-env": "node ./scripts/check-production-env.mjs",
     "prisma:generate": "prisma generate",
     "prisma:validate": "prisma validate",

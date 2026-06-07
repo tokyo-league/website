@@ -10,9 +10,10 @@
 | 管理者ツール | `app/admin/`, `components/admin-*`, `lib/admin-access.ts` | `npm run test:e2e` | E2Eモードで検証済み |
 | 仕様書PDF | `docs/output/tokyo-league-renewal-spec.pdf` | `npm run docs:spec` | 生成済み |
 | 管理者ツール説明書PDF | `docs/admin-manual/output/tokyo-league-admin-manual.pdf` | `npm run docs:admin` | 生成済み |
-| 管理者説明書QA画像 | `docs/admin-manual/output/qa-pages/` | `npm run docs:admin:qa` | 19ページ生成済み |
+| 管理者説明書QA画像 | `docs/admin-manual/output/qa-pages/` | `npm run docs:admin:qa` | 20ページ生成済み |
 | 本番デプロイRunbook | `docs/production-runbook.md` | 手順確認 | 作成済み |
 | 納品物自動チェック | PDF、QA画像、Runbook、古い文言混入 | `npm run docs:delivery:check` | 実装済み |
+| 納品前証跡レポート | `docs/output/delivery-evidence-*.md` | `npm run delivery:evidence` | 実装済み |
 
 ## 非機能要件: セキュリティ
 
@@ -45,12 +46,13 @@
 - `npm run docs:admin`: 成功
 - `npm run docs:admin:qa`: 成功
 - `npm run docs:delivery:check`: 成功
+- `npm run delivery:evidence`: 成功
 
 ## 納品前に残す確認
 
 - 本番デプロイURLで公開サイトの主要導線を確認する
 - 本番デプロイURLで管理画面ログイン、Owner操作、Editor操作を確認する
-- 本番デプロイURLで `npm run security:headers -- https://<production-domain>` を実行し、ヘッダー証跡を保存する
+- 本番デプロイURLで `npm run delivery:evidence -- --production-url https://<production-domain> --env-file .env.production.local --include-build --include-e2e` を実行し、証跡レポートを保存する
 - 本番環境の `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `DATABASE_URL`, `DIRECT_URL`, `BLOB_READ_WRITE_TOKEN` を `npm run security:prod-env -- .env.production.local` で確認する
 - Google OAuthのリダイレクトURIが本番ドメインだけに限定されていることを確認する
 - 初期Ownerメールアドレスを確定し、`npm run prisma:seed-admin` またはDB管理画面で登録する

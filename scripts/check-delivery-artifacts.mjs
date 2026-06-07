@@ -41,6 +41,11 @@ checkTextContains({
   filePath: "docs/production-runbook.md",
   requiredText: "npm run security:prod-env -- .env.production.local",
 });
+checkTextContains({
+  label: "納品前証跡レポート手順",
+  filePath: "docs/production-runbook.md",
+  requiredText: "npm run delivery:evidence -- --production-url https://<production-domain>",
+});
 
 console.log("Tokyo League delivery artifact check");
 console.log("");

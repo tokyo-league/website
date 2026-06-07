@@ -675,6 +675,7 @@
 ### 納品物検査
 
 - 納品前に `npm run docs:delivery:check` を実行し、仕様書PDF、管理者ツール説明書PDF、QA画像、Runbook、納品チェックリストが揃っていることを確認する
+- 納品前に `npm run delivery:evidence -- --production-url https://<production-domain> --env-file .env.production.local --include-build --include-e2e` を実行し、コマンド結果、PDFサイズ、QAページ数、本番URL/env確認の証跡をMarkdownとして保存する
 - 管理者マニュアルHTMLに古い制限事項の文言が残っていないことを自動検査し、実装済み機能と説明書の齟齬を防ぐ
 
 ### 運用・監査

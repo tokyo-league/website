@@ -126,6 +126,7 @@ https://<production-domain>/api/auth/callback/google
 - Production環境で必須環境変数がすべて設定されている
 - `npm run security:prod-env -- .env.production.local` が成功している
 - `npm run security:headers -- https://<production-domain>` が成功している
+- `npm run delivery:evidence -- --production-url https://<production-domain> --env-file .env.production.local --include-build --include-e2e` で納品前証跡レポートを生成している
 - Vercel Production Environmentに `E2E_TEST_MODE` が存在しない。存在してもproductionではE2Eバイパスが無効化される
 
 ## 納品PDF生成
@@ -166,13 +167,24 @@ npm run docs:admin:qa
 npm run docs:delivery:check
 ```
 
+納品前証跡レポート:
+
+```bash
+npm run delivery:evidence -- --production-url https://<production-domain> --env-file .env.production.local --include-build --include-e2e
+```
+
+出力:
+
+- `docs/output/delivery-evidence-YYYYMMDD-HHMMSS.md`
+
 確認内容:
 
 - 仕様書PDFと管理者ツール説明書PDFが生成済みで、極端に小さいファイルではない
-- 管理者ツール説明書のQA画像が19ページ分生成されている
+- 管理者ツール説明書のQA画像が20ページ分生成されている
 - Runbookと納品チェックリストが存在する
 - 管理者マニュアルHTMLに古い制限文が残っていない
 - Runbookに本番env安全確認手順が記載されている
+- 証跡レポートにコマンド結果、PDFサイズ、QAページ数、本番URL/env確認の実施有無が記録されている
 
 ## ロールバック
 
@@ -192,6 +204,7 @@ npm run docs:delivery:check
 - `npm run test:e2e` の成功ログ
 - `npm run security:headers -- https://<production-domain>` の成功ログ
 - `npm run docs:delivery:check` の成功ログ
+- `npm run delivery:evidence -- --production-url https://<production-domain> --env-file .env.production.local --include-build --include-e2e` の出力Markdown
 - 仕様書PDF
 - 管理者ツール説明書PDF
 - 初期Ownerメールアドレス

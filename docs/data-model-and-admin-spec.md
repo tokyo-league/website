@@ -660,6 +660,8 @@
 
 `robots.txt` でも `/admin`, `/login`, `/api/auth` のクロールを禁止する。
 
+納品前に `npm run security:headers -- https://<production-domain>` を実行し、公開トップ、ログイン画面、認証API、robots.txt の本番ヘッダーを確認する。
+
 ### 秘密情報・環境変数
 
 - `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `DATABASE_URL`, `DIRECT_URL`, `BLOB_READ_WRITE_TOKEN` は環境変数で管理し、リポジトリへコミットしない

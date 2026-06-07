@@ -124,6 +124,7 @@ https://<production-domain>/api/auth/callback/google
 - `/login`, `/admin`, `/api/auth/*` の上限超過レスポンスに `Retry-After` と共通セキュリティヘッダーが付与される
 - Production環境で必須環境変数がすべて設定されている
 - `npm run security:prod-env -- .env.production.local` が成功している
+- `npm run security:headers -- https://<production-domain>` が成功している
 - Vercel Production Environmentに `E2E_TEST_MODE` が存在しない。存在してもproductionではE2Eバイパスが無効化される
 
 ## 納品PDF生成
@@ -188,6 +189,7 @@ npm run docs:delivery:check
 - Vercel Production Deployment URL
 - `npm run build` の成功ログ
 - `npm run test:e2e` の成功ログ
+- `npm run security:headers -- https://<production-domain>` の成功ログ
 - `npm run docs:delivery:check` の成功ログ
 - 仕様書PDF
 - 管理者ツール説明書PDF

@@ -30,6 +30,7 @@
 | 外部URL制限 | 公式サイトURL、画像パスは `http` / `https` または安全な相対パスのみ許可 | 実装済み |
 | アップロード制限 | 画像・資料のMIME type、拡張子、ファイル内容、サイズ制限 | 実装済み |
 | HTTPセキュリティヘッダー | `next.config.ts` | 実装済み |
+| 本番ヘッダー確認 | `npm run security:headers -- https://<production-domain>` で公開/ログイン/認証API/robotsを確認 | 実装済み |
 | 管理画面noindex/no-store | `/admin`, `/login`, `/api/auth/*` に `X-Robots-Tag` と `Cache-Control` | 実装済み |
 | robots.txt | `/admin`, `/login`, `/api/auth` のクロール禁止 | 実装済み |
 | ヘッダー回帰テスト | `tests/e2e/security.spec.ts` | E2E通過 |
@@ -48,6 +49,7 @@
 
 - 本番デプロイURLで公開サイトの主要導線を確認する
 - 本番デプロイURLで管理画面ログイン、Owner操作、Editor操作を確認する
+- 本番デプロイURLで `npm run security:headers -- https://<production-domain>` を実行し、ヘッダー証跡を保存する
 - 本番環境の `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `DATABASE_URL`, `DIRECT_URL`, `BLOB_READ_WRITE_TOKEN` を `npm run security:prod-env -- .env.production.local` で確認する
 - Google OAuthのリダイレクトURIが本番ドメインだけに限定されていることを確認する
 - 初期Ownerメールアドレスを確定し、`npm run prisma:seed-admin` またはDB管理画面で登録する

@@ -18,6 +18,7 @@
     "docs:admin:qa": "node ./docs/admin-manual/render-manual-qa.mjs",
     "docs:delivery:check": "node ./scripts/check-delivery-artifacts.mjs",
     "delivery:evidence": "node ./scripts/collect-delivery-evidence.mjs",
+    "public:routes": "node ./scripts/check-public-routes.mjs",
     "security:headers": "node ./scripts/check-security-headers.mjs",
     "security:prod-env": "node ./scripts/check-production-env.mjs",
     "prisma:generate": "prisma generate",

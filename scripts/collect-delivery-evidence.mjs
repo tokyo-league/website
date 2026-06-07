@@ -41,8 +41,17 @@ if (options.includeE2e) {
 }
 
 if (options.productionUrl) {
+  runAndCollect("本番公開サイト主要導線", npmArgs("run", "public:routes", "--", options.productionUrl));
   runAndCollect("本番セキュリティヘッダー", npmArgs("run", "security:headers", "--", options.productionUrl));
 } else {
+  sections.push(`## 本番公開サイト主要導線
+
+未実行です。本番URL確定後に以下で証跡を保存します。
+
+\`\`\`bash
+npm run delivery:evidence -- --production-url https://<production-domain>
+\`\`\``);
+
   sections.push(`## 本番セキュリティヘッダー
 
 未実行です。本番URL確定後に以下で証跡を保存します。

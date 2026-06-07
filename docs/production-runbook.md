@@ -94,6 +94,7 @@ https://<production-domain>/api/auth/callback/google
 
 公開サイト:
 
+- `npm run public:routes -- https://<production-domain>` が成功している
 - `/` でトップページが表示される
 - `/competitions` から大会詳細、リーグ詳細へ遷移できる
 - `/news` で公開ニュースが表示される
@@ -126,6 +127,7 @@ https://<production-domain>/api/auth/callback/google
 - Production環境で必須環境変数がすべて設定されている
 - `npm run security:prod-env -- .env.production.local` が成功している
 - `npm run security:headers -- https://<production-domain>` が成功している
+- `npm run public:routes -- https://<production-domain>` が成功している
 - `npm run delivery:evidence -- --production-url https://<production-domain> --env-file .env.production.local --include-build --include-e2e` で納品前証跡レポートを生成している
 - Vercel Production Environmentに `E2E_TEST_MODE` が存在しない。存在してもproductionではE2Eバイパスが無効化される
 
@@ -177,6 +179,12 @@ npm run delivery:evidence -- --production-url https://<production-domain> --env-
 
 - `docs/output/delivery-evidence-YYYYMMDD-HHMMSS.md`
 
+本番公開導線チェック:
+
+```bash
+npm run public:routes -- https://<production-domain>
+```
+
 確認内容:
 
 - 仕様書PDFと管理者ツール説明書PDFが生成済みで、極端に小さいファイルではない
@@ -185,6 +193,7 @@ npm run delivery:evidence -- --production-url https://<production-domain> --env-
 - 管理者マニュアルHTMLに古い制限文が残っていない
 - Runbookに本番env安全確認手順が記載されている
 - 証跡レポートにコマンド結果、PDFサイズ、QAページ数、本番URL/env確認の実施有無が記録されている
+- 公開トップ、試合情報、大会詳細、リーグ詳細、ニュース、チーム、資料、問い合わせの200応答、主要見出し、主要リンクを確認できる
 
 ## ロールバック
 
@@ -200,6 +209,7 @@ npm run delivery:evidence -- --production-url https://<production-domain> --env-
 納品直前に以下を保存・共有します。
 
 - Vercel Production Deployment URL
+- `npm run public:routes -- https://<production-domain>` の成功ログ
 - `npm run build` の成功ログ
 - `npm run test:e2e` の成功ログ
 - `npm run security:headers -- https://<production-domain>` の成功ログ

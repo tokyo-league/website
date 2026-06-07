@@ -32,6 +32,7 @@ ${artifactRows().join("\n")}`);
 
 runAndCollect("納品物自動チェック", npmArgs("run", "docs:delivery:check"));
 runAndCollect("セキュリティ基準チェック", npmArgs("run", "security:baseline"));
+runAndCollect("秘密情報管理チェック", npmArgs("run", "security:secrets"));
 
 if (options.includeBuild) {
   runAndCollect("本番ビルド", npmArgs("run", "build"));

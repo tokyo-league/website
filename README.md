@@ -22,6 +22,7 @@
 - `npm run build`: 本番ビルド
 - `npm run test:e2e`: 公開サイト・管理者ツール・セキュリティヘッダーのE2E確認
 - `npm run security:baseline`: CSP、private routeヘッダー、レート制限、本番env検査、E2E本番無効化の静的確認
+- `npm run security:secrets`: env、納品証跡、秘密鍵、実トークンらしき値の混入確認
 - `npm run prisma:push`: `schema.prisma` をDBへ反映
 - `npm run docs:spec`: 仕様書PDF生成
 - `npm run docs:admin`: 管理者ツール説明書PDF生成

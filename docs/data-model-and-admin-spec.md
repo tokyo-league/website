@@ -668,6 +668,7 @@
 - `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `DATABASE_URL`, `DIRECT_URL`, `BLOB_READ_WRITE_TOKEN` は環境変数で管理し、リポジトリへコミットしない
 - Vercel Production Environmentでは上記必須環境変数の欠落と主要な形式不備をアプリ起動時に検出し、設定漏れや危険な値のまま本番運用しない
 - 納品前に `npm run security:prod-env -- .env.production.local` を実行し、値を表示せずに必須項目、`E2E_TEST_MODE` 誤設定、OAuth/DB/Blob形式を確認する
+- 納品前に `npm run security:secrets` を実行し、追跡済みenv、納品証跡Markdown、秘密鍵、実トークンらしき値がリポジトリに混入していないことを確認する
 - 初期管理者の登録は `SEED_ADMIN_EMAIL` を使った明示的なシード実行、またはDB管理画面での登録に限定する
 - 本番環境のGoogle OAuthリダイレクトURIはデプロイドメインに限定する
 - Vercel Production Environmentに `E2E_TEST_MODE` を設定しない。誤設定されてもproductionではアプリ側で無効化する
@@ -676,6 +677,7 @@
 
 - 納品前に `npm run docs:delivery:check` を実行し、仕様書PDF、管理者ツール説明書PDF、QA画像、Runbook、納品チェックリストが揃っていることを確認する
 - 納品前に `npm run security:baseline` を実行し、セキュリティ設定の必須条件がコード上で維持されていることを確認する
+- 納品前に `npm run security:secrets` を実行し、秘密情報と生成証跡の混入がないことを確認する
 - 納品前に `npm run delivery:evidence -- --production-url https://<production-domain> --env-file .env.production.local --include-build --include-e2e` を実行し、コマンド結果、PDFサイズ、QAページ数、本番URL/env確認の証跡をMarkdownとして保存する
 - 本番公開サイトは `npm run public:routes -- https://<production-domain>` で主要公開ページの200応答、見出し、主要リンクを確認する
 - 本番管理者ツールは `npm run admin:routes -- https://<production-domain>` でログイン画面、未ログイン管理画面redirect、認証session API、Google providerを確認する

@@ -36,6 +36,14 @@ npm run security:prod-env -- .env.production.local
 
 このコマンドは `E2E_TEST_MODE` の誤設定、短すぎる `AUTH_SECRET`、Google OAuth Client ID形式、PostgreSQL URL形式、Vercel Blob read/write token形式を確認します。結果は値そのものを含まないため、納品前証跡として共有できます。
 
+リポジトリ側の秘密情報混入も納品前に確認します。
+
+```bash
+npm run security:secrets
+```
+
+このコマンドは追跡済みenv、納品証跡Markdown、秘密鍵、実トークンらしき値がリポジトリに含まれていないことを確認します。
+
 ## 初回デプロイ手順
 
 1. Vercel ProjectをGitHubリポジトリに接続する
@@ -128,6 +136,7 @@ https://<production-domain>/api/auth/callback/google
 - `/login`, `/admin`, `/api/auth/*` の上限超過レスポンスに `Retry-After` と共通セキュリティヘッダーが付与される
 - Production環境で必須環境変数がすべて設定されている
 - `npm run security:baseline` が成功している
+- `npm run security:secrets` が成功している
 - `npm run security:prod-env -- .env.production.local` が成功している
 - `npm run security:headers -- https://<production-domain>` が成功している
 - `npm run public:routes -- https://<production-domain>` が成功している
@@ -179,6 +188,12 @@ npm run docs:delivery:check
 npm run security:baseline
 ```
 
+秘密情報管理チェック:
+
+```bash
+npm run security:secrets
+```
+
 納品前証跡レポート:
 
 ```bash
@@ -209,6 +224,7 @@ npm run admin:routes -- https://<production-domain>
 - 管理者マニュアルHTMLに古い制限文が残っていない
 - Runbookに本番env安全確認手順が記載されている
 - CSP、private routeヘッダー、レート制限、本番env検査、E2E本番無効化の静的基準を確認できる
+- 追跡済みenv、納品証跡Markdown、秘密鍵、実トークンらしき値の混入がないことを確認できる
 - 証跡レポートにコマンド結果、PDFサイズ、QAページ数、本番URL/env確認の実施有無が記録されている
 - 公開トップ、試合情報、大会詳細、リーグ詳細、ニュース、チーム、資料、問い合わせの200応答、主要見出し、主要リンクを確認できる
 - ログイン画面、未ログイン管理画面redirect、認証session API、Google providerを確認できる
@@ -232,6 +248,7 @@ npm run admin:routes -- https://<production-domain>
 - `npm run build` の成功ログ
 - `npm run test:e2e` の成功ログ
 - `npm run security:baseline` の成功ログ
+- `npm run security:secrets` の成功ログ
 - `npm run security:headers -- https://<production-domain>` の成功ログ
 - `npm run docs:delivery:check` の成功ログ
 - `npm run delivery:evidence -- --production-url https://<production-domain> --env-file .env.production.local --include-build --include-e2e` の出力Markdown

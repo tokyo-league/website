@@ -44,6 +44,14 @@ npm run security:secrets
 
 このコマンドは追跡済みenv、納品証跡Markdown、秘密鍵、実トークンらしき値がリポジトリに含まれていないことを確認します。
 
+依存関係の取得元とlockfileも納品前に確認します。
+
+```bash
+npm run security:supply-chain
+```
+
+このコマンドは `package-lock.json`、直接依存の取得元、lockfileのresolved URL、integrity、root install hookを確認します。
+
 ## 初回デプロイ手順
 
 1. Vercel ProjectをGitHubリポジトリに接続する
@@ -103,7 +111,7 @@ https://<production-domain>/api/auth/callback/google
 納品ゲート:
 
 - `npm run delivery:gate` が成功している
-- `delivery:gate` で仕様書PDF生成、管理者ツール説明書PDF生成、QA画像生成、納品物チェック、セキュリティ基準チェック、秘密情報管理チェック、ビルド、E2Eが実行されている
+- `delivery:gate` で仕様書PDF生成、管理者ツール説明書PDF生成、QA画像生成、納品物チェック、セキュリティ基準チェック、秘密情報管理チェック、依存関係供給網チェック、ビルド、E2Eが実行されている
 
 公開サイト:
 
@@ -142,6 +150,7 @@ https://<production-domain>/api/auth/callback/google
 - Production環境で必須環境変数がすべて設定されている
 - `npm run security:baseline` が成功している
 - `npm run security:secrets` が成功している
+- `npm run security:supply-chain` が成功している
 - `npm run security:prod-env -- .env.production.local` が成功している
 - `npm run security:headers -- https://<production-domain>` が成功している
 - `npm run public:routes -- https://<production-domain>` が成功している
@@ -205,6 +214,12 @@ npm run security:baseline
 npm run security:secrets
 ```
 
+依存関係供給網チェック:
+
+```bash
+npm run security:supply-chain
+```
+
 納品前証跡レポート:
 
 ```bash
@@ -237,6 +252,7 @@ npm run admin:routes -- https://<production-domain>
 - Runbookに本番env安全確認手順が記載されている
 - CSP、private routeヘッダー、レート制限、本番env検査、E2E本番無効化の静的基準を確認できる
 - 追跡済みenv、納品証跡Markdown、秘密鍵、実トークンらしき値の混入がないことを確認できる
+- lockfile、依存取得元、integrity、root install hookを確認できる
 - 証跡レポートにコマンド結果、PDFサイズ、QAページ数、本番URL/env確認の実施有無が記録されている
 - 公開トップ、試合情報、大会詳細、リーグ詳細、ニュース、チーム、資料、問い合わせの200応答、主要見出し、主要リンクを確認できる
 - ログイン画面、未ログイン管理画面redirect、認証session API、Google providerを確認できる
@@ -262,6 +278,7 @@ npm run admin:routes -- https://<production-domain>
 - `npm run test:e2e` の成功ログ
 - `npm run security:baseline` の成功ログ
 - `npm run security:secrets` の成功ログ
+- `npm run security:supply-chain` の成功ログ
 - `npm run security:headers -- https://<production-domain>` の成功ログ
 - `npm run docs:delivery:check` の成功ログ
 - `npm run delivery:evidence -- --production-url https://<production-domain> --env-file .env.production.local --include-build --include-e2e` の出力Markdown

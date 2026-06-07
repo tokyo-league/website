@@ -9,6 +9,7 @@ const steps = [
   ["納品物自動チェック", ["run", "docs:delivery:check"]],
   ["セキュリティ基準チェック", ["run", "security:baseline"]],
   ["秘密情報管理チェック", ["run", "security:secrets"]],
+  ["依存関係供給網チェック", ["run", "security:supply-chain"]],
   ...(options.skipBuild ? [] : [["本番ビルド", ["run", "build"]]]),
   ...(options.skipE2e ? [] : [["E2Eテスト", ["run", "test:e2e"]]]),
 ];

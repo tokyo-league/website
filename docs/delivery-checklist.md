@@ -15,7 +15,7 @@
 | 納品ハンドオフ | `docs/delivery-handoff.md` | 手順確認 | 作成済み |
 | 納品物自動チェック | PDF、QA画像、Runbook、古い文言混入 | `npm run docs:delivery:check` | 実装済み |
 | 納品前証跡レポート | `docs/output/delivery-evidence-*.md` | `npm run delivery:evidence` | 実装済み |
-| 納品ゲート | PDF生成、QA画像生成、納品物チェック、セキュリティ基準、秘密情報管理、ビルド、E2E | `npm run delivery:gate` | 実装済み |
+| 納品ゲート | PDF生成、QA画像生成、納品物チェック、セキュリティ基準、秘密情報管理、依存関係供給網、ビルド、E2E | `npm run delivery:gate` | 実装済み |
 | 本番公開導線確認 | 公開トップ、試合情報、大会詳細、リーグ詳細、ニュース、チーム、資料、問い合わせ | `npm run public:routes -- https://<production-domain>` | 実装済み |
 | 本番管理者到達確認 | ログイン画面、未ログイン管理画面redirect、認証session API、Google provider | `npm run admin:routes -- https://<production-domain>` | 実装済み |
 
@@ -32,6 +32,7 @@
 | Production環境変数検出 | Productionで必須環境変数の欠落を起動時検出 | 実装済み |
 | 本番env安全確認 | `npm run security:prod-env -- .env.production.local` で必須項目、E2E誤設定、OAuth/DB/Blob形式を値非表示で確認 | 実装済み |
 | 秘密情報管理チェック | `npm run security:secrets` で追跡済みenv、納品証跡Markdown、秘密鍵、実トークンらしき値の混入を確認 | 実装済み |
+| 依存関係供給網チェック | `npm run security:supply-chain` でlockfile、依存取得元、integrity、root install hookを確認 | 実装済み |
 | E2Eバイパス本番無効化 | `lib/test-mode.ts`、`tests/e2e/security.spec.ts` | 実装済み |
 | 入力サニタイズ | `lib/security.ts` と各管理アクション | 実装済み |
 | 外部URL制限 | 公式サイトURL、画像パスは `http` / `https` または安全な相対パスのみ許可 | 実装済み |
@@ -58,6 +59,7 @@
 - `npm run delivery:gate`: 成功
 - `npm run security:baseline`: 成功
 - `npm run security:secrets`: 成功
+- `npm run security:supply-chain`: 成功
 - `npm run public:routes`: ローカルE2Eモードで成功
 - `npm run admin:routes`: ローカルGoogle設定あり・未ログイン状態で成功
 
@@ -66,7 +68,7 @@
 - 本番デプロイURLで `npm run public:routes -- https://<production-domain>` を実行し、公開サイトの主要導線証跡を保存する
 - 本番デプロイURLで `npm run admin:routes -- https://<production-domain>` を実行し、管理者ツールの到達・保護状態証跡を保存する
 - 本番デプロイURLで管理画面ログイン、Owner操作、Editor操作を確認する
-- 納品直前に `npm run delivery:gate` を実行し、PDF生成、QA画像生成、納品物チェック、セキュリティ基準、秘密情報管理、ビルド、E2Eを一括確認する
+- 納品直前に `npm run delivery:gate` を実行し、PDF生成、QA画像生成、納品物チェック、セキュリティ基準、秘密情報管理、依存関係供給網、ビルド、E2Eを一括確認する
 - 本番デプロイURLで `npm run delivery:evidence -- --production-url https://<production-domain> --env-file .env.production.local --include-build --include-e2e` を実行し、証跡レポートを保存する
 - 本番環境の `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `DATABASE_URL`, `DIRECT_URL`, `BLOB_READ_WRITE_TOKEN` を `npm run security:prod-env -- .env.production.local` で確認する
 - `npm run security:secrets` でリポジトリに秘密情報や納品証跡Markdownが混入していないことを確認する

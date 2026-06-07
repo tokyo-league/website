@@ -23,6 +23,7 @@
     "admin:routes": "node ./scripts/check-admin-routes.mjs",
     "security:baseline": "node ./scripts/check-security-baseline.mjs",
     "security:secrets": "node ./scripts/check-secret-hygiene.mjs",
+    "security:supply-chain": "node ./scripts/check-supply-chain.mjs",
     "security:headers": "node ./scripts/check-security-headers.mjs",
     "security:prod-env": "node ./scripts/check-production-env.mjs",
     "prisma:generate": "prisma generate",

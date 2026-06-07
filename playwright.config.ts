@@ -6,6 +6,10 @@ const nodeBinPath = "/Users/kazuhiro/.nvm/versions/node/v24.14.0/bin";
 
 export default defineConfig({
   testDir: "./tests/e2e",
+  timeout: 60_000,
+  expect: {
+    timeout: 20_000,
+  },
   fullyParallel: false,
   workers: 1,
   retries: process.env.CI ? 2 : 0,

@@ -57,6 +57,11 @@ checkTextContains({
   requiredText: "npm run security:secrets",
 });
 checkTextContains({
+  label: "依存関係供給網チェック手順",
+  filePath: "docs/production-runbook.md",
+  requiredText: "npm run security:supply-chain",
+});
+checkTextContains({
   label: "納品前証跡レポート手順",
   filePath: "docs/production-runbook.md",
   requiredText: "npm run delivery:evidence -- --production-url https://<production-domain>",

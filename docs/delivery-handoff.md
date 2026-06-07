@@ -16,6 +16,7 @@
 | 本番Runbook | デプロイ、DB反映、初期Owner、OAuth、ロールバック | `docs/production-runbook.md` | 手順共有 |
 | 納品チェックリスト | 納品物、非機能要件、残確認 | `docs/delivery-checklist.md` | 手順共有 |
 | 納品前証跡 | コマンド結果と本番確認結果 | `docs/output/delivery-evidence-*.md` | `npm run delivery:evidence -- --production-url https://<production-domain> --env-file .env.production.local --include-build --include-e2e` |
+| 依存関係供給網 | lockfile、依存取得元、integrity、root install hook | `package.json`, `package-lock.json` | `npm run security:supply-chain` |
 
 ## 最終確認コマンド
 
@@ -31,6 +32,12 @@ npm run delivery:gate
 npm run public:routes -- https://<production-domain>
 npm run admin:routes -- https://<production-domain>
 npm run security:headers -- https://<production-domain>
+```
+
+依存関係供給網の静的チェック:
+
+```bash
+npm run security:supply-chain
 ```
 
 本番環境変数の値非表示チェック:

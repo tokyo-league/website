@@ -118,6 +118,7 @@ https://<production-domain>/api/auth/callback/google
 
 セキュリティ:
 
+- `npm run security:baseline` が成功している
 - `Content-Security-Policy` が付与されている
 - `Strict-Transport-Security` が付与されている
 - `X-Content-Type-Options: nosniff` が付与されている
@@ -126,6 +127,7 @@ https://<production-domain>/api/auth/callback/google
 - `/robots.txt` で `/admin`, `/login`, `/api/auth` が `Disallow` されている
 - `/login`, `/admin`, `/api/auth/*` の上限超過レスポンスに `Retry-After` と共通セキュリティヘッダーが付与される
 - Production環境で必須環境変数がすべて設定されている
+- `npm run security:baseline` が成功している
 - `npm run security:prod-env -- .env.production.local` が成功している
 - `npm run security:headers -- https://<production-domain>` が成功している
 - `npm run public:routes -- https://<production-domain>` が成功している
@@ -171,6 +173,12 @@ npm run docs:admin:qa
 npm run docs:delivery:check
 ```
 
+セキュリティ基準チェック:
+
+```bash
+npm run security:baseline
+```
+
 納品前証跡レポート:
 
 ```bash
@@ -200,6 +208,7 @@ npm run admin:routes -- https://<production-domain>
 - Runbookと納品チェックリストが存在する
 - 管理者マニュアルHTMLに古い制限文が残っていない
 - Runbookに本番env安全確認手順が記載されている
+- CSP、private routeヘッダー、レート制限、本番env検査、E2E本番無効化の静的基準を確認できる
 - 証跡レポートにコマンド結果、PDFサイズ、QAページ数、本番URL/env確認の実施有無が記録されている
 - 公開トップ、試合情報、大会詳細、リーグ詳細、ニュース、チーム、資料、問い合わせの200応答、主要見出し、主要リンクを確認できる
 - ログイン画面、未ログイン管理画面redirect、認証session API、Google providerを確認できる
@@ -222,6 +231,7 @@ npm run admin:routes -- https://<production-domain>
 - `npm run admin:routes -- https://<production-domain>` の成功ログ
 - `npm run build` の成功ログ
 - `npm run test:e2e` の成功ログ
+- `npm run security:baseline` の成功ログ
 - `npm run security:headers -- https://<production-domain>` の成功ログ
 - `npm run docs:delivery:check` の成功ログ
 - `npm run delivery:evidence -- --production-url https://<production-domain> --env-file .env.production.local --include-build --include-e2e` の出力Markdown

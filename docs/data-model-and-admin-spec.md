@@ -661,7 +661,7 @@
 
 `robots.txt` でも `/admin`, `/login`, `/api/auth` のクロールを禁止する。
 
-納品前に `npm run security:headers -- https://<production-domain>` を実行し、公開トップ、ログイン画面、認証API、robots.txt の本番ヘッダーを確認する。
+納品前に `npm run security:baseline` を実行し、CSP、private routeヘッダー、レート制限、本番env検査、E2E本番無効化の静的基準を確認する。さらに `npm run security:headers -- https://<production-domain>` を実行し、公開トップ、ログイン画面、認証API、robots.txt の本番ヘッダーを確認する。
 
 ### 秘密情報・環境変数
 
@@ -675,6 +675,7 @@
 ### 納品物検査
 
 - 納品前に `npm run docs:delivery:check` を実行し、仕様書PDF、管理者ツール説明書PDF、QA画像、Runbook、納品チェックリストが揃っていることを確認する
+- 納品前に `npm run security:baseline` を実行し、セキュリティ設定の必須条件がコード上で維持されていることを確認する
 - 納品前に `npm run delivery:evidence -- --production-url https://<production-domain> --env-file .env.production.local --include-build --include-e2e` を実行し、コマンド結果、PDFサイズ、QAページ数、本番URL/env確認の証跡をMarkdownとして保存する
 - 本番公開サイトは `npm run public:routes -- https://<production-domain>` で主要公開ページの200応答、見出し、主要リンクを確認する
 - 本番管理者ツールは `npm run admin:routes -- https://<production-domain>` でログイン画面、未ログイン管理画面redirect、認証session API、Google providerを確認する

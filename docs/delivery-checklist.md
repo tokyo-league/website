@@ -34,6 +34,7 @@
 | 外部URL制限 | 公式サイトURL、画像パスは `http` / `https` または安全な相対パスのみ許可 | 実装済み |
 | アップロード制限 | 画像・資料のMIME type、拡張子、ファイル内容、サイズ制限 | 実装済み |
 | HTTPセキュリティヘッダー | `next.config.ts` | 実装済み |
+| セキュリティ基準チェック | `npm run security:baseline` でCSP、private routeヘッダー、レート制限、本番env検査、E2E本番無効化を静的確認 | 実装済み |
 | 本番ヘッダー確認 | `npm run security:headers -- https://<production-domain>` で公開/ログイン/認証API/robotsを確認 | 実装済み |
 | 本番公開導線確認 | `npm run public:routes -- https://<production-domain>` で主要公開ページの200応答、見出し、主要リンクを確認 | 実装済み |
 | 本番管理者到達確認 | `npm run admin:routes -- https://<production-domain>` で未ログイン時の管理画面保護とGoogle認証Providerを確認 | 実装済み |
@@ -51,6 +52,7 @@
 - `npm run docs:admin:qa`: 成功
 - `npm run docs:delivery:check`: 成功
 - `npm run delivery:evidence`: 成功
+- `npm run security:baseline`: 成功
 - `npm run public:routes`: ローカルE2Eモードで成功
 - `npm run admin:routes`: ローカルGoogle設定あり・未ログイン状態で成功
 

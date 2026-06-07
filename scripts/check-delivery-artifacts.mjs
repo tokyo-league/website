@@ -42,6 +42,11 @@ checkTextContains({
   requiredText: "npm run security:prod-env -- .env.production.local",
 });
 checkTextContains({
+  label: "セキュリティ基準チェック手順",
+  filePath: "docs/production-runbook.md",
+  requiredText: "npm run security:baseline",
+});
+checkTextContains({
   label: "納品前証跡レポート手順",
   filePath: "docs/production-runbook.md",
   requiredText: "npm run delivery:evidence -- --production-url https://<production-domain>",

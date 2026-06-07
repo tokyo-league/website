@@ -1,6 +1,6 @@
 # 東京リーグ リニューアル納品チェックリスト
 
-最終更新: 2026-06-02 JST
+最終更新: 2026-06-07 JST
 
 ## 納品物
 
@@ -21,6 +21,7 @@
 | 権限管理 | `OWNER` / `EDITOR`、担当リーグ割当、担当者無効化 | 実装済み |
 | サーバー側認可 | `requireOwner`, `getAdminScope` をサーバーアクションで使用 | 実装済み |
 | Production環境変数検出 | Productionで必須環境変数の欠落を起動時検出 | 実装済み |
+| 本番env安全確認 | `npm run security:prod-env -- .env.production.local` で必須項目、E2E誤設定、OAuth/DB/Blob形式を値非表示で確認 | 実装済み |
 | E2Eバイパス本番無効化 | `lib/test-mode.ts`、`tests/e2e/security.spec.ts` | 実装済み |
 | 入力サニタイズ | `lib/security.ts` と各管理アクション | 実装済み |
 | 外部URL制限 | 公式サイトURL、画像パスは `http` / `https` または安全な相対パスのみ許可 | 実装済み |
@@ -33,7 +34,7 @@
 
 ## 直近の検証結果
 
-- `npm run test:e2e`: 19件成功
+- `npm run test:e2e`: 21件成功
 - `npm run build`: 成功。公開トップとニュース一覧は動的レンダリング化し、ビルド時のDB接続エラーログなし
 - `npm run docs:spec`: 成功
 - `npm run docs:admin`: 成功
@@ -43,7 +44,7 @@
 
 - 本番デプロイURLで公開サイトの主要導線を確認する
 - 本番デプロイURLで管理画面ログイン、Owner操作、Editor操作を確認する
-- 本番環境の `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `DATABASE_URL`, `DIRECT_URL`, `BLOB_READ_WRITE_TOKEN` を確認する
+- 本番環境の `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `DATABASE_URL`, `DIRECT_URL`, `BLOB_READ_WRITE_TOKEN` を `npm run security:prod-env -- .env.production.local` で確認する
 - Google OAuthのリダイレクトURIが本番ドメインだけに限定されていることを確認する
 - 初期Ownerメールアドレスを確定し、`npm run prisma:seed-admin` またはDB管理画面で登録する
 - Neon DB接続が本番ビルド・実行時に安定していることを確認する

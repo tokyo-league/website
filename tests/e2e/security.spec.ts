@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { assertDownloadFileAllowed } from "../../lib/download-file-validation";
-import { assertProductionEnvReady, getMissingProductionEnv } from "../../lib/env-validation";
+import { assertProductionEnvReady, getInvalidProductionEnv, getMissingProductionEnv } from "../../lib/env-validation";
 import { assertImageFileAllowed } from "../../lib/image-file-validation";
 import { isE2ETestMode } from "../../lib/test-mode";
 import { normalizeOptionalAssetPath, normalizeOptionalHttpUrl } from "../../lib/url-validation";
@@ -75,11 +75,11 @@ test("Production環境では必須環境変数の欠落を検出する", () => {
   const productionEnv = {
     NODE_ENV: "production",
     VERCEL_ENV: "production",
-    AUTH_SECRET: "secret",
-    AUTH_GOOGLE_ID: "google-id",
+    AUTH_SECRET: "0123456789abcdef0123456789abcdef",
+    AUTH_GOOGLE_ID: "tokyo-league.apps.googleusercontent.com",
     DATABASE_URL: "postgres://example",
     DIRECT_URL: "postgres://example-direct",
-    BLOB_READ_WRITE_TOKEN: "blob-token",
+    BLOB_READ_WRITE_TOKEN: "vercel_blob_rw_token",
   };
 
   expect(getMissingProductionEnv(productionEnv)).toEqual(["AUTH_GOOGLE_SECRET"]);
@@ -91,6 +91,31 @@ test("Production環境では必須環境変数の欠落を検出する", () => {
       VERCEL_ENV: "preview",
     }),
   ).not.toThrow();
+});
+
+test("Production環境では危険な環境変数値を検出する", () => {
+  const productionEnv = {
+    NODE_ENV: "production",
+    VERCEL_ENV: "production",
+    AUTH_SECRET: "short",
+    AUTH_GOOGLE_ID: "google-id",
+    AUTH_GOOGLE_SECRET: "short",
+    DATABASE_URL: "mysql://example",
+    DIRECT_URL: "https://example.com",
+    BLOB_READ_WRITE_TOKEN: "blob-token",
+    E2E_TEST_MODE: "1",
+  };
+
+  expect(getInvalidProductionEnv(productionEnv)).toEqual([
+    "E2E_TEST_MODE",
+    "AUTH_SECRET",
+    "AUTH_GOOGLE_ID",
+    "AUTH_GOOGLE_SECRET",
+    "DATABASE_URL",
+    "DIRECT_URL",
+    "BLOB_READ_WRITE_TOKEN",
+  ]);
+  expect(() => assertProductionEnvReady(productionEnv)).toThrow("Invalid production environment variables");
 });
 
 test("E2E認証バイパスは本番環境では無効化される", () => {

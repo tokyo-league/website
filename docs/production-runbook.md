@@ -1,6 +1,6 @@
 # 東京リーグ 本番デプロイ・運用開始Runbook
 
-最終更新: 2026-06-02 JST
+最終更新: 2026-06-07 JST
 
 このRunbookは、6/20納品前に本番環境を立ち上げ、公開サイト・管理者ツール・PDF納品物を確認するための手順です。時刻の扱いは日本時間を基準にします。
 
@@ -26,6 +26,15 @@
 | `SEED_ADMIN_NAME` | Local / one-off command | 初期Owner表示名 | 未設定時は `Tokyo League Admin` |
 
 Production環境では `DATABASE_URL`, `DIRECT_URL`, `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `BLOB_READ_WRITE_TOKEN` の欠落をアプリ起動時に検出します。Preview / Development ではローカル検証や画面確認を優先し、未設定時はログイン画面に設定メモを表示します。
+
+納品前にはVercel Production環境変数をpullし、値を表示せずに必須項目と主要な形式だけを検査します。
+
+```bash
+vercel env pull .env.production.local --environment=production --yes
+npm run security:prod-env -- .env.production.local
+```
+
+このコマンドは `E2E_TEST_MODE` の誤設定、短すぎる `AUTH_SECRET`、Google OAuth Client ID形式、PostgreSQL URL形式、Vercel Blob read/write token形式を確認します。結果は値そのものを含まないため、納品前証跡として共有できます。
 
 ## 初回デプロイ手順
 
@@ -111,6 +120,7 @@ https://<production-domain>/api/auth/callback/google
 - `/admin` と `/login` に `X-Robots-Tag: noindex, nofollow, noarchive` と `Cache-Control: no-store` が付与されている
 - `/robots.txt` で `/admin`, `/login`, `/api/auth` が `Disallow` されている
 - Production環境で必須環境変数がすべて設定されている
+- `npm run security:prod-env -- .env.production.local` が成功している
 - Vercel Production Environmentに `E2E_TEST_MODE` が存在しない。存在してもproductionではE2Eバイパスが無効化される
 
 ## 納品PDF生成
@@ -164,4 +174,4 @@ npm run docs:admin:qa
 - 仕様書PDF
 - 管理者ツール説明書PDF
 - 初期Ownerメールアドレス
-- 本番環境変数の設定有無チェック結果。値そのものは共有しない
+- `npm run security:prod-env -- .env.production.local` の成功結果。値そのものは共有しない

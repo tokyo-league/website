@@ -43,6 +43,14 @@ test("資料管理ページが表示できる", async ({ page }) => {
   await expect(page.getByText("公開URL", { exact: true })).toBeVisible();
 });
 
+test("チーム一覧で削除前の参照状況が確認できる", async ({ page }) => {
+  await page.goto("/admin/teams");
+
+  await expect(page.getByRole("heading", { name: "チーム管理" })).toBeVisible();
+  await expect(page.getByText("削除前確認", { exact: true })).toBeVisible();
+  await expect(page.getByText(/参照なし|所属リーグ \d+ \/ 試合 \d+ \/ 順位 \d+/).first()).toBeVisible();
+});
+
 test("担当リーグ割当で担当者編集UIが表示できる", async ({ page }) => {
   await page.goto("/admin/assignments");
 

@@ -9,7 +9,12 @@ const initialTeamActionState: TeamActionState = {
   message: "",
 };
 
-export function AdminTeamDeleteButton({ teamId }: { teamId: string }) {
+type AdminTeamDeleteButtonProps = {
+  teamId: string;
+  disabledReason?: string;
+};
+
+export function AdminTeamDeleteButton({ teamId, disabledReason }: AdminTeamDeleteButtonProps) {
   const [state, action, pending] = useActionState(deleteTeam, initialTeamActionState);
   const [message, setMessage] = useState("");
 
@@ -21,12 +26,18 @@ export function AdminTeamDeleteButton({ teamId }: { teamId: string }) {
 
   return (
     <div className="admin-inline-actions">
-      <ConfirmForm action={action} message="このチームを削除します。よろしいですか？">
-        <input type="hidden" name="teamId" value={teamId} />
-        <button type="submit" className="button button--ghost" disabled={pending}>
-          {pending ? "削除中..." : "削除"}
+      {disabledReason ? (
+        <button type="button" className="button button--ghost" disabled title={disabledReason}>
+          削除
         </button>
-      </ConfirmForm>
+      ) : (
+        <ConfirmForm action={action} message="このチームを削除します。よろしいですか？">
+          <input type="hidden" name="teamId" value={teamId} />
+          <button type="submit" className="button button--ghost" disabled={pending}>
+            {pending ? "削除中..." : "削除"}
+          </button>
+        </ConfirmForm>
+      )}
       {message ? <span className="admin-inline-message">{message}</span> : null}
     </div>
   );

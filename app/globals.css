@@ -1638,8 +1638,21 @@ button {
   grid-template-columns: 1.1fr 1.2fr 1.2fr 0.9fr auto;
 }
 
+.admin-table__row--teams {
+  grid-template-columns: 1.1fr 0.8fr 1fr 1fr minmax(180px, 1fr) auto;
+}
+
 .admin-table__row--downloads {
   grid-template-columns: 0.8fr minmax(180px, 1.5fr) 0.7fr minmax(140px, 1fr) 0.8fr auto;
+}
+
+.admin-team-references {
+  color: var(--warning);
+  font-size: 13px;
+}
+
+.admin-team-references.is-empty {
+  color: var(--muted);
 }
 
 .admin-download-file {

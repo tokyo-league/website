@@ -178,9 +178,11 @@ export async function deleteTeam(
   const hasReferences = Object.values(team._count).reduce((sum, count) => sum + count, 0) > 0;
 
   if (hasReferences) {
+    const matchCount = team._count.homeMatches + team._count.awayMatches;
+
     return {
       status: "error",
-      message: "リーグ所属や試合結果に紐づくため削除できません。",
+      message: `リーグ所属や試合結果に紐づくため削除できません。所属リーグ ${team._count.divisions} / 試合 ${matchCount} / 順位 ${team._count.standings}`,
     };
   }
 

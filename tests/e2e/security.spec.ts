@@ -3,6 +3,7 @@ import { applyAdminRecordToJwt, getAdminJwtLookupEmail } from "../../lib/admin-s
 import { assertDownloadFileAllowed } from "../../lib/download-file-validation";
 import { assertProductionEnvReady, getInvalidProductionEnv, getMissingProductionEnv } from "../../lib/env-validation";
 import { assertImageFileAllowed } from "../../lib/image-file-validation";
+import { checkRateLimit, createRateLimitStore, getRateLimitKey } from "../../lib/rate-limit";
 import { isE2ETestMode } from "../../lib/test-mode";
 import { normalizeOptionalAssetPath, normalizeOptionalHttpUrl } from "../../lib/url-validation";
 
@@ -167,6 +168,33 @@ test("管理者JWTはDB上の有効状態で再検証される", () => {
     }),
   ).toBeNull();
   expect(applyAdminRecordToJwt(token, null)).toBeNull();
+});
+
+test("ログインと管理画面のレート制限は上限超過を検出する", () => {
+  const store = createRateLimitStore();
+  const config = {
+    windowMs: 60_000,
+    maxRequests: 2,
+  };
+  const key = getRateLimitKey("login", "203.0.113.10");
+
+  expect(checkRateLimit(key, config, 1_000, store)).toMatchObject({
+    allowed: true,
+    remaining: 1,
+  });
+  expect(checkRateLimit(key, config, 2_000, store)).toMatchObject({
+    allowed: true,
+    remaining: 0,
+  });
+  expect(checkRateLimit(key, config, 3_000, store)).toMatchObject({
+    allowed: false,
+    remaining: 0,
+    retryAfterSeconds: 58,
+  });
+  expect(checkRateLimit(key, config, 62_000, store)).toMatchObject({
+    allowed: true,
+    remaining: 1,
+  });
 });
 
 test("資料アップロードはMIME typeとファイル内容を検証する", () => {

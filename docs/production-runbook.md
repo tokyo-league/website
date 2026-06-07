@@ -111,6 +111,7 @@ https://<production-domain>/api/auth/callback/google
 - 無効化済み担当者の既存JWTセッションもDB再検証で破棄される
 - Editorで割当済みリーグの結果管理だけ操作できる
 - 画像・資料アップロードがVercel Blobへ保存される
+- `/login` と `/admin` の短時間大量アクセスはアプリ側レート制限で `429 Too Many Requests` になる
 
 セキュリティ:
 
@@ -120,6 +121,7 @@ https://<production-domain>/api/auth/callback/google
 - `Permissions-Policy` で不要なデバイス権限が無効化されている
 - `/admin` と `/login` に `X-Robots-Tag: noindex, nofollow, noarchive` と `Cache-Control: no-store` が付与されている
 - `/robots.txt` で `/admin`, `/login`, `/api/auth` が `Disallow` されている
+- `/login` と `/admin` の上限超過レスポンスに `Retry-After` が付与される
 - Production環境で必須環境変数がすべて設定されている
 - `npm run security:prod-env -- .env.production.local` が成功している
 - Vercel Production Environmentに `E2E_TEST_MODE` が存在しない。存在してもproductionではE2Eバイパスが無効化される

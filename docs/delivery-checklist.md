@@ -15,6 +15,7 @@
 | 納品物自動チェック | PDF、QA画像、Runbook、古い文言混入 | `npm run docs:delivery:check` | 実装済み |
 | 納品前証跡レポート | `docs/output/delivery-evidence-*.md` | `npm run delivery:evidence` | 実装済み |
 | 本番公開導線確認 | 公開トップ、試合情報、大会詳細、リーグ詳細、ニュース、チーム、資料、問い合わせ | `npm run public:routes -- https://<production-domain>` | 実装済み |
+| 本番管理者到達確認 | ログイン画面、未ログイン管理画面redirect、認証session API、Google provider | `npm run admin:routes -- https://<production-domain>` | 実装済み |
 
 ## 非機能要件: セキュリティ
 
@@ -35,6 +36,7 @@
 | HTTPセキュリティヘッダー | `next.config.ts` | 実装済み |
 | 本番ヘッダー確認 | `npm run security:headers -- https://<production-domain>` で公開/ログイン/認証API/robotsを確認 | 実装済み |
 | 本番公開導線確認 | `npm run public:routes -- https://<production-domain>` で主要公開ページの200応答、見出し、主要リンクを確認 | 実装済み |
+| 本番管理者到達確認 | `npm run admin:routes -- https://<production-domain>` で未ログイン時の管理画面保護とGoogle認証Providerを確認 | 実装済み |
 | 管理画面noindex/no-store | `/admin`, `/login`, `/api/auth/*` に `X-Robots-Tag` と `Cache-Control` | 実装済み |
 | robots.txt | `/admin`, `/login`, `/api/auth` のクロール禁止 | 実装済み |
 | ヘッダー回帰テスト | `tests/e2e/security.spec.ts` | E2E通過 |
@@ -50,10 +52,12 @@
 - `npm run docs:delivery:check`: 成功
 - `npm run delivery:evidence`: 成功
 - `npm run public:routes`: ローカルE2Eモードで成功
+- `npm run admin:routes`: ローカルGoogle設定あり・未ログイン状態で成功
 
 ## 納品前に残す確認
 
 - 本番デプロイURLで `npm run public:routes -- https://<production-domain>` を実行し、公開サイトの主要導線証跡を保存する
+- 本番デプロイURLで `npm run admin:routes -- https://<production-domain>` を実行し、管理者ツールの到達・保護状態証跡を保存する
 - 本番デプロイURLで管理画面ログイン、Owner操作、Editor操作を確認する
 - 本番デプロイURLで `npm run delivery:evidence -- --production-url https://<production-domain> --env-file .env.production.local --include-build --include-e2e` を実行し、証跡レポートを保存する
 - 本番環境の `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `DATABASE_URL`, `DIRECT_URL`, `BLOB_READ_WRITE_TOKEN` を `npm run security:prod-env -- .env.production.local` で確認する

@@ -41,7 +41,18 @@ if (options.includeE2e) {
 }
 
 if (options.productionUrl) {
-  runAndCollect("本番公開サイト主要導線", npmArgs("run", "public:routes", "--", options.productionUrl));
+  if (!options.skipPublicRoutes) {
+    runAndCollect("本番公開サイト主要導線", npmArgs("run", "public:routes", "--", options.productionUrl));
+  } else {
+    sections.push(skippedSection("本番公開サイト主要導線", "一時検証オプション --skip-public-routes により省略しました。納品前証跡では省略しないでください。"));
+  }
+
+  if (!options.skipAdminRoutes) {
+    runAndCollect("本番管理者ツール到達確認", npmArgs("run", "admin:routes", "--", options.productionUrl));
+  } else {
+    sections.push(skippedSection("本番管理者ツール到達確認", "一時検証オプション --skip-admin-routes により省略しました。納品前証跡では省略しないでください。"));
+  }
+
   runAndCollect("本番セキュリティヘッダー", npmArgs("run", "security:headers", "--", options.productionUrl));
 } else {
   sections.push(`## 本番公開サイト主要導線
@@ -53,6 +64,14 @@ npm run delivery:evidence -- --production-url https://<production-domain>
 \`\`\``);
 
   sections.push(`## 本番セキュリティヘッダー
+
+未実行です。本番URL確定後に以下で証跡を保存します。
+
+\`\`\`bash
+npm run delivery:evidence -- --production-url https://<production-domain>
+\`\`\``);
+
+  sections.push(`## 本番管理者ツール到達確認
 
 未実行です。本番URL確定後に以下で証跡を保存します。
 
@@ -115,6 +134,8 @@ function parseArgs(args) {
     outputPath: undefined,
     includeBuild: false,
     includeE2e: false,
+    skipPublicRoutes: false,
+    skipAdminRoutes: false,
   };
 
   for (let index = 0; index < args.length; index += 1) {
@@ -142,6 +163,16 @@ function parseArgs(args) {
 
     if (arg === "--include-e2e") {
       parsed.includeE2e = true;
+      continue;
+    }
+
+    if (arg === "--skip-public-routes") {
+      parsed.skipPublicRoutes = true;
+      continue;
+    }
+
+    if (arg === "--skip-admin-routes") {
+      parsed.skipAdminRoutes = true;
       continue;
     }
 
@@ -176,6 +207,8 @@ Options:
   --env-file <path>       本番envファイルを値非表示で確認する
   --include-build         npm run build の結果も保存する
   --include-e2e           npm run test:e2e の結果も保存する
+  --skip-public-routes    production-url指定時に公開導線チェックを省略する
+  --skip-admin-routes     production-url指定時に管理者到達チェックを省略する
   --output <path>         出力先Markdownを指定する`);
   process.exit(code);
 }
@@ -250,6 +283,12 @@ function runCommand(command, args, { collectOnly = false } = {}) {
 
 function npmArgs(...args) {
   return [process.platform === "win32" ? "npm.cmd" : "npm", ...args];
+}
+
+function skippedSection(label, message) {
+  return `## ${label}
+
+${message}`;
 }
 
 function formatJstTimestampForFile(date) {

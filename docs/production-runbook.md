@@ -104,6 +104,7 @@ https://<production-domain>/api/auth/callback/google
 
 管理者ツール:
 
+- `npm run admin:routes -- https://<production-domain>` が成功している
 - `/admin` 未ログインアクセスで `/login?callbackUrl=/admin` へ遷移する
 - 登録済みOwnerメールでGoogleログインできる
 - 未登録、無効化済み、またはGoogle側でメール未検証のGoogleアカウントでは管理画面へ入れない
@@ -128,6 +129,7 @@ https://<production-domain>/api/auth/callback/google
 - `npm run security:prod-env -- .env.production.local` が成功している
 - `npm run security:headers -- https://<production-domain>` が成功している
 - `npm run public:routes -- https://<production-domain>` が成功している
+- `npm run admin:routes -- https://<production-domain>` が成功している
 - `npm run delivery:evidence -- --production-url https://<production-domain> --env-file .env.production.local --include-build --include-e2e` で納品前証跡レポートを生成している
 - Vercel Production Environmentに `E2E_TEST_MODE` が存在しない。存在してもproductionではE2Eバイパスが無効化される
 
@@ -185,6 +187,12 @@ npm run delivery:evidence -- --production-url https://<production-domain> --env-
 npm run public:routes -- https://<production-domain>
 ```
 
+本番管理者ツール到達チェック:
+
+```bash
+npm run admin:routes -- https://<production-domain>
+```
+
 確認内容:
 
 - 仕様書PDFと管理者ツール説明書PDFが生成済みで、極端に小さいファイルではない
@@ -194,6 +202,7 @@ npm run public:routes -- https://<production-domain>
 - Runbookに本番env安全確認手順が記載されている
 - 証跡レポートにコマンド結果、PDFサイズ、QAページ数、本番URL/env確認の実施有無が記録されている
 - 公開トップ、試合情報、大会詳細、リーグ詳細、ニュース、チーム、資料、問い合わせの200応答、主要見出し、主要リンクを確認できる
+- ログイン画面、未ログイン管理画面redirect、認証session API、Google providerを確認できる
 
 ## ロールバック
 
@@ -210,6 +219,7 @@ npm run public:routes -- https://<production-domain>
 
 - Vercel Production Deployment URL
 - `npm run public:routes -- https://<production-domain>` の成功ログ
+- `npm run admin:routes -- https://<production-domain>` の成功ログ
 - `npm run build` の成功ログ
 - `npm run test:e2e` の成功ログ
 - `npm run security:headers -- https://<production-domain>` の成功ログ

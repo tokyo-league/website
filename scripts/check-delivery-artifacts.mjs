@@ -51,6 +51,11 @@ checkTextContains({
   filePath: "docs/production-runbook.md",
   requiredText: "npm run public:routes -- https://<production-domain>",
 });
+checkTextContains({
+  label: "本番管理者到達確認手順",
+  filePath: "docs/production-runbook.md",
+  requiredText: "npm run admin:routes -- https://<production-domain>",
+});
 
 console.log("Tokyo League delivery artifact check");
 console.log("");

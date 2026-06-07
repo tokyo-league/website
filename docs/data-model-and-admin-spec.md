@@ -677,6 +677,7 @@
 - 納品前に `npm run docs:delivery:check` を実行し、仕様書PDF、管理者ツール説明書PDF、QA画像、Runbook、納品チェックリストが揃っていることを確認する
 - 納品前に `npm run delivery:evidence -- --production-url https://<production-domain> --env-file .env.production.local --include-build --include-e2e` を実行し、コマンド結果、PDFサイズ、QAページ数、本番URL/env確認の証跡をMarkdownとして保存する
 - 本番公開サイトは `npm run public:routes -- https://<production-domain>` で主要公開ページの200応答、見出し、主要リンクを確認する
+- 本番管理者ツールは `npm run admin:routes -- https://<production-domain>` でログイン画面、未ログイン管理画面redirect、認証session API、Google providerを確認する
 - 管理者マニュアルHTMLに古い制限事項の文言が残っていないことを自動検査し、実装済み機能と説明書の齟齬を防ぐ
 
 ### 運用・監査

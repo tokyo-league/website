@@ -27,6 +27,11 @@ export const loginRouteRateLimit: RateLimitConfig = {
   maxRequests: 30,
 };
 
+export const authRouteRateLimit: RateLimitConfig = {
+  windowMs: 60_000,
+  maxRequests: 60,
+};
+
 export function createRateLimitStore() {
   return new Map<string, RateLimitEntry>();
 }
@@ -75,7 +80,7 @@ export function checkRateLimit(
   };
 }
 
-export function getRateLimitKey(scope: "admin" | "login", ipAddress: string) {
+export function getRateLimitKey(scope: "admin" | "auth" | "login", ipAddress: string) {
   return `${scope}:${ipAddress || "unknown"}`;
 }
 

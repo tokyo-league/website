@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import authConfig from "@/auth.config";
 import {
   adminRouteRateLimit,
+  authRouteRateLimit,
   checkRateLimit,
   getRateLimitKey,
   loginRouteRateLimit,
@@ -28,22 +29,19 @@ export default auth((request) => {
 });
 
 export const config = {
-  matcher: ["/admin/:path*", "/login"],
+  matcher: ["/admin/:path*", "/api/auth/:path*", "/login"],
 };
 
 function getRateLimitResponse(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const ipAddress = getClientIp(request);
-  const scope = pathname.startsWith("/admin") ? "admin" : pathname === "/login" ? "login" : null;
+  const scope = getRateLimitScope(pathname);
 
   if (!scope) {
     return null;
   }
 
-  const result = checkRateLimit(
-    getRateLimitKey(scope, ipAddress),
-    scope === "admin" ? adminRouteRateLimit : loginRouteRateLimit,
-  );
+  const result = checkRateLimit(getRateLimitKey(scope, ipAddress), getRateLimitConfig(scope));
 
   if (result.allowed) {
     return null;
@@ -62,6 +60,34 @@ function getRateLimitResponse(request: NextRequest) {
   }
 
   return response;
+}
+
+function getRateLimitScope(pathname: string) {
+  if (pathname.startsWith("/admin")) {
+    return "admin";
+  }
+
+  if (pathname.startsWith("/api/auth")) {
+    return "auth";
+  }
+
+  if (pathname === "/login") {
+    return "login";
+  }
+
+  return null;
+}
+
+function getRateLimitConfig(scope: NonNullable<ReturnType<typeof getRateLimitScope>>) {
+  if (scope === "admin") {
+    return adminRouteRateLimit;
+  }
+
+  if (scope === "auth") {
+    return authRouteRateLimit;
+  }
+
+  return loginRouteRateLimit;
 }
 
 function getClientIp(request: NextRequest) {

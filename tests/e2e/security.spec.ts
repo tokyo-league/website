@@ -62,6 +62,15 @@ test("ログイン画面はnoindexかつno-storeで配信される", async ({ pa
   expect(headers["cache-control"]).toContain("no-store");
 });
 
+test("認証APIはnoindexかつno-storeで配信される", async ({ request }) => {
+  const response = await request.get("/api/auth/session");
+  const headers = response.headers();
+
+  expect(response.ok()).toBe(true);
+  expect(headers["x-robots-tag"]).toBe("noindex, nofollow, noarchive");
+  expect(headers["cache-control"]).toContain("no-store");
+});
+
 test("robots.txtで管理画面と認証APIのクロールを禁止する", async ({ request }) => {
   const response = await request.get("/robots.txt");
   const body = await response.text();
@@ -171,13 +180,14 @@ test("管理者JWTはDB上の有効状態で再検証される", () => {
   expect(applyAdminRecordToJwt(token, null)).toBeNull();
 });
 
-test("ログインと管理画面のレート制限は上限超過を検出する", () => {
+test("ログイン、管理画面、認証APIのレート制限は上限超過を検出する", () => {
   const store = createRateLimitStore();
   const config = {
     windowMs: 60_000,
     maxRequests: 2,
   };
   const key = getRateLimitKey("login", "203.0.113.10");
+  const authKey = getRateLimitKey("auth", "203.0.113.10");
 
   expect(checkRateLimit(key, config, 1_000, store)).toMatchObject({
     allowed: true,
@@ -196,6 +206,7 @@ test("ログインと管理画面のレート制限は上限超過を検出す�
     allowed: true,
     remaining: 1,
   });
+  expect(authKey).toBe("auth:203.0.113.10");
 });
 
 test("レート制限レスポンスにも共通セキュリティヘッダーを付与する", () => {

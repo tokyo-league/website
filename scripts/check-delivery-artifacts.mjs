@@ -23,6 +23,11 @@ checkFile({
   filePath: "docs/delivery-checklist.md",
   minBytes: 2_000,
 });
+checkFile({
+  label: "納品ハンドオフ",
+  filePath: "docs/delivery-handoff.md",
+  minBytes: 2_000,
+});
 
 checkQaPages({
   label: "管理者説明書QA画像",
@@ -70,6 +75,21 @@ checkTextContains({
   label: "納品ゲート手順",
   filePath: "docs/production-runbook.md",
   requiredText: "npm run delivery:gate",
+});
+checkTextContains({
+  label: "納品ハンドオフ: 納品ゲート",
+  filePath: "docs/delivery-handoff.md",
+  requiredText: "npm run delivery:gate",
+});
+checkTextContains({
+  label: "納品ハンドオフ: 本番証跡",
+  filePath: "docs/delivery-handoff.md",
+  requiredText: "npm run delivery:evidence -- --production-url https://<production-domain>",
+});
+checkTextContains({
+  label: "納品ハンドオフ: 共有注意",
+  filePath: "docs/delivery-handoff.md",
+  requiredText: ".env.production.local",
 });
 
 console.log("Tokyo League delivery artifact check");

@@ -8,7 +8,8 @@
 2. [データ設計・管理画面仕様](./docs/data-model-and-admin-spec.md)
 3. [納品チェックリスト](./docs/delivery-checklist.md)
 4. [本番デプロイ・運用開始Runbook](./docs/production-runbook.md)
-5. [UIモック比較](./mock/variants.html)
+5. [納品ハンドオフ](./docs/delivery-handoff.md)
+6. [UIモック比較](./mock/variants.html)
 
 ## 現在の決定事項
 

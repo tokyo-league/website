@@ -676,6 +676,7 @@
 ### 納品物検査
 
 - 納品前に `npm run docs:delivery:check` を実行し、仕様書PDF、管理者ツール説明書PDF、QA画像、Runbook、納品チェックリストが揃っていることを確認する
+- 納品時に `docs/delivery-handoff.md` を共有し、成果物、最終確認コマンド、本番で残る確認、共有時の注意をまとめて確認する
 - 納品前に `npm run security:baseline` を実行し、セキュリティ設定の必須条件がコード上で維持されていることを確認する
 - 納品前に `npm run security:secrets` を実行し、秘密情報と生成証跡の混入がないことを確認する
 - 納品前に `npm run delivery:gate` を実行し、PDF生成、管理者説明書QA画像生成、納品物チェック、セキュリティ基準、秘密情報管理、ビルド、E2Eを一括確認する

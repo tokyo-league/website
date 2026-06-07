@@ -232,6 +232,7 @@ npm run admin:routes -- https://<production-domain>
 - 仕様書PDFと管理者ツール説明書PDFが生成済みで、極端に小さいファイルではない
 - 管理者ツール説明書のQA画像が20ページ分生成されている
 - Runbookと納品チェックリストが存在する
+- 納品ハンドオフが存在し、成果物、最終確認コマンド、本番で残る確認、共有時の注意を確認できる
 - 管理者マニュアルHTMLに古い制限文が残っていない
 - Runbookに本番env安全確認手順が記載されている
 - CSP、private routeヘッダー、レート制限、本番env検査、E2E本番無効化の静的基準を確認できる
@@ -266,5 +267,6 @@ npm run admin:routes -- https://<production-domain>
 - `npm run delivery:evidence -- --production-url https://<production-domain> --env-file .env.production.local --include-build --include-e2e` の出力Markdown
 - 仕様書PDF
 - 管理者ツール説明書PDF
+- 納品ハンドオフ
 - 初期Ownerメールアドレス
 - `npm run security:prod-env -- .env.production.local` の成功結果。値そのものは共有しない

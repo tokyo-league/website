@@ -12,6 +12,7 @@
 | 管理者ツール説明書PDF | `docs/admin-manual/output/tokyo-league-admin-manual.pdf` | `npm run docs:admin` | 生成済み |
 | 管理者説明書QA画像 | `docs/admin-manual/output/qa-pages/` | `npm run docs:admin:qa` | 20ページ生成済み |
 | 本番デプロイRunbook | `docs/production-runbook.md` | 手順確認 | 作成済み |
+| 納品ハンドオフ | `docs/delivery-handoff.md` | 手順確認 | 作成済み |
 | 納品物自動チェック | PDF、QA画像、Runbook、古い文言混入 | `npm run docs:delivery:check` | 実装済み |
 | 納品前証跡レポート | `docs/output/delivery-evidence-*.md` | `npm run delivery:evidence` | 実装済み |
 | 納品ゲート | PDF生成、QA画像生成、納品物チェック、セキュリティ基準、秘密情報管理、ビルド、E2E | `npm run delivery:gate` | 実装済み |
@@ -75,3 +76,4 @@
 - PDF納品物のページ欠け、画像欠け、文字切れを最終目視確認する
 - `npm run docs:delivery:check` でPDF、QA画像、Runbook、古い文言混入の自動チェックを通す
 - `docs/production-runbook.md` に沿って本番反映・ロールバック手順を関係者へ共有する
+- `docs/delivery-handoff.md` に沿って納品物、証跡、共有時の注意を関係者へ共有する

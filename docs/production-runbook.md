@@ -100,6 +100,11 @@ https://<production-domain>/api/auth/callback/google
 
 ## 本番確認チェック
 
+納品ゲート:
+
+- `npm run delivery:gate` が成功している
+- `delivery:gate` で仕様書PDF生成、管理者ツール説明書PDF生成、QA画像生成、納品物チェック、セキュリティ基準チェック、秘密情報管理チェック、ビルド、E2Eが実行されている
+
 公開サイト:
 
 - `npm run public:routes -- https://<production-domain>` が成功している
@@ -182,6 +187,12 @@ npm run docs:admin:qa
 npm run docs:delivery:check
 ```
 
+納品ゲート:
+
+```bash
+npm run delivery:gate
+```
+
 セキュリティ基準チェック:
 
 ```bash
@@ -243,6 +254,7 @@ npm run admin:routes -- https://<production-domain>
 納品直前に以下を保存・共有します。
 
 - Vercel Production Deployment URL
+- `npm run delivery:gate` の成功ログ
 - `npm run public:routes -- https://<production-domain>` の成功ログ
 - `npm run admin:routes -- https://<production-domain>` の成功ログ
 - `npm run build` の成功ログ

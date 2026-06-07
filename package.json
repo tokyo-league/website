@@ -18,6 +18,7 @@
     "docs:admin:qa": "node ./docs/admin-manual/render-manual-qa.mjs",
     "docs:delivery:check": "node ./scripts/check-delivery-artifacts.mjs",
     "delivery:evidence": "node ./scripts/collect-delivery-evidence.mjs",
+    "delivery:gate": "node ./scripts/run-delivery-gate.mjs",
     "public:routes": "node ./scripts/check-public-routes.mjs",
     "admin:routes": "node ./scripts/check-admin-routes.mjs",
     "security:baseline": "node ./scripts/check-security-baseline.mjs",

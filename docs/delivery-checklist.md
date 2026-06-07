@@ -14,6 +14,7 @@
 | 本番デプロイRunbook | `docs/production-runbook.md` | 手順確認 | 作成済み |
 | 納品物自動チェック | PDF、QA画像、Runbook、古い文言混入 | `npm run docs:delivery:check` | 実装済み |
 | 納品前証跡レポート | `docs/output/delivery-evidence-*.md` | `npm run delivery:evidence` | 実装済み |
+| 納品ゲート | PDF生成、QA画像生成、納品物チェック、セキュリティ基準、秘密情報管理、ビルド、E2E | `npm run delivery:gate` | 実装済み |
 | 本番公開導線確認 | 公開トップ、試合情報、大会詳細、リーグ詳細、ニュース、チーム、資料、問い合わせ | `npm run public:routes -- https://<production-domain>` | 実装済み |
 | 本番管理者到達確認 | ログイン画面、未ログイン管理画面redirect、認証session API、Google provider | `npm run admin:routes -- https://<production-domain>` | 実装済み |
 
@@ -53,6 +54,7 @@
 - `npm run docs:admin:qa`: 成功
 - `npm run docs:delivery:check`: 成功
 - `npm run delivery:evidence`: 成功
+- `npm run delivery:gate`: 成功
 - `npm run security:baseline`: 成功
 - `npm run security:secrets`: 成功
 - `npm run public:routes`: ローカルE2Eモードで成功
@@ -63,6 +65,7 @@
 - 本番デプロイURLで `npm run public:routes -- https://<production-domain>` を実行し、公開サイトの主要導線証跡を保存する
 - 本番デプロイURLで `npm run admin:routes -- https://<production-domain>` を実行し、管理者ツールの到達・保護状態証跡を保存する
 - 本番デプロイURLで管理画面ログイン、Owner操作、Editor操作を確認する
+- 納品直前に `npm run delivery:gate` を実行し、PDF生成、QA画像生成、納品物チェック、セキュリティ基準、秘密情報管理、ビルド、E2Eを一括確認する
 - 本番デプロイURLで `npm run delivery:evidence -- --production-url https://<production-domain> --env-file .env.production.local --include-build --include-e2e` を実行し、証跡レポートを保存する
 - 本番環境の `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `DATABASE_URL`, `DIRECT_URL`, `BLOB_READ_WRITE_TOKEN` を `npm run security:prod-env -- .env.production.local` で確認する
 - `npm run security:secrets` でリポジトリに秘密情報や納品証跡Markdownが混入していないことを確認する

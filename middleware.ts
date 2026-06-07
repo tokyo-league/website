@@ -8,6 +8,7 @@ import {
   getRateLimitKey,
   loginRouteRateLimit,
 } from "@/lib/rate-limit";
+import { rateLimitedRouteHeaders } from "@/lib/security-headers";
 import { isE2ETestMode } from "@/lib/test-mode";
 
 const { auth } = NextAuth(authConfig);
@@ -48,15 +49,19 @@ function getRateLimitResponse(request: NextRequest) {
     return null;
   }
 
-  return new NextResponse("Too Many Requests", {
+  const response = new NextResponse("Too Many Requests", {
     status: 429,
     headers: {
-      "Cache-Control": "no-store, no-cache, must-revalidate",
       "Content-Type": "text/plain; charset=utf-8",
       "Retry-After": String(result.retryAfterSeconds),
-      "X-Robots-Tag": "noindex, nofollow, noarchive",
     },
   });
+
+  for (const header of rateLimitedRouteHeaders) {
+    response.headers.set(header.key, header.value);
+  }
+
+  return response;
 }
 
 function getClientIp(request: NextRequest) {

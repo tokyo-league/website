@@ -21,7 +21,7 @@
 | 管理画面認証 | NextAuth + Google OIDC、DB有効登録メールのみ許可 | 実装済み |
 | 権限管理 | `OWNER` / `EDITOR`、担当リーグ割当、担当者無効化 | 実装済み |
 | 既存セッション再検証 | JWT確認時にDB上の有効状態とロールを再反映し、無効化済み担当者の既存トークンを破棄 | 実装済み |
-| 管理/ログインレート制限 | `/login` と `/admin` の短時間大量アクセスに `429` と `Retry-After` を返す | 実装済み |
+| 管理/ログインレート制限 | `/login` と `/admin` の短時間大量アクセスに共通セキュリティヘッダー付きの `429` と `Retry-After` を返す | 実装済み |
 | サーバー側認可 | `requireOwner`, `getAdminScope` をサーバーアクションで使用 | 実装済み |
 | Production環境変数検出 | Productionで必須環境変数の欠落を起動時検出 | 実装済み |
 | 本番env安全確認 | `npm run security:prod-env -- .env.production.local` で必須項目、E2E誤設定、OAuth/DB/Blob形式を値非表示で確認 | 実装済み |
@@ -37,7 +37,7 @@
 
 ## 直近の検証結果
 
-- `npm run test:e2e`: 23件成功
+- `npm run test:e2e`: 24件成功
 - `npm run build`: 成功。公開トップとニュース一覧は動的レンダリング化し、ビルド時のDB接続エラーログなし
 - `npm run docs:spec`: 成功
 - `npm run docs:admin`: 成功

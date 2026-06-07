@@ -4,6 +4,7 @@ import { assertDownloadFileAllowed } from "../../lib/download-file-validation";
 import { assertProductionEnvReady, getInvalidProductionEnv, getMissingProductionEnv } from "../../lib/env-validation";
 import { assertImageFileAllowed } from "../../lib/image-file-validation";
 import { checkRateLimit, createRateLimitStore, getRateLimitKey } from "../../lib/rate-limit";
+import { rateLimitedRouteHeaders } from "../../lib/security-headers";
 import { isE2ETestMode } from "../../lib/test-mode";
 import { normalizeOptionalAssetPath, normalizeOptionalHttpUrl } from "../../lib/url-validation";
 
@@ -195,6 +196,18 @@ test("ログインと管理画面のレート制限は上限超過を検出す�
     allowed: true,
     remaining: 1,
   });
+});
+
+test("レート制限レスポンスにも共通セキュリティヘッダーを付与する", () => {
+  const headers = new Map(rateLimitedRouteHeaders.map((header) => [header.key.toLowerCase(), header.value]));
+
+  expect(headers.get("content-security-policy")).toContain("default-src 'self'");
+  expect(headers.get("content-security-policy")).toContain("object-src 'none'");
+  expect(headers.get("referrer-policy")).toBe("strict-origin-when-cross-origin");
+  expect(headers.get("x-content-type-options")).toBe("nosniff");
+  expect(headers.get("x-frame-options")).toBe("SAMEORIGIN");
+  expect(headers.get("x-robots-tag")).toBe("noindex, nofollow, noarchive");
+  expect(headers.get("cache-control")).toContain("no-store");
 });
 
 test("資料アップロードはMIME typeとファイル内容を検証する", () => {

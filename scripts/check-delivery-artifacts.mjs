@@ -27,7 +27,7 @@ checkFile({
 checkQaPages({
   label: "管理者説明書QA画像",
   dirPath: "docs/admin-manual/output/qa-pages",
-  expectedCount: 19,
+  expectedCount: 20,
 });
 
 checkTextDoesNotContain({

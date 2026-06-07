@@ -53,6 +53,11 @@ export function AdminDashboard({ scope }: { scope: AdminScope }) {
             <Link href="/admin/downloads" className="button button--ghost">
               資料を差し替え
             </Link>
+            {scope.canManageAssignments ? (
+              <Link href="/admin/audit" className="button button--ghost">
+                更新履歴を確認
+              </Link>
+            ) : null}
           </div>
         </article>
       </div>

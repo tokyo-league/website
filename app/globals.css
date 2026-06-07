@@ -1646,6 +1646,31 @@ button {
   grid-template-columns: 0.8fr minmax(180px, 1.5fr) 0.7fr minmax(140px, 1fr) 0.8fr auto;
 }
 
+.admin-table__row--audit {
+  grid-template-columns: 0.9fr 0.7fr minmax(220px, 1.4fr) minmax(180px, 1fr);
+}
+
+.admin-audit-target,
+.admin-audit-detail,
+.admin-audit-actor {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.admin-audit-target span,
+.admin-audit-detail span,
+.admin-audit-actor span {
+  color: var(--muted);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.admin-audit-detail strong,
+.admin-audit-actor strong {
+  overflow-wrap: anywhere;
+}
+
 .admin-team-references {
   color: var(--warning);
   font-size: 13px;

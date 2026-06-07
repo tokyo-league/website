@@ -107,6 +107,7 @@ https://<production-domain>/api/auth/callback/google
 - 登録済みOwnerメールでGoogleログインできる
 - 未登録、無効化済み、またはGoogle側でメール未検証のGoogleアカウントでは管理画面へ入れない
 - Ownerでニュース、チーム、資料、担当割当を操作できる
+- Ownerで `/admin/audit` から直近更新履歴を確認できる
 - Ownerで退任者を無効化でき、無効化済み担当者は管理画面へ入れない
 - 無効化済み担当者の既存JWTセッションもDB再検証で破棄される
 - Editorで割当済みリーグの結果管理だけ操作できる

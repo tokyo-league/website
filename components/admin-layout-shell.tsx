@@ -31,6 +31,7 @@ export async function AdminLayoutShell({
         ]
       : []),
     ...(scope?.canManageAssignments ? [{ href: "/admin/assignments", label: "担当割当" }] : []),
+    ...(scope?.canManageAssignments ? [{ href: "/admin/audit", label: "更新履歴" }] : []),
   ];
 
   return (

@@ -20,6 +20,7 @@ const pages = [
   { slug: "teams-form", path: "/admin/teams/new", label: "チーム作成" },
   { slug: "downloads", path: "/admin/downloads", label: "資料管理" },
   { slug: "assignments", path: "/admin/assignments", label: "担当割当" },
+  { slug: "audit", path: "/admin/audit", label: "更新履歴" },
 ];
 
 await fs.mkdir(outputDir, { recursive: true });

@@ -61,6 +61,15 @@ test("担当リーグ割当で担当者編集UIが表示できる", async ({ pag
   await expect(page.getByLabel("ロール").first()).toBeVisible();
 });
 
+test("Ownerは更新履歴を確認できる", async ({ page }) => {
+  await page.goto("/admin/audit");
+
+  await expect(page.getByRole("heading", { name: "更新履歴" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "直近50件の更新" })).toBeVisible();
+  await expect(page.getByText("E2Eニュース")).toBeVisible();
+  await expect(page.getByText("e2e@example.com").first()).toBeVisible();
+});
+
 test("ニュース作成フローが完了できる", async ({ page }) => {
   await page.goto("/admin/news/new");
 

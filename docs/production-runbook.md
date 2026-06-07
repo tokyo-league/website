@@ -108,6 +108,7 @@ https://<production-domain>/api/auth/callback/google
 - 未登録または無効化済みGoogleアカウントでは管理画面へ入れない
 - Ownerでニュース、チーム、資料、担当割当を操作できる
 - Ownerで退任者を無効化でき、無効化済み担当者は管理画面へ入れない
+- 無効化済み担当者の既存JWTセッションもDB再検証で破棄される
 - Editorで割当済みリーグの結果管理だけ操作できる
 - 画像・資料アップロードがVercel Blobへ保存される
 

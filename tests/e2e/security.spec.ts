@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { applyAdminRecordToJwt, getAdminJwtLookupEmail } from "../../lib/admin-session";
 import { assertDownloadFileAllowed } from "../../lib/download-file-validation";
 import { assertProductionEnvReady, getInvalidProductionEnv, getMissingProductionEnv } from "../../lib/env-validation";
 import { assertImageFileAllowed } from "../../lib/image-file-validation";
@@ -135,6 +136,37 @@ test("E2E認証バイパスは本番環境では無効化される", () => {
     restoreEnv("E2E_TEST_MODE", originalE2ETestMode);
     restoreEnv("NODE_ENV", originalNodeEnv);
   }
+});
+
+test("管理者JWTはDB上の有効状態で再検証される", () => {
+  const token = {
+    sub: "old-user-id",
+    email: "admin@example.com",
+    role: "OWNER",
+  };
+
+  expect(getAdminJwtLookupEmail(token)).toBe("admin@example.com");
+  expect(
+    applyAdminRecordToJwt(token, {
+      id: "current-user-id",
+      email: "admin@example.com",
+      role: "EDITOR",
+      isActive: true,
+    }),
+  ).toEqual({
+    sub: "current-user-id",
+    email: "admin@example.com",
+    role: "EDITOR",
+  });
+  expect(
+    applyAdminRecordToJwt(token, {
+      id: "disabled-user-id",
+      email: "admin@example.com",
+      role: "OWNER",
+      isActive: false,
+    }),
+  ).toBeNull();
+  expect(applyAdminRecordToJwt(token, null)).toBeNull();
 });
 
 test("資料アップロードはMIME typeとファイル内容を検証する", () => {

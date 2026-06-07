@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import type { AdminRole } from "@prisma/client";
 import authConfig from "@/auth.config";
+import { applyAdminRecordToJwt, getAdminJwtLookupEmail } from "@/lib/admin-session";
 import { prisma } from "@/lib/prisma";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
@@ -35,30 +36,29 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         });
       }
 
+      user.id = admin.id;
       user.role = admin.role;
 
       return true;
     },
     async jwt({ token, user }) {
-      if (user) {
-        token.sub = user.id;
-        token.role = user.role;
+      const email = getAdminJwtLookupEmail(token, user);
 
-        return token;
+      if (!email) {
+        return null;
       }
 
-      if (token.email && !token.role) {
-        const admin = await prisma.user.findUnique({
-          where: { email: token.email },
-        });
+      const admin = await prisma.user.findUnique({
+        where: { email },
+        select: {
+          id: true,
+          email: true,
+          role: true,
+          isActive: true,
+        },
+      });
 
-        if (admin?.isActive) {
-          token.sub = admin.id;
-          token.role = admin.role;
-        }
-      }
-
-      return token;
+      return applyAdminRecordToJwt(token, admin);
     },
     async session({ session, token }) {
       if (session.user) {

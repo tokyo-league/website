@@ -50,7 +50,7 @@
 
 ## 直近の検証結果
 
-- `npm run test:e2e`: 27件成功
+- `npm run test:e2e`: 28件成功
 - `npm run build`: 成功。公開トップとニュース一覧は動的レンダリング化し、ビルド時のDB接続エラーログなし
 - `npm run docs:spec`: 成功
 - `npm run docs:admin`: 成功

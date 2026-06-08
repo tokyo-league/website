@@ -7,57 +7,73 @@ import { e2eMockCompetition, isE2ETestMode } from "@/lib/test-mode";
 export default async function AdminResultsPage() {
   const scope = await getAdminScope();
 
-  const divisions = isE2ETestMode()
-    ? e2eMockCompetition.divisions.map((division) => ({
-        ...division,
-        competition: {
-          name: e2eMockCompetition.name,
-          edition: e2eMockCompetition.edition,
-          season: e2eMockCompetition.season,
-        },
-      }))
-    : await prisma.division.findMany({
-        where:
-          scope.admin.role === "OWNER"
-            ? undefined
-            : {
-                id: {
-                  in: scope.accessibleDivisions.map((division) => division.id),
-                },
-              },
-        include: {
+  const [divisions, teams] = isE2ETestMode()
+    ? [
+        e2eMockCompetition.divisions.map((division) => ({
+          ...division,
           competition: {
-            include: {
-              season: true,
+            name: e2eMockCompetition.name,
+            edition: e2eMockCompetition.edition,
+            season: e2eMockCompetition.season,
+          },
+        })),
+        buildE2ETeamOptions(),
+      ]
+    : await Promise.all([
+        prisma.division.findMany({
+          where:
+            scope.admin.role === "OWNER"
+              ? undefined
+              : {
+                  id: {
+                    in: scope.accessibleDivisions.map((division) => division.id),
+                  },
+                },
+          include: {
+            competition: {
+              include: {
+                season: true,
+              },
+            },
+            teams: {
+              include: {
+                team: true,
+              },
+              orderBy: { sortOrder: "asc" },
+            },
+            matches: {
+              include: {
+                venue: true,
+                homeTeam: true,
+                awayTeam: true,
+              },
+              orderBy: [{ matchDate: "desc" }, { createdAt: "desc" }],
+            },
+            standings: {
+              include: {
+                team: true,
+              },
+              orderBy: [{ rank: "asc" }, { team: { sortOrder: "asc" } }],
             },
           },
-          teams: {
-            include: {
-              team: true,
-            },
-            orderBy: { sortOrder: "asc" },
+          orderBy: [
+            { competition: { season: { year: "desc" } } },
+            { competition: { edition: "desc" } },
+            { sortOrder: "asc" },
+          ],
+        }),
+        prisma.team.findMany({
+          where: {
+            status: "PUBLISHED",
           },
-          matches: {
-            include: {
-              venue: true,
-              homeTeam: true,
-              awayTeam: true,
-            },
-            orderBy: [{ matchDate: "desc" }, { createdAt: "desc" }],
+          orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+          select: {
+            id: true,
+            name: true,
+            region: true,
           },
-          standings: {
-            include: {
-              team: true,
-            },
-            orderBy: [{ rank: "asc" }, { team: { sortOrder: "asc" } }],
-          },
-        },
-        orderBy: [
-          { competition: { season: { year: "desc" } } },
-          { competition: { edition: "desc" } },
-          { sortOrder: "asc" },
-        ],
-      });
+        }),
+      ]);
 
   return (
     <AdminLayoutShell currentPath="/admin/results" title="結果管理" kicker="Results" scope={scope}>
@@ -77,6 +93,11 @@ export default async function AdminResultsPage() {
       </div>
 
       <AdminResultsForms
+        teams={teams.map((team) => ({
+          id: team.id,
+          name: team.name,
+          region: team.region ?? "",
+        }))}
         divisions={divisions.map((division) => ({
           id: division.id,
           seasonYear: division.competition.season.year,
@@ -119,4 +140,20 @@ export default async function AdminResultsPage() {
       />
     </AdminLayoutShell>
   );
+}
+
+function buildE2ETeamOptions() {
+  const teams = new Map<string, { id: string; name: string; region: string }>();
+
+  for (const division of e2eMockCompetition.divisions) {
+    for (const assignment of division.teams) {
+      teams.set(assignment.team.id, {
+        id: assignment.team.id,
+        name: assignment.team.name,
+        region: assignment.team.region ?? "",
+      });
+    }
+  }
+
+  return Array.from(teams.values());
 }

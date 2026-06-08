@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useActionState, useEffect, useState } from "react";
 import {
+  addStandingRow,
   createMatch,
   deleteMatch,
   deleteStanding,
@@ -59,10 +60,18 @@ type DivisionOption = {
   }>;
 };
 
+type TeamOption = {
+  id: string;
+  name: string;
+  region: string;
+};
+
 export function AdminResultsForms({
   divisions,
+  teams,
 }: {
   divisions: DivisionOption[];
+  teams: TeamOption[];
 }) {
   const seasons = Array.from(new Map(divisions.map((division) => [division.seasonYear, division.seasonLabel])).entries())
     .sort((left, right) => right[0] - left[0]);
@@ -100,6 +109,7 @@ export function AdminResultsForms({
   const [resultState, resultAction, resultPending] = useActionState(updateDivisionResultImage, initialState);
   const [matchState, matchAction, matchPending] = useActionState(createMatch, initialState);
   const [standingState, standingAction, standingPending] = useActionState(replaceStandings, initialState);
+  const [addStandingState, addStandingAction, addStandingPending] = useActionState(addStandingRow, initialState);
   const [regenState, regenerateAction, regeneratePending] = useActionState(regenerateStandingsFromMatches, initialState);
   const [toast, setToast] = useState(initialState);
   const [resultPreview, setResultPreview] = useState<string | null>(null);
@@ -107,13 +117,13 @@ export function AdminResultsForms({
   const [resultUploadError, setResultUploadError] = useState("");
 
   useEffect(() => {
-    const states = [resultState, matchState, standingState, regenState];
+    const states = [resultState, matchState, standingState, addStandingState, regenState];
     const latest = [...states].reverse().find((state) => state.status !== "idle");
 
     if (latest) {
       setToast(latest);
     }
-  }, [resultState, matchState, standingState, regenState]);
+  }, [resultState, matchState, standingState, addStandingState, regenState]);
 
   useEffect(() => {
     if (resultPreview) {
@@ -134,6 +144,9 @@ export function AdminResultsForms({
       </article>
     );
   }
+
+  const assignedTeamIds = new Set(selectedDivision.teams.map((team) => team.id));
+  const addableTeams = teams.filter((team) => !assignedTeamIds.has(team.id));
 
   return (
     <>
@@ -399,14 +412,22 @@ export function AdminResultsForms({
           <p className={`admin-inline-message admin-inline-message--${regenState.status}`}>{regenState.message}</p>
         ) : null}
         {canEditScores ? (
-          <BulkStandingEditor
-            key={selectedDivision.id}
-            divisionId={selectedDivision.id}
-            teams={selectedDivision.teams}
-            standings={selectedDivision.standings}
-            action={standingAction}
-            pending={standingPending}
-          />
+          <>
+            <StandingRowAddForm
+              divisionId={selectedDivision.id}
+              teams={addableTeams}
+              action={addStandingAction}
+              pending={addStandingPending}
+            />
+            <BulkStandingEditor
+              key={selectedDivision.id}
+              divisionId={selectedDivision.id}
+              teams={selectedDivision.teams}
+              standings={selectedDivision.standings}
+              action={standingAction}
+              pending={standingPending}
+            />
+          </>
         ) : null}
       </article>
 
@@ -459,6 +480,48 @@ export function AdminResultsForms({
         )}
       </article>
     </>
+  );
+}
+
+function StandingRowAddForm({
+  divisionId,
+  teams,
+  action,
+  pending,
+}: {
+  divisionId: string;
+  teams: TeamOption[];
+  action: (payload: FormData) => void;
+  pending: boolean;
+}) {
+  if (teams.length === 0) {
+    return (
+      <p className="admin-muted">
+        順位表へ追加できる未所属チームはありません。所属済みチームは入力表に表示されています。
+      </p>
+    );
+  }
+
+  return (
+    <form action={action} className="admin-standing-add">
+      <input type="hidden" name="divisionId" value={divisionId} />
+      <label className="admin-field">
+        <span>順位表行を追加</span>
+        <select name="teamId" defaultValue="" required>
+          <option value="" disabled>
+            追加するチームを選択
+          </option>
+          {teams.map((team) => (
+            <option key={team.id} value={team.id}>
+              {team.name}{team.region ? ` / ${team.region}` : ""}
+            </option>
+          ))}
+        </select>
+      </label>
+      <button type="submit" className="button button--ghost" disabled={pending}>
+        {pending ? "追加中..." : "行を追加"}
+      </button>
+    </form>
   );
 }
 

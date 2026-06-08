@@ -40,6 +40,11 @@ checkTextDoesNotContain({
   filePath: "docs/admin-manual/output/tokyo-league-admin-manual.html",
   forbiddenText: "単体の編集・削除UIはありません",
 });
+checkTextDoesNotContain({
+  label: "管理者マニュアルの古い順位表行追加文",
+  filePath: "docs/admin-manual/output/tokyo-league-admin-manual.html",
+  forbiddenText: "任意行追加は追加実装候補",
+});
 
 checkTextContains({
   label: "本番env安全確認手順",

@@ -304,6 +304,112 @@ export async function deleteStanding(
   };
 }
 
+export async function addStandingRow(
+  _prevState: ResultActionState,
+  formData: FormData,
+): Promise<ResultActionState> {
+  const scope = await getAdminScope();
+  const divisionId = sanitizePlainText(String(formData.get("divisionId") ?? ""), 64);
+  const teamId = sanitizePlainText(String(formData.get("teamId") ?? ""), 64);
+
+  if (!isValidUuid(divisionId) || !isValidUuid(teamId)) {
+    return { status: "error", message: "追加するリーグとチームを確認してください。" };
+  }
+
+  if (!canEditDivision(scope, divisionId)) {
+    return { status: "error", message: "このリーグを編集する権限がありません。" };
+  }
+
+  const [team, existingStanding, lastStanding, lastAssignment] = await Promise.all([
+    prisma.team.findUnique({
+      where: { id: teamId },
+      select: {
+        name: true,
+        status: true,
+      },
+    }),
+    prisma.standing.findUnique({
+      where: {
+        divisionId_teamId: {
+          divisionId,
+          teamId,
+        },
+      },
+      select: { id: true },
+    }),
+    prisma.standing.findFirst({
+      where: { divisionId },
+      orderBy: { rank: "desc" },
+      select: { rank: true },
+    }),
+    prisma.divisionTeam.findFirst({
+      where: { divisionId },
+      orderBy: { sortOrder: "desc" },
+      select: { sortOrder: true },
+    }),
+  ]);
+
+  if (!team || team.status !== "PUBLISHED") {
+    return { status: "error", message: "公開中のチームを選択してください。" };
+  }
+
+  if (existingStanding) {
+    return { status: "error", message: "このチームは既に順位表へ登録されています。" };
+  }
+
+  const rank = (lastStanding?.rank ?? 0) + 1;
+  const sortOrder = (lastAssignment?.sortOrder ?? 0) + 1;
+
+  try {
+    await prisma.$transaction(async (tx) => {
+      await tx.divisionTeam.upsert({
+        where: {
+          divisionId_teamId: {
+            divisionId,
+            teamId,
+          },
+        },
+        update: {},
+        create: {
+          divisionId,
+          teamId,
+          sortOrder,
+        },
+      });
+
+      await tx.standing.create({
+        data: {
+          divisionId,
+          teamId,
+          rank,
+          played: 0,
+          won: 0,
+          drawn: 0,
+          lost: 0,
+          goalsFor: 0,
+          goalsAgainst: 0,
+          goalDifference: 0,
+          points: 0,
+        },
+      });
+    });
+  } catch (error) {
+    console.error("addStandingRow failed", error);
+    return {
+      status: "error",
+      message: "順位表行の追加に失敗しました。既に登録されていないか確認してください。",
+    };
+  }
+
+  revalidatePath("/admin/results");
+  revalidatePath("/admin/competitions");
+
+  return {
+    status: "success",
+    message: `${team.name} を順位表に追加しました。`,
+  };
+}
+
 export async function replaceStandings(
   _prevState: ResultActionState,
   formData: FormData,

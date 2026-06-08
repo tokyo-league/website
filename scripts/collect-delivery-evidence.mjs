@@ -2,6 +2,16 @@ import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 
+const manualCheckItems = [
+  "本番管理者ログイン",
+  "Owner操作",
+  "Editor操作",
+  "Google OAuthリダイレクトURI",
+  "初期Owner",
+  "PDF目視確認",
+  "Runbook共有",
+];
+
 const options = parseArgs(process.argv.slice(2));
 assertFinalEvidenceOptions(options);
 const generatedAt = new Date();
@@ -11,6 +21,7 @@ const outputPath =
 
 const sections = [];
 const commandResults = [];
+const manualChecksContent = loadManualChecksContent(options.manualChecksFile);
 
 const gitCommit = runCommand("git", ["rev-parse", "--short", "HEAD"], { collectOnly: true });
 const gitStatus = runCommand("git", ["status", "--short"], { collectOnly: true });
@@ -71,7 +82,7 @@ npm run delivery:evidence -- --production-url https://<production-domain>
 最終納品証跡では以下を使い、本番URL、Production env、build、E2E、公開/管理導線を必須確認します。
 
 \`\`\`bash
-npm run delivery:evidence -- --final --production-url https://<production-domain> --production-env-file .env.production.local --include-build --include-e2e
+npm run delivery:evidence -- --final --production-url https://<production-domain> --production-env-file .env.production.local --manual-checks-file docs/output/manual-checks-YYYYMMDD.md --include-build --include-e2e
 \`\`\``);
 
   sections.push(`## 本番セキュリティヘッダー
@@ -85,7 +96,7 @@ npm run delivery:evidence -- --production-url https://<production-domain>
 最終納品証跡では以下を使い、本番URL、Production env、build、E2E、公開/管理導線を必須確認します。
 
 \`\`\`bash
-npm run delivery:evidence -- --final --production-url https://<production-domain> --production-env-file .env.production.local --include-build --include-e2e
+npm run delivery:evidence -- --final --production-url https://<production-domain> --production-env-file .env.production.local --manual-checks-file docs/output/manual-checks-YYYYMMDD.md --include-build --include-e2e
 \`\`\``);
 
   sections.push(`## 本番管理者ツール到達確認
@@ -99,7 +110,7 @@ npm run delivery:evidence -- --production-url https://<production-domain>
 最終納品証跡では以下を使い、本番URL、Production env、build、E2E、公開/管理導線を必須確認します。
 
 \`\`\`bash
-npm run delivery:evidence -- --final --production-url https://<production-domain> --production-env-file .env.production.local --include-build --include-e2e
+npm run delivery:evidence -- --final --production-url https://<production-domain> --production-env-file .env.production.local --manual-checks-file docs/output/manual-checks-YYYYMMDD.md --include-build --include-e2e
 \`\`\``);
 }
 
@@ -117,22 +128,13 @@ npm run delivery:evidence -- --production-env-file .env.production.local
 最終納品証跡では以下を使い、本番URL、Production env、build、E2E、公開/管理導線を必須確認します。
 
 \`\`\`bash
-npm run delivery:evidence -- --final --production-url https://<production-domain> --production-env-file .env.production.local --include-build --include-e2e
+npm run delivery:evidence -- --final --production-url https://<production-domain> --production-env-file .env.production.local --manual-checks-file docs/output/manual-checks-YYYYMMDD.md --include-build --include-e2e
 \`\`\``);
 }
 
 sections.push(`## 手動確認チェック
 
-| 項目 | 状態 | メモ |
-| --- | --- | --- |
-| 本番公開サイト主要導線 | 未記入 | /, /competitions, /news, /teams, /downloads, /contact |
-| 本番管理者ログイン | 未記入 | 登録済みOwnerメールでGoogleログイン |
-| Owner操作 | 未記入 | ニュース、チーム、資料、担当割当、更新履歴 |
-| Editor操作 | 未記入 | 割当済みリーグの結果管理 |
-| Google OAuthリダイレクトURI | 未記入 | 本番ドメインのみ許可 |
-| 初期Owner | 未記入 | メールアドレスを関係者へ共有。値は必要最小限 |
-| PDF目視確認 | 未記入 | ページ欠け、画像欠け、文字切れ |
-| Runbook共有 | 未記入 | 関係者へ共有 |`);
+${manualChecksContent ?? manualChecksTemplate()}`);
 
 if (commandResults.length > 0) {
   sections.push(`## コマンド結果
@@ -160,6 +162,7 @@ function parseArgs(args) {
   const parsed = {
     productionUrl: undefined,
     envFile: undefined,
+    manualChecksFile: undefined,
     outputPath: undefined,
     includeBuild: false,
     includeE2e: false,
@@ -183,6 +186,11 @@ function parseArgs(args) {
 
     if (arg === "--output") {
       parsed.outputPath = requiredValue(args, (index += 1), arg);
+      continue;
+    }
+
+    if (arg === "--manual-checks-file") {
+      parsed.manualChecksFile = requiredValue(args, (index += 1), arg);
       continue;
     }
 
@@ -231,6 +239,7 @@ function assertFinalEvidenceOptions(options) {
 
   if (!options.productionUrl) missing.push("--production-url");
   if (!options.envFile) missing.push("--production-env-file");
+  if (!options.manualChecksFile) missing.push("--manual-checks-file");
   if (!options.includeBuild) missing.push("--include-build");
   if (!options.includeE2e) missing.push("--include-e2e");
   if (options.skipPublicRoutes) missing.push("remove --skip-public-routes");
@@ -258,6 +267,8 @@ function assertFinalEvidenceOptions(options) {
     errors.push(`--production-env-file が見つかりません: ${options.envFile}`);
   }
 
+  validateFinalManualChecksFile(options.manualChecksFile, errors);
+
   const gitStatus = runCommand("git", ["status", "--short"], { collectOnly: true });
   if (gitStatus.status !== 0) {
     errors.push("git status を確認できませんでした。");
@@ -271,6 +282,45 @@ function assertFinalEvidenceOptions(options) {
     }
     process.exit(1);
   }
+}
+
+function validateFinalManualChecksFile(filePath, errors) {
+  if (!filePath) {
+    return;
+  }
+
+  const absolutePath = path.resolve(filePath);
+  if (!fs.existsSync(absolutePath)) {
+    errors.push(`--manual-checks-file が見つかりません: ${filePath}`);
+    return;
+  }
+
+  const content = fs.readFileSync(absolutePath, "utf8").trim();
+  if (content.length < 160) {
+    errors.push("--manual-checks-file の内容が短すぎます。各手動確認の結果を記録してください。");
+  }
+
+  const missingItems = manualCheckItems.filter((item) => !content.includes(item));
+  if (missingItems.length > 0) {
+    errors.push(`--manual-checks-file に手動確認項目が不足しています: ${missingItems.join(", ")}`);
+  }
+
+  if (/(未記入|未実行|TODO|TBD)/i.test(content)) {
+    errors.push("--manual-checks-file に未記入/未実行/TODOが残っています。");
+  }
+}
+
+function loadManualChecksContent(filePath) {
+  if (!filePath) {
+    return null;
+  }
+
+  const absolutePath = path.resolve(filePath);
+  if (!fs.existsSync(absolutePath)) {
+    return `手動確認メモファイルが見つかりません: \`${filePath}\``;
+  }
+
+  return fs.readFileSync(absolutePath, "utf8").trim();
 }
 
 function parseFinalProductionUrl(value) {
@@ -295,12 +345,14 @@ function printHelpAndExit(code = 0) {
   npm run delivery:evidence
   npm run delivery:evidence -- --production-url https://example.com --production-env-file .env.production.local
   npm run delivery:evidence -- --include-build --include-e2e
-  npm run delivery:evidence -- --final --production-url https://example.com --production-env-file .env.production.local --include-build --include-e2e
+  npm run delivery:evidence -- --final --production-url https://example.com --production-env-file .env.production.local --manual-checks-file docs/output/manual-checks-YYYYMMDD.md --include-build --include-e2e
 
 Options:
   --production-url <url>  本番URLのセキュリティヘッダーを確認する
   --production-env-file <path>
                           本番envファイルを値非表示で確認する
+  --manual-checks-file <path>
+                          本番ログイン、Owner/Editor操作、PDF目視などの手動確認メモを取り込む
   --include-build         npm run build の結果も保存する
   --include-e2e           npm run test:e2e の結果も保存する
   --final                 最終納品証跡としてclean worktree、https本番URL、env、build、E2E、公開・管理導線を必須化する
@@ -308,6 +360,19 @@ Options:
   --skip-admin-routes     production-url指定時に管理者到達チェックを省略する
   --output <path>         出力先Markdownを指定する`);
   process.exit(code);
+}
+
+function manualChecksTemplate() {
+  return `| 項目 | 状態 | メモ |
+| --- | --- | --- |
+| 本番公開サイト主要導線 | 未記入 | /, /competitions, /news, /teams, /downloads, /contact |
+| 本番管理者ログイン | 未記入 | 登録済みOwnerメールでGoogleログイン |
+| Owner操作 | 未記入 | ニュース、チーム、資料、担当割当、更新履歴 |
+| Editor操作 | 未記入 | 割当済みリーグの結果管理 |
+| Google OAuthリダイレクトURI | 未記入 | 本番ドメインのみ許可 |
+| 初期Owner | 未記入 | メールアドレスを関係者へ共有。値は必要最小限 |
+| PDF目視確認 | 未記入 | ページ欠け、画像欠け、文字切れ |
+| Runbook共有 | 未記入 | 関係者へ共有 |`;
 }
 
 function artifactRows() {

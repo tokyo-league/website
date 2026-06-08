@@ -32,6 +32,7 @@ function checkGitignore() {
     ".env",
     ".env.local",
     "docs/output/delivery-evidence-*.md",
+    "docs/output/manual-checks-*.md",
     "docs/admin-manual/output/qa-pages/",
     "test-results",
   ];
@@ -54,6 +55,7 @@ function checkForbiddenTrackedFiles() {
     return (
       /^\.env(?:\.|$)/.test(filePath) ||
       /^docs\/output\/delivery-evidence-\d{8}-\d{6}\.md$/.test(filePath) ||
+      /^docs\/output\/manual-checks-.*\.md$/.test(filePath) ||
       /^docs\/admin-manual\/output\/qa-pages\//.test(filePath) ||
       /^test-results\//.test(filePath)
     );

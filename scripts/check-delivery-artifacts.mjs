@@ -69,12 +69,12 @@ checkTextContains({
 checkTextContains({
   label: "納品前証跡レポート手順",
   filePath: "docs/production-runbook.md",
-  requiredText: "npm run delivery:evidence -- --final --production-url https://<production-domain> --production-env-file",
+  requiredText: "npm run delivery:evidence -- --final --production-url https://<production-domain> --production-env-file .env.production.local --manual-checks-file",
 });
 checkTextContains({
   label: "納品前証跡final前提",
   filePath: "docs/production-runbook.md",
-  requiredText: "clean worktree",
+  requiredText: "手動確認メモ",
 });
 checkTextContains({
   label: "本番公開導線確認手順",
@@ -99,7 +99,7 @@ checkTextContains({
 checkTextContains({
   label: "納品ハンドオフ: 本番証跡",
   filePath: "docs/delivery-handoff.md",
-  requiredText: "npm run delivery:evidence -- --final --production-url https://<production-domain> --production-env-file",
+  requiredText: "npm run delivery:evidence -- --final --production-url https://<production-domain> --production-env-file .env.production.local --manual-checks-file",
 });
 checkTextContains({
   label: "納品ハンドオフ: 共有注意",

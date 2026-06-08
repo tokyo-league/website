@@ -157,7 +157,7 @@ https://<production-domain>/api/auth/callback/google
 - `npm run security:headers -- https://<production-domain>` が成功し、CSPレポートAPIのPOST 204も確認している
 - `npm run public:routes -- https://<production-domain>` が成功している
 - `npm run admin:routes -- https://<production-domain>` が成功している
-- `npm run delivery:evidence -- --final --production-url https://<production-domain> --production-env-file .env.production.local --include-build --include-e2e` で納品前証跡レポートを生成している
+- `npm run delivery:evidence -- --final --production-url https://<production-domain> --production-env-file .env.production.local --manual-checks-file docs/output/manual-checks-YYYYMMDD.md --include-build --include-e2e` で納品前証跡レポートを生成している
 - Vercel Production Environmentに `E2E_TEST_MODE` が存在しない。存在してもproductionではE2Eバイパスが無効化される
 
 ## 納品PDF生成
@@ -225,10 +225,24 @@ npm run security:supply-chain
 納品前証跡レポート:
 
 ```bash
-npm run delivery:evidence -- --final --production-url https://<production-domain> --production-env-file .env.production.local --include-build --include-e2e
+npm run delivery:evidence -- --final --production-url https://<production-domain> --production-env-file .env.production.local --manual-checks-file docs/output/manual-checks-YYYYMMDD.md --include-build --include-e2e
 ```
 
-`--final` は clean worktree、HTTPSの本番URL、存在するProduction envファイル、build、E2E、公開導線、管理者到達確認を必須にします。
+`--final` は clean worktree、HTTPSの本番URL、存在するProduction envファイル、手動確認メモ、build、E2E、公開導線、管理者到達確認を必須にします。
+
+手動確認メモは値や秘密情報を含めず、以下のような表を `docs/output/manual-checks-YYYYMMDD.md` に保存します。このファイルは `.gitignore` 対象です。
+
+```markdown
+| 項目 | 状態 | メモ |
+| --- | --- | --- |
+| 本番管理者ログイン | 実施済み | OwnerメールでGoogleログイン確認 |
+| Owner操作 | 実施済み | ニュース、チーム、資料、担当割当、更新履歴 |
+| Editor操作 | 実施済み | 割当済みリーグの結果管理のみ操作可能 |
+| Google OAuthリダイレクトURI | 実施済み | 本番ドメインのみ許可 |
+| 初期Owner | 実施済み | 関係者へ別経路で共有 |
+| PDF目視確認 | 実施済み | ページ欠け、画像欠け、文字切れなし |
+| Runbook共有 | 実施済み | 関係者へ共有 |
+```
 
 出力:
 
@@ -286,7 +300,7 @@ npm run admin:routes -- https://<production-domain>
 - `npm run security:supply-chain` の成功ログ
 - `npm run security:headers -- https://<production-domain>` の成功ログ
 - `npm run docs:delivery:check` の成功ログ
-- `npm run delivery:evidence -- --final --production-url https://<production-domain> --production-env-file .env.production.local --include-build --include-e2e` の出力Markdown
+- `npm run delivery:evidence -- --final --production-url https://<production-domain> --production-env-file .env.production.local --manual-checks-file docs/output/manual-checks-YYYYMMDD.md --include-build --include-e2e` の出力Markdown
 - 仕様書PDF
 - 管理者ツール説明書PDF
 - 納品ハンドオフ

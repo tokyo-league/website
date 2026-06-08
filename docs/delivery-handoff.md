@@ -34,6 +34,14 @@ npm run admin:routes -- https://<production-domain>
 npm run security:headers -- https://<production-domain>
 ```
 
+CSP違反レポートAPIの確認:
+
+```bash
+curl -X POST https://<production-domain>/api/security/csp-report \
+  -H "Content-Type: application/csp-report" \
+  -d '{"csp-report":{"blocked-uri":"https://example.com","effective-directive":"script-src"}}'
+```
+
 依存関係供給網の静的チェック:
 
 ```bash
@@ -64,6 +72,7 @@ npm run delivery:evidence -- --production-url https://<production-domain> --env-
 - Ownerでニュース、チーム、資料、担当割当、更新履歴を確認できる
 - Editorで割当済みリーグの結果管理だけ操作できる
 - 画像・資料アップロードがVercel Blobへ保存される
+- CSP違反レポートAPIが `204` を返し、Vercel Logsで値を永続保存せず確認できる
 - PDF納品物のページ欠け、画像欠け、文字切れを目視確認済み
 
 ## 共有時の注意

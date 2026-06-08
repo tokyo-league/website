@@ -17,6 +17,7 @@ export const contentSecurityPolicy = [
   "base-uri 'self'",
   "object-src 'none'",
   "frame-ancestors 'self'",
+  "report-uri /api/security/csp-report",
   ...(isDevelopment ? [] : ["upgrade-insecure-requests"]),
 ].join("; ");
 

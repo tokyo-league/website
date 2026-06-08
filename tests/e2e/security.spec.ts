@@ -30,6 +30,7 @@ test("公開ページにセキュリティヘッダーが付与される", async
   expect(csp).toContain("frame-ancestors 'self'");
   expect(csp).toContain("base-uri 'self'");
   expect(csp).toContain("form-action 'self'");
+  expect(csp).toContain("report-uri /api/security/csp-report");
   expect(csp).toContain("https://accounts.google.com");
   expect(csp).toContain("https://*.public.blob.vercel-storage.com");
   expect(headers["x-robots-tag"]).toBeUndefined();
@@ -72,7 +73,24 @@ test("認証APIはnoindexかつno-storeで配信される", async ({ request }) 
   expect(headers["cache-control"]).toContain("no-store");
 });
 
-test("robots.txtで管理画面と認証APIのクロールを禁止する", async ({ request }) => {
+test("CSPレポートAPIはnoindexかつno-storeで受信できる", async ({ request }) => {
+  const response = await request.post("/api/security/csp-report", {
+    data: {
+      "csp-report": {
+        "blocked-uri": "https://example.com/script.js",
+        "document-uri": "https://tokyo-league.example/",
+        "effective-directive": "script-src",
+      },
+    },
+  });
+  const headers = response.headers();
+
+  expect(response.status()).toBe(204);
+  expect(headers["x-robots-tag"]).toBe("noindex, nofollow, noarchive");
+  expect(headers["cache-control"]).toContain("no-store");
+});
+
+test("robots.txtで管理画面と認証・セキュリティAPIのクロールを禁止する", async ({ request }) => {
   const response = await request.get("/robots.txt");
   const body = await response.text();
 
@@ -82,6 +100,7 @@ test("robots.txtで管理画面と認証APIのクロールを禁止する", asyn
   expect(body).toContain("Disallow: /admin");
   expect(body).toContain("Disallow: /login");
   expect(body).toContain("Disallow: /api/auth");
+  expect(body).toContain("Disallow: /api/security");
 });
 
 test("Production環境では必須環境変数の欠落を検出する", () => {
@@ -188,7 +207,7 @@ test("Googleログインは検証済みメールだけを許可する", () => {
   expect(isVerifiedGoogleProfile(null)).toBe(false);
 });
 
-test("ログイン、管理画面、認証APIのレート制限は上限超過を検出する", () => {
+test("ログイン、管理画面、認証・セキュリティAPIのレート制限は上限超過を検出する", () => {
   const store = createRateLimitStore();
   const config = {
     windowMs: 60_000,
@@ -196,6 +215,7 @@ test("ログイン、管理画面、認証APIのレート制限は上限超過�
   };
   const key = getRateLimitKey("login", "203.0.113.10");
   const authKey = getRateLimitKey("auth", "203.0.113.10");
+  const securityKey = getRateLimitKey("security", "203.0.113.10");
 
   expect(checkRateLimit(key, config, 1_000, store)).toMatchObject({
     allowed: true,
@@ -215,6 +235,7 @@ test("ログイン、管理画面、認証APIのレート制限は上限超過�
     remaining: 1,
   });
   expect(authKey).toBe("auth:203.0.113.10");
+  expect(securityKey).toBe("security:203.0.113.10");
 });
 
 test("レート制限レスポンスにも共通セキュリティヘッダーを付与する", () => {

@@ -32,6 +32,10 @@ const nextConfig: NextConfig = {
         source: "/api/auth/:path*",
         headers: privateRouteHeaders,
       },
+      {
+        source: "/api/security/:path*",
+        headers: privateRouteHeaders,
+      },
     ];
   },
 };

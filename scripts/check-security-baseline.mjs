@@ -43,6 +43,7 @@ function checkSecurityHeaders() {
     ["CSP frame-ancestors", "\"frame-ancestors 'self'\""],
     ["CSP base-uri", "\"base-uri 'self'\""],
     ["CSP form-action", "\"form-action 'self'\""],
+    ["CSP report-uri", "\"report-uri /api/security/csp-report\""],
     ["CSP upgrade-insecure-requests", "\"upgrade-insecure-requests\""],
     ["Google OAuth connect-src", "https://accounts.google.com"],
     ["Google OAuth token endpoint", "https://oauth2.googleapis.com"],
@@ -92,6 +93,7 @@ function checkHeaderConfig() {
     ["管理画面 privateRouteHeaders", "source: \"/admin/:path*\""],
     ["ログイン privateRouteHeaders", "source: \"/login\""],
     ["認証API privateRouteHeaders", "source: \"/api/auth/:path*\""],
+    ["CSP report privateRouteHeaders", "source: \"/api/security/:path*\""],
   ];
 
   pushIncludesCheck({
@@ -105,10 +107,12 @@ function checkRateLimitMiddleware() {
   const required = [
     ["middleware matcher admin", "\"/admin/:path*\""],
     ["middleware matcher auth", "\"/api/auth/:path*\""],
+    ["middleware matcher security", "\"/api/security/:path*\""],
     ["middleware matcher login", "\"/login\""],
     ["adminRouteRateLimit", "adminRouteRateLimit"],
     ["authRouteRateLimit", "authRouteRateLimit"],
     ["loginRouteRateLimit", "loginRouteRateLimit"],
+    ["securityRouteRateLimit", "securityRouteRateLimit"],
     ["Retry-After", "\"Retry-After\""],
     ["rate limited headers", "rateLimitedRouteHeaders"],
   ];

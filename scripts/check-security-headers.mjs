@@ -8,6 +8,7 @@ await checkRoute({
     ["content-security-policy", "default-src 'self'"],
     ["content-security-policy", "object-src 'none'"],
     ["content-security-policy", "frame-ancestors 'self'"],
+    ["content-security-policy", "report-uri /api/security/csp-report"],
     ["referrer-policy", "strict-origin-when-cross-origin"],
     ["x-content-type-options", "nosniff"],
     ["x-frame-options", "SAMEORIGIN"],
@@ -29,6 +30,15 @@ await checkRoute({
 await checkRoute({
   label: "認証API",
   path: "/api/auth/session",
+  requiredHeaders: [
+    ["x-robots-tag", "noindex, nofollow, noarchive"],
+    ["cache-control", "no-store"],
+  ],
+});
+
+await checkRoute({
+  label: "CSPレポートAPI",
+  path: "/api/security/csp-report",
   requiredHeaders: [
     ["x-robots-tag", "noindex, nofollow, noarchive"],
     ["cache-control", "no-store"],
@@ -110,7 +120,7 @@ async function checkRobotsTxt() {
   }
 
   const body = await response.text();
-  const missing = ["/admin", "/login", "/api/auth"].filter((path) => !body.includes(`Disallow: ${path}`));
+  const missing = ["/admin", "/login", "/api/auth", "/api/security"].filter((path) => !body.includes(`Disallow: ${path}`));
 
   checks.push({
     ok: response.ok && missing.length === 0,

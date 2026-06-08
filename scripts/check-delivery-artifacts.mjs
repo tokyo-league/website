@@ -96,6 +96,11 @@ checkTextContains({
   filePath: "docs/delivery-handoff.md",
   requiredText: ".env.production.local",
 });
+checkTextContains({
+  label: "CSPレポートAPI手順",
+  filePath: "docs/production-runbook.md",
+  requiredText: "report-uri /api/security/csp-report",
+});
 
 console.log("Tokyo League delivery artifact check");
 console.log("");

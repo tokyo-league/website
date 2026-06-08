@@ -8,6 +8,7 @@ import {
   checkRateLimit,
   getRateLimitKey,
   loginRouteRateLimit,
+  securityRouteRateLimit,
 } from "@/lib/rate-limit";
 import { rateLimitedRouteHeaders } from "@/lib/security-headers";
 import { isE2ETestMode } from "@/lib/test-mode";
@@ -29,7 +30,7 @@ export default auth((request) => {
 });
 
 export const config = {
-  matcher: ["/admin/:path*", "/api/auth/:path*", "/login"],
+  matcher: ["/admin/:path*", "/api/auth/:path*", "/api/security/:path*", "/login"],
 };
 
 function getRateLimitResponse(request: NextRequest) {
@@ -71,6 +72,10 @@ function getRateLimitScope(pathname: string) {
     return "auth";
   }
 
+  if (pathname.startsWith("/api/security")) {
+    return "security";
+  }
+
   if (pathname === "/login") {
     return "login";
   }
@@ -85,6 +90,10 @@ function getRateLimitConfig(scope: NonNullable<ReturnType<typeof getRateLimitSco
 
   if (scope === "auth") {
     return authRouteRateLimit;
+  }
+
+  if (scope === "security") {
+    return securityRouteRateLimit;
   }
 
   return loginRouteRateLimit;

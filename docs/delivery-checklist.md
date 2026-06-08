@@ -39,11 +39,12 @@
 | アップロード制限 | 画像・資料のMIME type、拡張子、ファイル内容、サイズ制限 | 実装済み |
 | HTTPセキュリティヘッダー | `next.config.ts` | 実装済み |
 | セキュリティ基準チェック | `npm run security:baseline` でCSP、private routeヘッダー、レート制限、本番env検査、E2E本番無効化を静的確認 | 実装済み |
+| CSP違反レポート受信 | `Content-Security-Policy` の `report-uri /api/security/csp-report` と受信API。noindex/no-store、レート制限、本文サイズ制限付き | 実装済み |
 | 本番ヘッダー確認 | `npm run security:headers -- https://<production-domain>` で公開/ログイン/認証API/robotsを確認 | 実装済み |
 | 本番公開導線確認 | `npm run public:routes -- https://<production-domain>` で主要公開ページの200応答、見出し、主要リンクを確認 | 実装済み |
 | 本番管理者到達確認 | `npm run admin:routes -- https://<production-domain>` で未ログイン時の管理画面保護とGoogle認証Providerを確認 | 実装済み |
 | 管理画面noindex/no-store | `/admin`, `/login`, `/api/auth/*` に `X-Robots-Tag` と `Cache-Control` | 実装済み |
-| robots.txt | `/admin`, `/login`, `/api/auth` のクロール禁止 | 実装済み |
+| robots.txt | `/admin`, `/login`, `/api/auth`, `/api/security` のクロール禁止 | 実装済み |
 | ヘッダー回帰テスト | `tests/e2e/security.spec.ts` | E2E通過 |
 | 非機能仕様書記載 | `docs/data-model-and-admin-spec.md` | 記載済み |
 

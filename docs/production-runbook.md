@@ -146,7 +146,7 @@ https://<production-domain>/api/auth/callback/google
 - `Permissions-Policy` で不要なデバイス権限が無効化されている
 - CSPに `report-uri /api/security/csp-report` が含まれている
 - `/admin` と `/login` に `X-Robots-Tag: noindex, nofollow, noarchive` と `Cache-Control: no-store` が付与されている
-- `/api/security/csp-report` は `204` でCSPレポートを受け取り、noindex/no-storeで配信されている
+- `/api/security/csp-report` はPOSTで `204` を返してCSPレポートを受け取り、noindex/no-storeで配信されている
 - `/robots.txt` で `/admin`, `/login`, `/api/auth`, `/api/security` が `Disallow` されている
 - `/login`, `/admin`, `/api/auth/*`, `/api/security/*` の上限超過レスポンスに `Retry-After` と共通セキュリティヘッダーが付与される
 - Production環境で必須環境変数がすべて設定されている
@@ -154,7 +154,7 @@ https://<production-domain>/api/auth/callback/google
 - `npm run security:secrets` が成功している
 - `npm run security:supply-chain` が成功している
 - `npm run security:prod-env -- .env.production.local` が成功している
-- `npm run security:headers -- https://<production-domain>` が成功している
+- `npm run security:headers -- https://<production-domain>` が成功し、CSPレポートAPIのPOST 204も確認している
 - `npm run public:routes -- https://<production-domain>` が成功している
 - `npm run admin:routes -- https://<production-domain>` が成功している
 - `npm run delivery:evidence -- --production-url https://<production-domain> --env-file .env.production.local --include-build --include-e2e` で納品前証跡レポートを生成している

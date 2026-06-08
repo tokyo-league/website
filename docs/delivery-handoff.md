@@ -34,7 +34,7 @@ npm run admin:routes -- https://<production-domain>
 npm run security:headers -- https://<production-domain>
 ```
 
-CSP違反レポートAPIの確認:
+CSP違反レポートAPIのPOST確認:
 
 ```bash
 curl -X POST https://<production-domain>/api/security/csp-report \

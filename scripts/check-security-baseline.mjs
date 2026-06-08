@@ -6,11 +6,13 @@ const files = {
   envValidation: readText("lib/env-validation.ts"),
   middleware: readText("middleware.ts"),
   nextConfig: readText("next.config.ts"),
+  securityHeaderCheck: readText("scripts/check-security-headers.mjs"),
   securityHeaders: readText("lib/security-headers.ts"),
   testMode: readText("lib/test-mode.ts"),
 };
 
 checkSecurityHeaders();
+checkSecurityHeaderProbe();
 checkPrivateRouteHeaders();
 checkHeaderConfig();
 checkRateLimitMiddleware();
@@ -82,6 +84,21 @@ function checkPrivateRouteHeaders() {
   pushIncludesCheck({
     label: "管理/認証privateヘッダー",
     source: files.securityHeaders,
+    required,
+  });
+}
+
+function checkSecurityHeaderProbe() {
+  const required = [
+    ["CSP report POST path", "path: \"/api/security/csp-report\""],
+    ["CSP report POST method", "method: \"POST\""],
+    ["CSP report expected 204", "expectedStatus: 204"],
+    ["CSP report content type", "\"content-type\": \"application/csp-report\""],
+  ];
+
+  pushIncludesCheck({
+    label: "本番セキュリティヘッダー外部検査",
+    source: files.securityHeaderCheck,
     required,
   });
 }

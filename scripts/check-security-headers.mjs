@@ -39,6 +39,18 @@ await checkRoute({
 await checkRoute({
   label: "CSPレポートAPI",
   path: "/api/security/csp-report",
+  method: "POST",
+  expectedStatus: 204,
+  headers: {
+    "content-type": "application/csp-report",
+  },
+  body: JSON.stringify({
+    "csp-report": {
+      "blocked-uri": "https://example.com/script.js",
+      "document-uri": baseUrl.origin,
+      "effective-directive": "script-src",
+    },
+  }),
   requiredHeaders: [
     ["x-robots-tag", "noindex, nofollow, noarchive"],
     ["cache-control", "no-store"],
@@ -80,15 +92,26 @@ function parseBaseUrl(value) {
   }
 }
 
-async function checkRoute({ label, path, requiredHeaders, forbiddenHeaders = [] }) {
-  const response = await fetchUrl(path);
+async function checkRoute({
+  label,
+  path,
+  requiredHeaders,
+  forbiddenHeaders = [],
+  method = "GET",
+  expectedStatus,
+  headers,
+  body,
+}) {
+  const response = await fetchUrl(path, { method, headers, body });
   if (!response) {
     return;
   }
 
   const messages = [];
 
-  if (response.status < 200 || response.status >= 400) {
+  if (expectedStatus !== undefined && response.status !== expectedStatus) {
+    messages.push(`${method} ${path} が ${response.status} を返しました。expected=${expectedStatus}`);
+  } else if (expectedStatus === undefined && (response.status < 200 || response.status >= 400)) {
     messages.push(`${path} が ${response.status} を返しました。`);
   }
 
@@ -109,7 +132,7 @@ async function checkRoute({ label, path, requiredHeaders, forbiddenHeaders = [] 
   checks.push({
     ok: messages.length === 0,
     label,
-    message: messages.length === 0 ? `${path} ok` : messages.join(" "),
+    message: messages.length === 0 ? `${method} ${path} ok` : messages.join(" "),
   });
 }
 
@@ -132,9 +155,10 @@ async function checkRobotsTxt() {
   });
 }
 
-async function fetchUrl(path) {
+async function fetchUrl(path, init = {}) {
   try {
     return await fetch(new URL(path, baseUrl), {
+      ...init,
       redirect: "manual",
       signal: AbortSignal.timeout(15_000),
     });

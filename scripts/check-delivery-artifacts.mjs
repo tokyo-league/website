@@ -101,6 +101,11 @@ checkTextContains({
   filePath: "docs/production-runbook.md",
   requiredText: "report-uri /api/security/csp-report",
 });
+checkTextContains({
+  label: "CSPレポートAPI POST確認",
+  filePath: "docs/production-runbook.md",
+  requiredText: "CSPレポートAPIのPOST 204",
+});
 
 console.log("Tokyo League delivery artifact check");
 console.log("");

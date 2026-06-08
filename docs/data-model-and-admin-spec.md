@@ -656,13 +656,13 @@
 | X-Permitted-Cross-Domain-Policies | `none` |
 | Permissions-Policy | camera / microphone / geolocation / payment / usb を無効化 |
 | Strict-Transport-Security | HTTPS本番環境で長期HSTSを有効化 |
-| CSP report-uri | `/api/security/csp-report` でCSP違反レポートを受信し、保存せずサーバーログへ安全に記録する |
+| CSP report-uri | `/api/security/csp-report` でCSP違反レポートをPOST受信し、保存せずサーバーログへ安全に記録する |
 | X-Robots-Tag | 管理画面、ログイン画面、認証APIは `noindex, nofollow, noarchive` |
 | Cache-Control | 管理画面、ログイン画面、認証APIは `no-store` |
 
 `robots.txt` でも `/admin`, `/login`, `/api/auth`, `/api/security` のクロールを禁止する。
 
-納品前に `npm run security:baseline` を実行し、CSP、private routeヘッダー、レート制限、本番env検査、E2E本番無効化の静的基準を確認する。さらに `npm run security:headers -- https://<production-domain>` を実行し、公開トップ、ログイン画面、認証API、robots.txt の本番ヘッダーを確認する。
+納品前に `npm run security:baseline` を実行し、CSP、private routeヘッダー、レート制限、本番env検査、E2E本番無効化の静的基準を確認する。さらに `npm run security:headers -- https://<production-domain>` を実行し、公開トップ、ログイン画面、認証API、CSPレポートPOST、robots.txt の本番ヘッダーを確認する。
 
 ### 秘密情報・環境変数
 
@@ -691,7 +691,7 @@
 
 - 管理データは `createdById` / `updatedById` と `createdAt` / `updatedAt` を保持する
 - `/admin/audit` は `OWNER` 専用画面とし、直近50件の更新履歴を日本時間で表示する
-- `/api/security/csp-report` はCSP違反レポートを受け取り、本文サイズを制限し、値を永続保存せずサーバーログで確認する
+- `/api/security/csp-report` はCSP違反レポートをPOSTで受け取り、本文サイズを制限し、値を永続保存せずサーバーログで確認する
 - 削除操作は参照中データを壊さないよう、関連データの存在確認を行う
 - 納品後の改善候補として、管理者招待フロー、Vercel WAF連携、CSPレポート収集を追加検討する
 

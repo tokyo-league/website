@@ -71,7 +71,7 @@ npm run delivery:evidence -- --production-url https://<production-domain>
 最終納品証跡では以下を使い、本番URL、Production env、build、E2E、公開/管理導線を必須確認します。
 
 \`\`\`bash
-npm run delivery:evidence -- --final --production-url https://<production-domain> --env-file .env.production.local --include-build --include-e2e
+npm run delivery:evidence -- --final --production-url https://<production-domain> --production-env-file .env.production.local --include-build --include-e2e
 \`\`\``);
 
   sections.push(`## 本番セキュリティヘッダー
@@ -85,7 +85,7 @@ npm run delivery:evidence -- --production-url https://<production-domain>
 最終納品証跡では以下を使い、本番URL、Production env、build、E2E、公開/管理導線を必須確認します。
 
 \`\`\`bash
-npm run delivery:evidence -- --final --production-url https://<production-domain> --env-file .env.production.local --include-build --include-e2e
+npm run delivery:evidence -- --final --production-url https://<production-domain> --production-env-file .env.production.local --include-build --include-e2e
 \`\`\``);
 
   sections.push(`## 本番管理者ツール到達確認
@@ -99,7 +99,7 @@ npm run delivery:evidence -- --production-url https://<production-domain>
 最終納品証跡では以下を使い、本番URL、Production env、build、E2E、公開/管理導線を必須確認します。
 
 \`\`\`bash
-npm run delivery:evidence -- --final --production-url https://<production-domain> --env-file .env.production.local --include-build --include-e2e
+npm run delivery:evidence -- --final --production-url https://<production-domain> --production-env-file .env.production.local --include-build --include-e2e
 \`\`\``);
 }
 
@@ -111,13 +111,13 @@ if (options.envFile) {
 未実行です。Vercel Production環境変数をpull後に以下で証跡を保存します。
 
 \`\`\`bash
-npm run delivery:evidence -- --env-file .env.production.local
+npm run delivery:evidence -- --production-env-file .env.production.local
 \`\`\`
 
 最終納品証跡では以下を使い、本番URL、Production env、build、E2E、公開/管理導線を必須確認します。
 
 \`\`\`bash
-npm run delivery:evidence -- --final --production-url https://<production-domain> --env-file .env.production.local --include-build --include-e2e
+npm run delivery:evidence -- --final --production-url https://<production-domain> --production-env-file .env.production.local --include-build --include-e2e
 \`\`\``);
 }
 
@@ -176,7 +176,7 @@ function parseArgs(args) {
       continue;
     }
 
-    if (arg === "--env-file") {
+    if (arg === "--env-file" || arg === "--production-env-file") {
       parsed.envFile = requiredValue(args, (index += 1), arg);
       continue;
     }
@@ -230,7 +230,7 @@ function assertFinalEvidenceOptions(options) {
   const missing = [];
 
   if (!options.productionUrl) missing.push("--production-url");
-  if (!options.envFile) missing.push("--env-file");
+  if (!options.envFile) missing.push("--production-env-file");
   if (!options.includeBuild) missing.push("--include-build");
   if (!options.includeE2e) missing.push("--include-e2e");
   if (options.skipPublicRoutes) missing.push("remove --skip-public-routes");
@@ -239,6 +239,45 @@ function assertFinalEvidenceOptions(options) {
   if (missing.length > 0) {
     console.error(`[error] --final では次の条件が必須です: ${missing.join(", ")}`);
     printHelpAndExit(1);
+  }
+
+  const errors = [];
+  const productionUrl = parseFinalProductionUrl(options.productionUrl);
+
+  if (!productionUrl) {
+    errors.push("--production-url は有効なURLを指定してください。");
+  } else if (productionUrl.protocol !== "https:") {
+    errors.push("--production-url は https URL を指定してください。");
+  } else if (["localhost", "127.0.0.1", "::1"].includes(productionUrl.hostname)) {
+    errors.push("--production-url はlocalhostではなく本番ドメインを指定してください。");
+  } else if (productionUrl.hostname.includes("<") || productionUrl.hostname.includes(">")) {
+    errors.push("--production-url のプレースホルダーを本番ドメインに置き換えてください。");
+  }
+
+  if (!fs.existsSync(path.resolve(options.envFile))) {
+    errors.push(`--production-env-file が見つかりません: ${options.envFile}`);
+  }
+
+  const gitStatus = runCommand("git", ["status", "--short"], { collectOnly: true });
+  if (gitStatus.status !== 0) {
+    errors.push("git status を確認できませんでした。");
+  } else if (gitStatus.stdout.trim()) {
+    errors.push("--final はclean worktreeで実行してください。未コミット差分があります。");
+  }
+
+  if (errors.length > 0) {
+    for (const error of errors) {
+      console.error(`[error] ${error}`);
+    }
+    process.exit(1);
+  }
+}
+
+function parseFinalProductionUrl(value) {
+  try {
+    return new URL(value);
+  } catch {
+    return null;
   }
 }
 
@@ -254,16 +293,17 @@ function requiredValue(args, index, optionName) {
 function printHelpAndExit(code = 0) {
   console.log(`Usage:
   npm run delivery:evidence
-  npm run delivery:evidence -- --production-url https://example.com --env-file .env.production.local
+  npm run delivery:evidence -- --production-url https://example.com --production-env-file .env.production.local
   npm run delivery:evidence -- --include-build --include-e2e
-  npm run delivery:evidence -- --final --production-url https://example.com --env-file .env.production.local --include-build --include-e2e
+  npm run delivery:evidence -- --final --production-url https://example.com --production-env-file .env.production.local --include-build --include-e2e
 
 Options:
   --production-url <url>  本番URLのセキュリティヘッダーを確認する
-  --env-file <path>       本番envファイルを値非表示で確認する
+  --production-env-file <path>
+                          本番envファイルを値非表示で確認する
   --include-build         npm run build の結果も保存する
   --include-e2e           npm run test:e2e の結果も保存する
-  --final                 最終納品証跡として本番URL/env/build/E2E/公開・管理導線を必須化する
+  --final                 最終納品証跡としてclean worktree、https本番URL、env、build、E2E、公開・管理導線を必須化する
   --skip-public-routes    production-url指定時に公開導線チェックを省略する
   --skip-admin-routes     production-url指定時に管理者到達チェックを省略する
   --output <path>         出力先Markdownを指定する`);

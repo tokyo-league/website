@@ -683,7 +683,7 @@
 - 納品前に `npm run security:secrets` を実行し、秘密情報と生成証跡の混入がないことを確認する
 - 納品前に `npm run security:supply-chain` を実行し、lockfile、依存取得元、integrity、root install hookを確認する
 - 納品前に `npm run delivery:gate` を実行し、PDF生成、管理者説明書QA画像生成、納品物チェック、セキュリティ基準、秘密情報管理、依存関係供給網、ビルド、E2Eを一括確認する
-- 納品前に `npm run delivery:evidence -- --final --production-url https://<production-domain> --env-file .env.production.local --include-build --include-e2e` を実行し、コマンド結果、PDFサイズ、QAページ数、本番URL/env確認の証跡をMarkdownとして保存する
+- 納品前にclean worktreeで `npm run delivery:evidence -- --final --production-url https://<production-domain> --production-env-file .env.production.local --include-build --include-e2e` を実行し、コマンド結果、PDFサイズ、QAページ数、本番URL/env確認の証跡をMarkdownとして保存する
 - 本番公開サイトは `npm run public:routes -- https://<production-domain>` で主要公開ページの200応答、見出し、主要リンクを確認する
 - 本番管理者ツールは `npm run admin:routes -- https://<production-domain>` でログイン画面、未ログイン管理画面redirect、認証session API、Google providerを確認する
 - 管理者マニュアルHTMLに古い制限事項の文言が残っていないことを自動検査し、実装済み機能と説明書の齟齬を防ぐ

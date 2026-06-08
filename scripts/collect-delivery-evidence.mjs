@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 const options = parseArgs(process.argv.slice(2));
+assertFinalEvidenceOptions(options);
 const generatedAt = new Date();
 const outputPath =
   options.outputPath ??
@@ -22,7 +23,8 @@ sections.push(`## 基本情報
 | Git commit | ${inlineValue(gitCommit.stdout.trim() || "取得失敗")} |
 | Git status | ${inlineValue(gitStatus.stdout.trim() || "clean")} |
 | Production URL | ${inlineValue(options.productionUrl ?? "未指定")} |
-| Production env file | ${inlineValue(options.envFile ?? "未指定")} |`);
+| Production env file | ${inlineValue(options.envFile ?? "未指定")} |
+| Final evidence mode | ${inlineValue(options.final ? "enabled" : "disabled")} |`);
 
 sections.push(`## 納品物
 
@@ -64,6 +66,12 @@ if (options.productionUrl) {
 
 \`\`\`bash
 npm run delivery:evidence -- --production-url https://<production-domain>
+\`\`\`
+
+最終納品証跡では以下を使い、本番URL、Production env、build、E2E、公開/管理導線を必須確認します。
+
+\`\`\`bash
+npm run delivery:evidence -- --final --production-url https://<production-domain> --env-file .env.production.local --include-build --include-e2e
 \`\`\``);
 
   sections.push(`## 本番セキュリティヘッダー
@@ -72,6 +80,12 @@ npm run delivery:evidence -- --production-url https://<production-domain>
 
 \`\`\`bash
 npm run delivery:evidence -- --production-url https://<production-domain>
+\`\`\`
+
+最終納品証跡では以下を使い、本番URL、Production env、build、E2E、公開/管理導線を必須確認します。
+
+\`\`\`bash
+npm run delivery:evidence -- --final --production-url https://<production-domain> --env-file .env.production.local --include-build --include-e2e
 \`\`\``);
 
   sections.push(`## 本番管理者ツール到達確認
@@ -80,6 +94,12 @@ npm run delivery:evidence -- --production-url https://<production-domain>
 
 \`\`\`bash
 npm run delivery:evidence -- --production-url https://<production-domain>
+\`\`\`
+
+最終納品証跡では以下を使い、本番URL、Production env、build、E2E、公開/管理導線を必須確認します。
+
+\`\`\`bash
+npm run delivery:evidence -- --final --production-url https://<production-domain> --env-file .env.production.local --include-build --include-e2e
 \`\`\``);
 }
 
@@ -92,6 +112,12 @@ if (options.envFile) {
 
 \`\`\`bash
 npm run delivery:evidence -- --env-file .env.production.local
+\`\`\`
+
+最終納品証跡では以下を使い、本番URL、Production env、build、E2E、公開/管理導線を必須確認します。
+
+\`\`\`bash
+npm run delivery:evidence -- --final --production-url https://<production-domain> --env-file .env.production.local --include-build --include-e2e
 \`\`\``);
 }
 
@@ -137,6 +163,7 @@ function parseArgs(args) {
     outputPath: undefined,
     includeBuild: false,
     includeE2e: false,
+    final: false,
     skipPublicRoutes: false,
     skipAdminRoutes: false,
   };
@@ -169,6 +196,11 @@ function parseArgs(args) {
       continue;
     }
 
+    if (arg === "--final") {
+      parsed.final = true;
+      continue;
+    }
+
     if (arg === "--skip-public-routes") {
       parsed.skipPublicRoutes = true;
       continue;
@@ -190,6 +222,26 @@ function parseArgs(args) {
   return parsed;
 }
 
+function assertFinalEvidenceOptions(options) {
+  if (!options.final) {
+    return;
+  }
+
+  const missing = [];
+
+  if (!options.productionUrl) missing.push("--production-url");
+  if (!options.envFile) missing.push("--env-file");
+  if (!options.includeBuild) missing.push("--include-build");
+  if (!options.includeE2e) missing.push("--include-e2e");
+  if (options.skipPublicRoutes) missing.push("remove --skip-public-routes");
+  if (options.skipAdminRoutes) missing.push("remove --skip-admin-routes");
+
+  if (missing.length > 0) {
+    console.error(`[error] --final では次の条件が必須です: ${missing.join(", ")}`);
+    printHelpAndExit(1);
+  }
+}
+
 function requiredValue(args, index, optionName) {
   const value = args[index];
   if (!value || value.startsWith("--")) {
@@ -204,12 +256,14 @@ function printHelpAndExit(code = 0) {
   npm run delivery:evidence
   npm run delivery:evidence -- --production-url https://example.com --env-file .env.production.local
   npm run delivery:evidence -- --include-build --include-e2e
+  npm run delivery:evidence -- --final --production-url https://example.com --env-file .env.production.local --include-build --include-e2e
 
 Options:
   --production-url <url>  本番URLのセキュリティヘッダーを確認する
   --env-file <path>       本番envファイルを値非表示で確認する
   --include-build         npm run build の結果も保存する
   --include-e2e           npm run test:e2e の結果も保存する
+  --final                 最終納品証跡として本番URL/env/build/E2E/公開・管理導線を必須化する
   --skip-public-routes    production-url指定時に公開導線チェックを省略する
   --skip-admin-routes     production-url指定時に管理者到達チェックを省略する
   --output <path>         出力先Markdownを指定する`);

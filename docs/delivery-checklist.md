@@ -31,7 +31,7 @@
 | 管理画面CSRF対策 | `/admin` 配下のPOST等は外部Originまたは `Sec-Fetch-Site: cross-site` を共通セキュリティヘッダー付き `403` で拒否 | 実装済み |
 | サーバー側認可 | `requireOwner`, `getAdminScope` をサーバーアクションで使用 | 実装済み |
 | Production環境変数検出 | Productionで必須環境変数の欠落を起動時検出 | 実装済み |
-| 本番env安全確認 | `npm run security:prod-env -- .env.production.local` で必須項目、E2E誤設定、OAuth/DB/Blob形式を値非表示で確認 | 実装済み |
+| 本番env安全確認 | `npm run security:prod-env -- .env.production.local --production-url https://<production-domain>` で必須項目、E2E誤設定、OAuth/DB/Blob形式、AUTH_URL/NEXTAUTH_URLの本番URL一致を値非表示で確認 | 実装済み |
 | 秘密情報管理チェック | `npm run security:secrets` で追跡済みenv、納品証跡Markdown、秘密鍵、実トークンらしき値の混入を確認 | 実装済み |
 | 依存関係供給網チェック | `npm run security:supply-chain` でlockfile、依存取得元、integrity、root install hookを確認 | 実装済み |
 | E2Eバイパス本番無効化 | `lib/test-mode.ts`、`tests/e2e/security.spec.ts` | 実装済み |
@@ -51,7 +51,7 @@
 
 ## 直近の検証結果
 
-- `npm run test:e2e`: 28件成功
+- `npm run test:e2e`: 30件成功
 - `npm run build`: 成功。公開トップとニュース一覧は動的レンダリング化し、ビルド時のDB接続エラーログなし
 - `npm run docs:spec`: 成功
 - `npm run docs:admin`: 成功
@@ -72,7 +72,7 @@
 - 本番デプロイURLで管理画面ログイン、Owner操作、Editor操作を確認する
 - 納品直前に `npm run delivery:gate` を実行し、PDF生成、QA画像生成、納品物チェック、セキュリティ基準、秘密情報管理、依存関係供給網、ビルド、E2Eを一括確認する
 - clean worktreeで、本番デプロイURLに対して `npm run delivery:evidence -- --final --production-url https://<production-domain> --production-env-file .env.production.local --manual-checks-file docs/output/manual-checks-YYYYMMDD.md --include-build --include-e2e` を実行し、証跡レポートを保存する
-- 本番環境の `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `DATABASE_URL`, `DIRECT_URL`, `BLOB_READ_WRITE_TOKEN` を `npm run security:prod-env -- .env.production.local` で確認する
+- 本番環境の `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `DATABASE_URL`, `DIRECT_URL`, `BLOB_READ_WRITE_TOKEN`, `AUTH_URL`, `NEXTAUTH_URL` を `npm run security:prod-env -- .env.production.local --production-url https://<production-domain>` で確認する
 - `npm run security:secrets` でリポジトリに秘密情報や納品証跡Markdownが混入していないことを確認する
 - Google OAuthのリダイレクトURIが本番ドメインだけに限定されていることを確認する
 - 初期Ownerメールアドレスを確定し、`npm run prisma:seed-admin` またはDB管理画面で登録する

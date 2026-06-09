@@ -49,7 +49,7 @@ checkTextDoesNotContain({
 checkTextContains({
   label: "本番env安全確認手順",
   filePath: "docs/production-runbook.md",
-  requiredText: "npm run security:prod-env -- .env.production.local",
+  requiredText: "npm run security:prod-env -- .env.production.local --production-url https://<production-domain>",
 });
 checkTextContains({
   label: "セキュリティ基準チェック手順",

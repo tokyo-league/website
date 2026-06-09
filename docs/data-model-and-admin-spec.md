@@ -670,7 +670,7 @@
 
 - `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `DATABASE_URL`, `DIRECT_URL`, `BLOB_READ_WRITE_TOKEN` は環境変数で管理し、リポジトリへコミットしない
 - Vercel Production Environmentでは上記必須環境変数の欠落と主要な形式不備をアプリ起動時に検出し、設定漏れや危険な値のまま本番運用しない
-- 納品前に `npm run security:prod-env -- .env.production.local` を実行し、値を表示せずに必須項目、`E2E_TEST_MODE` 誤設定、OAuth/DB/Blob形式を確認する
+- 納品前に `npm run security:prod-env -- .env.production.local --production-url https://<production-domain>` を実行し、値を表示せずに必須項目、`E2E_TEST_MODE` 誤設定、OAuth/DB/Blob形式、`AUTH_URL` / `NEXTAUTH_URL` の本番URL一致を確認する
 - 納品前に `npm run security:secrets` を実行し、追跡済みenv、納品証跡Markdown、秘密鍵、実トークンらしき値がリポジトリに混入していないことを確認する
 - 初期管理者の登録は `SEED_ADMIN_EMAIL` を使った明示的なシード実行、またはDB管理画面での登録に限定する
 - 本番環境のGoogle OAuthリダイレクトURIはデプロイドメインに限定する

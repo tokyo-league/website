@@ -31,10 +31,10 @@ Production環境では `DATABASE_URL`, `DIRECT_URL`, `AUTH_SECRET`, `AUTH_GOOGLE
 
 ```bash
 vercel env pull .env.production.local --environment=production --yes
-npm run security:prod-env -- .env.production.local
+npm run security:prod-env -- .env.production.local --production-url https://<production-domain>
 ```
 
-このコマンドは `E2E_TEST_MODE` の誤設定、短すぎる `AUTH_SECRET`、Google OAuth Client ID形式、PostgreSQL URL形式、Vercel Blob read/write token形式を確認します。結果は値そのものを含まないため、納品前証跡として共有できます。
+このコマンドは `E2E_TEST_MODE` の誤設定、短すぎる `AUTH_SECRET`、Google OAuth Client ID形式、PostgreSQL URL形式、Vercel Blob read/write token形式、`AUTH_URL` / `NEXTAUTH_URL` が設定されている場合の本番URL origin一致を確認します。結果は値そのものを含まないため、納品前証跡として共有できます。
 
 リポジトリ側の秘密情報混入も納品前に確認します。
 
@@ -155,7 +155,7 @@ https://<production-domain>/api/auth/callback/google
 - `npm run security:baseline` が成功している
 - `npm run security:secrets` が成功している
 - `npm run security:supply-chain` が成功している
-- `npm run security:prod-env -- .env.production.local` が成功している
+- `npm run security:prod-env -- .env.production.local --production-url https://<production-domain>` が成功している
 - `npm run security:headers -- https://<production-domain>` が成功し、CSPレポートAPIのPOST 204も確認している
 - `npm run public:routes -- https://<production-domain>` が成功している
 - `npm run admin:routes -- https://<production-domain>` が成功している
@@ -307,4 +307,4 @@ npm run admin:routes -- https://<production-domain>
 - 管理者ツール説明書PDF
 - 納品ハンドオフ
 - 初期Ownerメールアドレス
-- `npm run security:prod-env -- .env.production.local` の成功結果。値そのものは共有しない
+- `npm run security:prod-env -- .env.production.local --production-url https://<production-domain>` の成功結果。値そのものは共有しない

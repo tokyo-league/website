@@ -52,7 +52,7 @@ npm run security:supply-chain
 
 ```bash
 vercel env pull .env.production.local --environment=production --yes
-npm run security:prod-env -- .env.production.local
+npm run security:prod-env -- .env.production.local --production-url https://<production-domain>
 ```
 
 納品前証跡レポート:

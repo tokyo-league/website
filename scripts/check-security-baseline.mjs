@@ -175,6 +175,9 @@ function checkProductionEnvValidation() {
     ["AUTH_SECRET長さ検査", "env.AUTH_SECRET.length < 32"],
     ["Google ID形式検査", ".apps.googleusercontent.com"],
     ["Blob token形式検査", "vercel_blob_rw_"],
+    ["Auth URL形式検査", "AUTH_URL"],
+    ["NextAuth URL形式検査", "NEXTAUTH_URL"],
+    ["Auth URL https検査", "isHttpsProductionUrl"],
   ];
 
   pushIncludesCheck({

@@ -160,6 +160,8 @@ test("Production環境では危険な環境変数値を検出する", () => {
     DIRECT_URL: "https://example.com",
     BLOB_READ_WRITE_TOKEN: "blob-token",
     E2E_TEST_MODE: "1",
+    AUTH_URL: "http://localhost:3000",
+    NEXTAUTH_URL: "not-a-url",
   };
 
   expect(getInvalidProductionEnv(productionEnv)).toEqual([
@@ -170,6 +172,8 @@ test("Production環境では危険な環境変数値を検出する", () => {
     "DATABASE_URL",
     "DIRECT_URL",
     "BLOB_READ_WRITE_TOKEN",
+    "AUTH_URL",
+    "NEXTAUTH_URL",
   ]);
   expect(() => assertProductionEnvReady(productionEnv)).toThrow("Invalid production environment variables");
 });

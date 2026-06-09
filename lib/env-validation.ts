@@ -46,6 +46,12 @@ export function getInvalidProductionEnv(env: NodeJS.ProcessEnv = process.env) {
     invalid.push("BLOB_READ_WRITE_TOKEN");
   }
 
+  for (const key of ["AUTH_URL", "NEXTAUTH_URL"]) {
+    if (env[key] && !isHttpsProductionUrl(env[key])) {
+      invalid.push(key);
+    }
+  }
+
   return invalid;
 }
 
@@ -72,6 +78,23 @@ function isPostgresUrl(value: string) {
     const url = new URL(value);
 
     return url.protocol === "postgres:" || url.protocol === "postgresql:";
+  } catch {
+    return false;
+  }
+}
+
+function isHttpsProductionUrl(value: string) {
+  try {
+    const url = new URL(value);
+
+    return (
+      url.protocol === "https:" &&
+      url.hostname !== "localhost" &&
+      url.hostname !== "127.0.0.1" &&
+      url.hostname !== "::1" &&
+      !url.hostname.includes("<") &&
+      !url.hostname.includes(">")
+    );
   } catch {
     return false;
   }

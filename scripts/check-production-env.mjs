@@ -10,13 +10,19 @@ const requiredEnv = [
   "BLOB_READ_WRITE_TOKEN",
 ];
 
-const envFilePath = process.argv[2] ?? ".env.production.local";
-const explicitEnvFile = Boolean(process.argv[2]);
+const options = parseArgs(process.argv.slice(2));
+const envFilePath = options.envFilePath ?? ".env.production.local";
+const explicitEnvFile = Boolean(options.envFilePath);
 const resolvedEnvFilePath = path.resolve(envFilePath);
 const fileEnv = loadEnvFile(resolvedEnvFilePath, explicitEnvFile);
 const env = { ...process.env, ...fileEnv };
+const productionUrl = options.productionUrl ? parseProductionUrl(options.productionUrl) : null;
 const errors = [];
 const warnings = [];
+
+if (options.productionUrl && !productionUrl) {
+  errors.push("--production-url は本番ドメインの https URL を指定してください。");
+}
 
 for (const key of requiredEnv) {
   if (!env[key]) {
@@ -57,13 +63,28 @@ if (env.DATABASE_URL && env.DIRECT_URL && env.DATABASE_URL === env.DIRECT_URL) {
 }
 
 for (const key of ["AUTH_URL", "NEXTAUTH_URL"]) {
-  if (env[key] && !isHttpsProductionUrl(env[key])) {
-    warnings.push(`${key} は本番ドメインの https URL か未設定にしてください。`);
+  if (!env[key]) {
+    continue;
+  }
+
+  const authUrl = parseProductionUrl(env[key]);
+
+  if (!authUrl) {
+    errors.push(`${key} は本番ドメインの https URL か未設定にしてください。`);
+    continue;
+  }
+
+  if (productionUrl && authUrl.origin !== productionUrl.origin) {
+    errors.push(`${key} は --production-url と同じoriginにしてください。`);
   }
 }
 
 console.log("Tokyo League production environment security check");
 console.log(`Source: ${fs.existsSync(resolvedEnvFilePath) ? resolvedEnvFilePath : "process.env"}`);
+if (productionUrl) {
+  console.log(`Production URL origin: ${productionUrl.origin}`);
+  console.log(`Expected Google OAuth callback: ${productionUrl.origin}/api/auth/callback/google`);
+}
 console.log("");
 
 if (errors.length === 0) {
@@ -83,6 +104,60 @@ console.log("値そのものは表示していません。チェック結果だ�
 
 if (errors.length > 0) {
   process.exit(1);
+}
+
+function parseArgs(args) {
+  const parsed = {
+    envFilePath: undefined,
+    productionUrl: undefined,
+  };
+
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index];
+
+    if (arg === "--production-url") {
+      parsed.productionUrl = requiredValue(args, (index += 1), arg);
+      continue;
+    }
+
+    if (arg === "--help") {
+      printHelpAndExit();
+    }
+
+    if (arg.startsWith("--")) {
+      console.log(`[error] 未対応のオプションです: ${arg}`);
+      printHelpAndExit(1);
+    }
+
+    if (parsed.envFilePath) {
+      console.log(`[error] envファイルは1つだけ指定してください: ${arg}`);
+      printHelpAndExit(1);
+    }
+
+    parsed.envFilePath = arg;
+  }
+
+  return parsed;
+}
+
+function requiredValue(args, index, optionName) {
+  const value = args[index];
+  if (!value || value.startsWith("--")) {
+    console.log(`[error] ${optionName} の値を指定してください。`);
+    printHelpAndExit(1);
+  }
+  return value;
+}
+
+function printHelpAndExit(code = 0) {
+  console.log(`Usage:
+  npm run security:prod-env
+  npm run security:prod-env -- .env.production.local
+  npm run security:prod-env -- .env.production.local --production-url https://example.com
+
+Options:
+  --production-url <url>  AUTH_URL / NEXTAUTH_URL が設定されている場合に本番URL origin と一致するか確認する`);
+  process.exit(code);
 }
 
 function loadEnvFile(filePath, required) {
@@ -138,12 +213,23 @@ function isPostgresUrl(value) {
   }
 }
 
-function isHttpsProductionUrl(value) {
+function parseProductionUrl(value) {
   try {
     const url = new URL(value);
 
-    return url.protocol === "https:" && url.hostname !== "localhost" && url.hostname !== "127.0.0.1";
+    if (
+      url.protocol !== "https:" ||
+      url.hostname === "localhost" ||
+      url.hostname === "127.0.0.1" ||
+      url.hostname === "::1" ||
+      url.hostname.includes("<") ||
+      url.hostname.includes(">")
+    ) {
+      return null;
+    }
+
+    return url;
   } catch {
-    return false;
+    return null;
   }
 }

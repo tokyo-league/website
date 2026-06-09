@@ -115,7 +115,11 @@ npm run delivery:evidence -- --final --production-url https://<production-domain
 }
 
 if (options.envFile) {
-  runAndCollect("本番env安全確認", npmArgs("run", "security:prod-env", "--", options.envFile));
+  const productionEnvArgs = options.productionUrl
+    ? npmArgs("run", "security:prod-env", "--", options.envFile, "--production-url", options.productionUrl)
+    : npmArgs("run", "security:prod-env", "--", options.envFile);
+
+  runAndCollect("本番env安全確認", productionEnvArgs);
 } else {
   sections.push(`## 本番env安全確認
 

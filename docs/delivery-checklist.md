@@ -28,6 +28,7 @@
 | 既存セッション再検証 | JWT確認時にDB上の有効状態とロールを再反映し、無効化済み担当者の既存トークンを破棄 | 実装済み |
 | 更新履歴 | Owner専用 `/admin/audit` でニュース、大会、試合、資料等の直近作成・更新履歴を日本時間で確認 | 実装済み |
 | 管理/認証レート制限 | `/login`, `/admin`, `/api/auth/*` の短時間大量アクセスに共通セキュリティヘッダー付きの `429` と `Retry-After` を返す | 実装済み |
+| 管理画面CSRF対策 | `/admin` 配下のPOST等は外部Originまたは `Sec-Fetch-Site: cross-site` を共通セキュリティヘッダー付き `403` で拒否 | 実装済み |
 | サーバー側認可 | `requireOwner`, `getAdminScope` をサーバーアクションで使用 | 実装済み |
 | Production環境変数検出 | Productionで必須環境変数の欠落を起動時検出 | 実装済み |
 | 本番env安全確認 | `npm run security:prod-env -- .env.production.local` で必須項目、E2E誤設定、OAuth/DB/Blob形式を値非表示で確認 | 実装済み |
@@ -38,7 +39,7 @@
 | 外部URL制限 | 公式サイトURL、画像パスは `http` / `https` または安全な相対パスのみ許可 | 実装済み |
 | アップロード制限 | 画像・資料のMIME type、拡張子、ファイル内容、サイズ制限 | 実装済み |
 | HTTPセキュリティヘッダー | `next.config.ts` | 実装済み |
-| セキュリティ基準チェック | `npm run security:baseline` でCSP、private routeヘッダー、レート制限、本番env検査、E2E本番無効化を静的確認 | 実装済み |
+| セキュリティ基準チェック | `npm run security:baseline` でCSP、private routeヘッダー、レート制限、管理画面Origin検証、本番env検査、E2E本番無効化を静的確認 | 実装済み |
 | CSP違反レポート受信 | `Content-Security-Policy` の `report-uri /api/security/csp-report` とPOST受信API。noindex/no-store、レート制限、本文サイズ制限付き | 実装済み |
 | 本番ヘッダー確認 | `npm run security:headers -- https://<production-domain>` で公開/ログイン/認証API/CSPレポートPOST/robotsを確認 | 実装済み |
 | 本番公開導線確認 | `npm run public:routes -- https://<production-domain>` で主要公開ページの200応答、見出し、主要リンクを確認 | 実装済み |

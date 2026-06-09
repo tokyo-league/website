@@ -54,6 +54,30 @@ test("管理画面にも同じセキュリティヘッダーが付与される",
   expect(headers["cache-control"]).toContain("no-store");
 });
 
+test("管理画面の変更リクエストは外部Originを拒否する", async ({ request }) => {
+  const response = await request.post("/admin", {
+    headers: {
+      Origin: "https://evil.example",
+    },
+  });
+  const headers = response.headers();
+
+  expect(response.status()).toBe(403);
+  expect(headers["content-security-policy"]).toContain("default-src 'self'");
+  expect(headers["x-robots-tag"]).toBe("noindex, nofollow, noarchive");
+  expect(headers["cache-control"]).toContain("no-store");
+});
+
+test("管理画面の変更リクエストはcross-site Fetch Metadataを拒否する", async ({ request }) => {
+  const response = await request.post("/admin", {
+    headers: {
+      "Sec-Fetch-Site": "cross-site",
+    },
+  });
+
+  expect(response.status()).toBe(403);
+});
+
 test("ログイン画面はnoindexかつno-storeで配信される", async ({ page }) => {
   const response = await page.goto("/login");
 

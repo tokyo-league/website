@@ -16,6 +16,7 @@ checkSecurityHeaderProbe();
 checkPrivateRouteHeaders();
 checkHeaderConfig();
 checkRateLimitMiddleware();
+checkAdminOriginGuard();
 checkProductionEnvValidation();
 checkE2ETestModeGuard();
 
@@ -136,6 +137,26 @@ function checkRateLimitMiddleware() {
 
   pushIncludesCheck({
     label: "管理/認証レート制限middleware",
+    source: files.middleware,
+    required,
+  });
+}
+
+function checkAdminOriginGuard() {
+  const required = [
+    ["admin origin guard", "getAdminOriginResponse"],
+    ["mutating method guard", "isSafeMethod"],
+    ["Origin header", "request.headers.get(\"origin\")"],
+    ["same origin comparison", "isSameOrigin"],
+    ["Fetch Metadata", "isCrossSiteFetch"],
+    ["trusted fetch metadata", "isTrustedFetchSite"],
+    ["Sec-Fetch-Site header", "sec-fetch-site"],
+    ["forbidden response", "createProtectedTextResponse(\"Forbidden\", 403)"],
+    ["protected headers", "rateLimitedRouteHeaders"],
+  ];
+
+  pushIncludesCheck({
+    label: "管理画面Origin検証middleware",
     source: files.middleware,
     required,
   });

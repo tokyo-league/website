@@ -136,6 +136,7 @@ https://<production-domain>/api/auth/callback/google
 - Editorで割当済みリーグの結果管理だけ操作できる
 - 画像・資料アップロードがVercel Blobへ保存される
 - `/login`, `/admin`, `/api/auth/*` の短時間大量アクセスはアプリ側レート制限で `429 Too Many Requests` になる
+- `/admin` 配下のPOST等は外部Originまたは `Sec-Fetch-Site: cross-site` の変更リクエストを `403 Forbidden` で拒否する
 
 セキュリティ:
 
@@ -149,6 +150,7 @@ https://<production-domain>/api/auth/callback/google
 - `/api/security/csp-report` はPOSTで `204` を返してCSPレポートを受け取り、noindex/no-storeで配信されている
 - `/robots.txt` で `/admin`, `/login`, `/api/auth`, `/api/security` が `Disallow` されている
 - `/login`, `/admin`, `/api/auth/*`, `/api/security/*` の上限超過レスポンスに `Retry-After` と共通セキュリティヘッダーが付与される
+- 外部Originまたは `Sec-Fetch-Site: cross-site` の `/admin` 変更リクエストは共通セキュリティヘッダー付きで `403` になる
 - Production環境で必須環境変数がすべて設定されている
 - `npm run security:baseline` が成功している
 - `npm run security:secrets` が成功している
@@ -268,7 +270,7 @@ npm run admin:routes -- https://<production-domain>
 - 納品ハンドオフが存在し、成果物、最終確認コマンド、本番で残る確認、共有時の注意を確認できる
 - 管理者マニュアルHTMLに古い制限文が残っていない
 - Runbookに本番env安全確認手順が記載されている
-- CSP、private routeヘッダー、レート制限、本番env検査、E2E本番無効化の静的基準を確認できる
+- CSP、private routeヘッダー、レート制限、管理画面Origin検証、本番env検査、E2E本番無効化の静的基準を確認できる
 - CSP違反レポート受信APIがnoindex/no-storeとレート制限付きで確認できる
 - 追跡済みenv、納品証跡Markdown、秘密鍵、実トークンらしき値の混入がないことを確認できる
 - lockfile、依存取得元、integrity、root install hookを確認できる

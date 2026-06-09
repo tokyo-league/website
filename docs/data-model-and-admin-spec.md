@@ -643,6 +643,7 @@
 - 資料アップロードは PDF / Excel / Word の許可拡張子、MIME type、ファイル内容シグネチャ、サイズ上限を検証する
 - 資料一覧ではアップロード済みファイル名と公開URL確認リンクを表示し、公開前後のURL確認を管理画面内で行えるようにする
 - ファイル名は保存前に安全な文字へ正規化し、Blob保存時はランダムサフィックスを付与する
+- `/admin` 配下のPOST等は外部Originまたは `Sec-Fetch-Site: cross-site` の変更リクエストを、共通セキュリティヘッダー付きで `403 Forbidden` として拒否する
 
 ### HTTPレスポンスヘッダー
 
@@ -663,7 +664,7 @@
 
 `robots.txt` でも `/admin`, `/login`, `/api/auth`, `/api/security` のクロールを禁止する。
 
-納品前に `npm run security:baseline` を実行し、CSP、private routeヘッダー、レート制限、本番env検査、E2E本番無効化の静的基準を確認する。さらに `npm run security:headers -- https://<production-domain>` を実行し、公開トップ、ログイン画面、認証API、CSPレポートPOST、robots.txt の本番ヘッダーを確認する。
+納品前に `npm run security:baseline` を実行し、CSP、private routeヘッダー、レート制限、管理画面Origin検証、本番env検査、E2E本番無効化の静的基準を確認する。さらに `npm run security:headers -- https://<production-domain>` を実行し、公開トップ、ログイン画面、認証API、CSPレポートPOST、robots.txt の本番ヘッダーを確認する。
 
 ### 秘密情報・環境変数
 

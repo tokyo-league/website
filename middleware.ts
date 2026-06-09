@@ -22,6 +22,12 @@ export default auth((request) => {
     return rateLimitResponse;
   }
 
+  const adminOriginResponse = getAdminOriginResponse(request);
+
+  if (adminOriginResponse) {
+    return adminOriginResponse;
+  }
+
   if (isE2ETestMode()) {
     return NextResponse.next();
   }
@@ -97,6 +103,63 @@ function getRateLimitConfig(scope: NonNullable<ReturnType<typeof getRateLimitSco
   }
 
   return loginRouteRateLimit;
+}
+
+function getAdminOriginResponse(request: NextRequest) {
+  if (!request.nextUrl.pathname.startsWith("/admin") || isSafeMethod(request.method)) {
+    return null;
+  }
+
+  const origin = request.headers.get("origin");
+
+  if (isCrossSiteFetch(request)) {
+    return createProtectedTextResponse("Forbidden", 403);
+  }
+
+  if (origin && !isSameOrigin(origin, request.nextUrl.origin) && !isTrustedFetchSite(request)) {
+    return createProtectedTextResponse("Forbidden", 403);
+  }
+
+  return null;
+}
+
+function isSafeMethod(method: string) {
+  return method === "GET" || method === "HEAD" || method === "OPTIONS";
+}
+
+function isSameOrigin(origin: string, expectedOrigin: string) {
+  try {
+    return new URL(origin).origin === expectedOrigin;
+  } catch {
+    return false;
+  }
+}
+
+function isCrossSiteFetch(request: NextRequest) {
+  const fetchSite = request.headers.get("sec-fetch-site");
+
+  return fetchSite === "cross-site";
+}
+
+function isTrustedFetchSite(request: NextRequest) {
+  const fetchSite = request.headers.get("sec-fetch-site");
+
+  return fetchSite === "same-origin" || fetchSite === "same-site";
+}
+
+function createProtectedTextResponse(body: string, status: number) {
+  const response = new NextResponse(body, {
+    status,
+    headers: {
+      "Content-Type": "text/plain; charset=utf-8",
+    },
+  });
+
+  for (const header of rateLimitedRouteHeaders) {
+    response.headers.set(header.key, header.value);
+  }
+
+  return response;
 }
 
 function getClientIp(request: NextRequest) {

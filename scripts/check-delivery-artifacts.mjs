@@ -116,6 +116,16 @@ checkTextContains({
   filePath: "docs/production-runbook.md",
   requiredText: "CSPレポートAPIのPOST 204",
 });
+checkTextContains({
+  label: "管理画面CSRF対策記載",
+  filePath: "docs/delivery-checklist.md",
+  requiredText: "管理画面CSRF対策",
+});
+checkTextContains({
+  label: "管理画面Origin検証記載",
+  filePath: "docs/data-model-and-admin-spec.md",
+  requiredText: "管理画面Origin検証",
+});
 
 console.log("Tokyo League delivery artifact check");
 console.log("");

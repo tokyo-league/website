@@ -8,6 +8,7 @@ const steps = [
   ["管理者ツール説明書QA画像生成", ["run", "docs:admin:qa"]],
   ["納品物自動チェック", ["run", "docs:delivery:check"]],
   ["セキュリティ基準チェック", ["run", "security:baseline"]],
+  ["管理Server Action認可チェック", ["run", "security:admin-actions"]],
   ["秘密情報管理チェック", ["run", "security:secrets"]],
   ["依存関係供給網チェック", ["run", "security:supply-chain"]],
   ...(options.skipBuild ? [] : [["本番ビルド", ["run", "build"]]]),

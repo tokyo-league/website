@@ -151,8 +151,10 @@ https://<production-domain>/api/auth/callback/google
 - `/robots.txt` で `/admin`, `/login`, `/api/auth`, `/api/security` が `Disallow` されている
 - `/login`, `/admin`, `/api/auth/*`, `/api/security/*` の上限超過レスポンスに `Retry-After` と共通セキュリティヘッダーが付与される
 - 外部Originまたは `Sec-Fetch-Site: cross-site` の `/admin` 変更リクエストは共通セキュリティヘッダー付きで `403` になる
+- 管理Server Actionは `requireOwner()` または `getAdminScope()` を必ず呼び、Editor操作は対象リーグ認可を確認している
 - Production環境で必須環境変数がすべて設定されている
 - `npm run security:baseline` が成功している
+- `npm run security:admin-actions` が成功している
 - `npm run security:secrets` が成功している
 - `npm run security:supply-chain` が成功している
 - `npm run security:prod-env -- .env.production.local --production-url https://<production-domain>` が成功している
@@ -210,6 +212,12 @@ npm run delivery:gate
 
 ```bash
 npm run security:baseline
+```
+
+管理Server Action認可チェック:
+
+```bash
+npm run security:admin-actions
 ```
 
 秘密情報管理チェック:
@@ -271,6 +279,7 @@ npm run admin:routes -- https://<production-domain>
 - 管理者マニュアルHTMLに古い制限文が残っていない
 - Runbookに本番env安全確認手順が記載されている
 - CSP、private routeヘッダー、レート制限、管理画面Origin検証、本番env検査、E2E本番無効化の静的基準を確認できる
+- 管理Server ActionのOwner認可・リーグスコープ認可を静的確認できる
 - CSP違反レポート受信APIがnoindex/no-storeとレート制限付きで確認できる
 - 追跡済みenv、納品証跡Markdown、秘密鍵、実トークンらしき値の混入がないことを確認できる
 - lockfile、依存取得元、integrity、root install hookを確認できる

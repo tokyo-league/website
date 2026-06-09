@@ -22,6 +22,7 @@
     "public:routes": "node ./scripts/check-public-routes.mjs",
     "admin:routes": "node ./scripts/check-admin-routes.mjs",
     "security:baseline": "node ./scripts/check-security-baseline.mjs",
+    "security:admin-actions": "node ./scripts/check-admin-action-security.mjs",
     "security:secrets": "node ./scripts/check-secret-hygiene.mjs",
     "security:supply-chain": "node ./scripts/check-supply-chain.mjs",
     "security:headers": "node ./scripts/check-security-headers.mjs",

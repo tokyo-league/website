@@ -57,6 +57,11 @@ checkTextContains({
   requiredText: "npm run security:baseline",
 });
 checkTextContains({
+  label: "管理Server Action認可チェック手順",
+  filePath: "docs/production-runbook.md",
+  requiredText: "npm run security:admin-actions",
+});
+checkTextContains({
   label: "秘密情報管理チェック手順",
   filePath: "docs/production-runbook.md",
   requiredText: "npm run security:secrets",

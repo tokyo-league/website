@@ -42,9 +42,10 @@ curl -X POST https://<production-domain>/api/security/csp-report \
   -d '{"csp-report":{"blocked-uri":"https://example.com","effective-directive":"script-src"}}'
 ```
 
-依存関係供給網の静的チェック:
+管理認可・依存関係供給網の静的チェック:
 
 ```bash
+npm run security:admin-actions
 npm run security:supply-chain
 ```
 

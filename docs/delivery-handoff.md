@@ -1,6 +1,6 @@
 # 東京リーグ リニューアル納品ハンドオフ
 
-最終更新: 2026-06-07 JST
+最終更新: 2026-06-10 JST
 
 この資料は、6/20納品時に共有する成果物、最終確認コマンド、本番環境で残る確認を1か所にまとめたハンドオフ用メモです。時刻の扱いは日本時間を基準にします。
 
@@ -63,7 +63,7 @@ npm run security:prod-env -- .env.production.local --production-url https://<pro
 npm run delivery:evidence -- --final --production-url https://<production-domain> --production-env-file .env.production.local --manual-checks-file docs/output/manual-checks-YYYYMMDD.md --include-build --include-e2e
 ```
 
-`--final` は clean worktree、HTTPSの本番URL、存在するProduction envファイル、手動確認メモ、build、E2E、公開導線、管理者到達確認を必須にします。
+`--final` は clean worktree、HTTPSの本番URL、存在するProduction envファイル、手動確認メモ、build、E2E、公開導線、管理者到達確認を必須にします。手動確認メモの必須項目はすべて `実施済み` にしてください。
 
 ## 本番で残る確認
 

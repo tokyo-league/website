@@ -1,6 +1,6 @@
 # 東京リーグ 本番デプロイ・運用開始Runbook
 
-最終更新: 2026-06-07 JST
+最終更新: 2026-06-10 JST
 
 このRunbookは、6/20納品前に本番環境を立ち上げ、公開サイト・管理者ツール・PDF納品物を確認するための手順です。時刻の扱いは日本時間を基準にします。
 
@@ -240,13 +240,14 @@ npm run security:supply-chain
 npm run delivery:evidence -- --final --production-url https://<production-domain> --production-env-file .env.production.local --manual-checks-file docs/output/manual-checks-YYYYMMDD.md --include-build --include-e2e
 ```
 
-`--final` は clean worktree、HTTPSの本番URL、存在するProduction envファイル、手動確認メモ、build、E2E、公開導線、管理者到達確認を必須にします。
+`--final` は clean worktree、HTTPSの本番URL、存在するProduction envファイル、手動確認メモ、build、E2E、公開導線、管理者到達確認を必須にします。手動確認メモは必須項目がすべて揃い、状態が `実施済み` の場合だけ最終証跡として通過します。
 
 手動確認メモは値や秘密情報を含めず、以下のような表を `docs/output/manual-checks-YYYYMMDD.md` に保存します。このファイルは `.gitignore` 対象です。
 
 ```markdown
 | 項目 | 状態 | メモ |
 | --- | --- | --- |
+| 本番公開サイト主要導線 | 実施済み | /, /competitions, /news, /teams, /downloads, /contact |
 | 本番管理者ログイン | 実施済み | OwnerメールでGoogleログイン確認 |
 | Owner操作 | 実施済み | ニュース、チーム、資料、担当割当、更新履歴 |
 | Editor操作 | 実施済み | 割当済みリーグの結果管理のみ操作可能 |

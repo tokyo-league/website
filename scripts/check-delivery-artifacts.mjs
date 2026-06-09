@@ -82,6 +82,11 @@ checkTextContains({
   requiredText: "手動確認メモ",
 });
 checkTextContains({
+  label: "納品前証跡手動確認完了条件",
+  filePath: "docs/production-runbook.md",
+  requiredText: "状態が `実施済み`",
+});
+checkTextContains({
   label: "本番公開導線確認手順",
   filePath: "docs/production-runbook.md",
   requiredText: "npm run public:routes -- https://<production-domain>",

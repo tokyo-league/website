@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 const manualCheckItems = [
+  "本番公開サイト主要導線",
   "本番管理者ログイン",
   "Owner操作",
   "Editor操作",
@@ -311,9 +312,45 @@ function validateFinalManualChecksFile(filePath, errors) {
     errors.push(`--manual-checks-file に手動確認項目が不足しています: ${missingItems.join(", ")}`);
   }
 
+  const manualRows = parseManualCheckRows(content);
+  const incompleteItems = manualCheckItems.filter((item) => manualRows.get(item) !== "実施済み");
+
+  if (incompleteItems.length > 0) {
+    errors.push(`--manual-checks-file の状態は必ず「実施済み」にしてください: ${incompleteItems.join(", ")}`);
+  }
+
   if (/(未記入|未実行|TODO|TBD)/i.test(content)) {
     errors.push("--manual-checks-file に未記入/未実行/TODOが残っています。");
   }
+}
+
+function parseManualCheckRows(content) {
+  const rows = new Map();
+
+  for (const rawLine of content.split(/\r?\n/)) {
+    const line = rawLine.trim();
+
+    if (!line.startsWith("|") || !line.endsWith("|")) {
+      continue;
+    }
+
+    const cells = line
+      .split("|")
+      .slice(1, -1)
+      .map((cell) => cell.trim());
+
+    if (cells.length < 2 || cells[0] === "項目" || /^:?-+:?$/.test(cells[0])) {
+      continue;
+    }
+
+    rows.set(stripInlineMarkdown(cells[0]), stripInlineMarkdown(cells[1]));
+  }
+
+  return rows;
+}
+
+function stripInlineMarkdown(value) {
+  return value.replaceAll("`", "").trim();
 }
 
 function loadManualChecksContent(filePath) {

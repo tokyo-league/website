@@ -148,7 +148,7 @@ https://<production-domain>/api/auth/callback/google
 - `Permissions-Policy` で不要なデバイス権限が無効化されている
 - CSPに `report-uri /api/security/csp-report` が含まれている
 - `/admin` と `/login` に `X-Robots-Tag: noindex, nofollow, noarchive` と `Cache-Control: no-store` が付与されている
-- `/api/security/csp-report` はPOSTで `204` を返してCSPレポートを受け取り、noindex/no-storeで配信されている
+- `/api/security/csp-report` はPOSTで `204` を返してCSPレポートを受け取り、noindex/no-storeで配信され、ログ出力前にURL query/hashと秘密値を除去・redactしている
 - `/robots.txt` で `/admin`, `/login`, `/api/auth`, `/api/security` が `Disallow` されている
 - `/login`, `/admin`, `/api/auth/*`, `/api/security/*` の上限超過レスポンスに `Retry-After` と共通セキュリティヘッダーが付与される
 - 外部Originまたは `Sec-Fetch-Site: cross-site` の `/admin` 変更リクエストは共通セキュリティヘッダー付きで `403` になる
@@ -282,7 +282,7 @@ npm run admin:routes -- https://<production-domain>
 - 管理者マニュアルHTMLに古い制限文が残っていない
 - Runbookに本番env安全確認手順が記載されている
 - Prisma schemaをDB反映前に検証できる
-- CSP、private routeヘッダー、レート制限、管理画面Origin検証、本番env検査、E2E本番無効化の静的基準を確認できる
+- CSP、CSPレポートログ秘匿、private routeヘッダー、レート制限、管理画面Origin検証、本番env検査、E2E本番無効化の静的基準を確認できる
 - 管理Server ActionのOwner認可・リーグスコープ認可を静的確認できる
 - CSP違反レポート受信APIがnoindex/no-storeとレート制限付きで確認できる
 - 追跡済みenv、納品証跡Markdown、秘密鍵、実トークンらしき値の混入がないことを確認できる

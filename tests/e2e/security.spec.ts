@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { applyAdminRecordToJwt, getAdminJwtLookupEmail } from "../../lib/admin-session";
+import { normalizeCspReport } from "../../lib/csp-report";
 import { assertDownloadFileAllowed } from "../../lib/download-file-validation";
 import { assertProductionEnvReady, getInvalidProductionEnv, getMissingProductionEnv } from "../../lib/env-validation";
 import { isVerifiedGoogleProfile } from "../../lib/google-profile";
@@ -112,6 +113,31 @@ test("CSPレポートAPIはnoindexかつno-storeで受信できる", async ({ re
   expect(response.status()).toBe(204);
   expect(headers["x-robots-tag"]).toBe("noindex, nofollow, noarchive");
   expect(headers["cache-control"]).toContain("no-store");
+});
+
+test("CSPレポートログはURLクエリと秘密値を残さない", () => {
+  expect(
+    normalizeCspReport({
+      "csp-report": {
+        "blocked-uri": "https://example.com/script.js?token=secret-token#frag",
+        "document-uri": "https://tokyo-league.example/admin?code=oauth-code&state=oauth-state",
+        "effective-directive": "script-src\u0000",
+        "original-policy": "script-src 'nonce-abcdef' https://example.com?secret=value; report-uri /api/security/csp-report",
+        referrer: "https://accounts.google.com/login?auth=secret",
+      },
+    }),
+  ).toEqual({
+    blockedUri: "https://example.com/script.js",
+    documentUri: "https://tokyo-league.example/admin",
+    effectiveDirective: "script-src",
+    originalPolicy: "script-src 'nonce-[redacted]' https://example.com?secret=[redacted]; report-uri /api/security/csp-report",
+    referrer: "https://accounts.google.com/login",
+    violatedDirective: undefined,
+  });
+
+  expect(normalizeCspReport({ "blocked-uri": "data:text/html,<script>secret</script>" })?.blockedUri).toBe(
+    "data:[redacted]",
+  );
 });
 
 test("robots.txtで管理画面と認証・セキュリティAPIのクロールを禁止する", async ({ request }) => {

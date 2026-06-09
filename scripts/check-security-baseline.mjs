@@ -6,6 +6,7 @@ const files = {
   envValidation: readText("lib/env-validation.ts"),
   middleware: readText("middleware.ts"),
   nextConfig: readText("next.config.ts"),
+  cspReport: readText("lib/csp-report.ts"),
   securityHeaderCheck: readText("scripts/check-security-headers.mjs"),
   securityHeaders: readText("lib/security-headers.ts"),
   testMode: readText("lib/test-mode.ts"),
@@ -13,6 +14,7 @@ const files = {
 
 checkSecurityHeaders();
 checkSecurityHeaderProbe();
+checkCspReportSanitization();
 checkPrivateRouteHeaders();
 checkHeaderConfig();
 checkRateLimitMiddleware();
@@ -100,6 +102,23 @@ function checkSecurityHeaderProbe() {
   pushIncludesCheck({
     label: "本番セキュリティヘッダー外部検査",
     source: files.securityHeaderCheck,
+    required,
+  });
+}
+
+function checkCspReportSanitization() {
+  const required = [
+    ["CSP report query removal", "url.search = \"\""],
+    ["CSP report hash removal", "url.hash = \"\""],
+    ["CSP report data URI redaction", "\"data:[redacted]\""],
+    ["CSP report sensitive assignment redaction", "sensitiveAssignmentPattern"],
+    ["CSP report nonce redaction", "noncePattern"],
+    ["CSP report bearer redaction", "bearerPattern"],
+  ];
+
+  pushIncludesCheck({
+    label: "CSPレポートログ秘匿",
+    source: files.cspReport,
     required,
   });
 }

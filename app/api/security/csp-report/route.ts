@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { normalizeCspReport } from "@/lib/csp-report";
 
 const maxReportBytes = 16 * 1024;
 
@@ -35,38 +36,4 @@ export async function POST(request: Request) {
 
 export function GET() {
   return NextResponse.json({ ok: true }, { status: 200 });
-}
-
-function normalizeCspReport(value: unknown) {
-  if (!value || typeof value !== "object") {
-    return null;
-  }
-
-  const body = value as Record<string, unknown>;
-  const report = getObject(body["csp-report"]) ?? body;
-
-  return {
-    blockedUri: sanitizeReportValue(report["blocked-uri"] ?? report["blockedURL"]),
-    documentUri: sanitizeReportValue(report["document-uri"] ?? report["documentURL"]),
-    effectiveDirective: sanitizeReportValue(report["effective-directive"] ?? report["effectiveDirective"]),
-    originalPolicy: sanitizeReportValue(report["original-policy"] ?? report["originalPolicy"], 240),
-    referrer: sanitizeReportValue(report.referrer),
-    violatedDirective: sanitizeReportValue(report["violated-directive"] ?? report["violatedDirective"]),
-  };
-}
-
-function getObject(value: unknown) {
-  if (!value || typeof value !== "object") {
-    return null;
-  }
-
-  return value as Record<string, unknown>;
-}
-
-function sanitizeReportValue(value: unknown, maxLength = 160) {
-  if (typeof value !== "string") {
-    return undefined;
-  }
-
-  return value.replaceAll(/[\u0000-\u001f\u007f]/g, "").slice(0, maxLength);
 }

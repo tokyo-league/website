@@ -41,7 +41,7 @@
 | アップロード制限 | 画像・資料のMIME type、拡張子、ファイル内容、サイズ制限 | 実装済み |
 | HTTPセキュリティヘッダー | `next.config.ts` | 実装済み |
 | セキュリティ基準チェック | `npm run security:baseline` でCSP、private routeヘッダー、レート制限、管理画面Origin検証、本番env検査、E2E本番無効化を静的確認 | 実装済み |
-| CSP違反レポート受信 | `Content-Security-Policy` の `report-uri /api/security/csp-report` とPOST受信API。noindex/no-store、レート制限、本文サイズ制限付き | 実装済み |
+| CSP違反レポート受信 | `Content-Security-Policy` の `report-uri /api/security/csp-report` とPOST受信API。noindex/no-store、レート制限、本文サイズ制限、ログ出力前のquery/hash除去・秘密値redaction付き | 実装済み |
 | 本番ヘッダー確認 | `npm run security:headers -- https://<production-domain>` で公開/ログイン/認証API/CSPレポートPOST/robotsを確認 | 実装済み |
 | 本番公開導線確認 | `npm run public:routes -- https://<production-domain>` で主要公開ページの200応答、見出し、主要リンクを確認 | 実装済み |
 | 本番管理者到達確認 | `npm run admin:routes -- https://<production-domain>` で未ログイン時の管理画面保護とGoogle認証Providerを確認 | 実装済み |
@@ -52,7 +52,7 @@
 
 ## 直近の検証結果
 
-- `npm run test:e2e`: 30件成功
+- `npm run test:e2e`: 31件成功
 - `npm run build`: 成功。公開トップとニュース一覧は動的レンダリング化し、ビルド時のDB接続エラーログなし
 - `npm run docs:spec`: 成功
 - `npm run docs:admin`: 成功

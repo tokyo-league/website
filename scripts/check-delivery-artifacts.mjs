@@ -132,6 +132,11 @@ checkTextContains({
   requiredText: "CSPレポートAPIのPOST 204",
 });
 checkTextContains({
+  label: "CSPレポートログ秘匿記載",
+  filePath: "docs/production-runbook.md",
+  requiredText: "URL query/hashと秘密値を除去・redact",
+});
+checkTextContains({
   label: "管理画面CSRF対策記載",
   filePath: "docs/delivery-checklist.md",
   requiredText: "管理画面CSRF対策",

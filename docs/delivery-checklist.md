@@ -72,7 +72,8 @@
 - 本番デプロイURLで `npm run public:routes -- https://<production-domain>` を実行し、公開サイトの主要導線証跡を保存する
 - 本番デプロイURLで `npm run admin:routes -- https://<production-domain>` を実行し、管理者ツールの到達・保護状態証跡を保存する
 - 本番デプロイURLで管理画面ログイン、Owner操作、Editor操作を確認する
-- 納品直前に `npm run delivery:gate` を実行し、PDF生成、QA画像生成、納品物チェック、セキュリティ基準、秘密情報管理、依存関係供給網、ビルド、E2Eを一括確認する
+- 納品直前に `npm run delivery:gate` を実行し、PDF生成、QA画像生成、納品物チェック、Prisma schema検証、セキュリティ基準、秘密情報管理、依存関係供給網、ビルド、E2Eを一括確認する
+- `npm run prisma:validate` でDB反映前にPrisma schemaを確認する
 - `npm run security:admin-actions` で管理Server Actionの認可ガードが維持されていることを確認する
 - clean worktreeで、本番デプロイURLに対して `npm run delivery:evidence -- --final --production-url https://<production-domain> --production-env-file .env.production.local --manual-checks-file docs/output/manual-checks-YYYYMMDD.md --include-build --include-e2e` を実行し、証跡レポートを保存する
 - 本番環境の `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `DATABASE_URL`, `DIRECT_URL`, `BLOB_READ_WRITE_TOKEN`, `AUTH_URL`, `NEXTAUTH_URL` を `npm run security:prod-env -- .env.production.local --production-url https://<production-domain>` で確認する

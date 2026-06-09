@@ -97,6 +97,11 @@ checkTextContains({
   requiredText: "npm run delivery:gate",
 });
 checkTextContains({
+  label: "Prismaスキーマ検証手順",
+  filePath: "docs/production-runbook.md",
+  requiredText: "npm run prisma:validate",
+});
+checkTextContains({
   label: "納品ハンドオフ: 納品ゲート",
   filePath: "docs/delivery-handoff.md",
   requiredText: "npm run delivery:gate",

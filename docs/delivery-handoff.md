@@ -45,6 +45,7 @@ curl -X POST https://<production-domain>/api/security/csp-report \
 管理認可・依存関係供給網の静的チェック:
 
 ```bash
+npm run prisma:validate
 npm run security:admin-actions
 npm run security:supply-chain
 ```

@@ -71,10 +71,11 @@ npm run security:supply-chain
 vercel env pull .env.production.local --environment=production --yes
 set -a && source .env.production.local && set +a
 npm run prisma:generate
+npm run prisma:validate
 npm run prisma:push
 ```
 
-Vercel/CI上で実行する場合も、Production用の `DATABASE_URL` と `DIRECT_URL` が読める状態で `npm run prisma:push` を実行します。現在のリポジトリはPrisma migrationディレクトリを持たないため、納品前のDB反映は `schema.prisma` を正本にした `prisma db push` で行います。
+Vercel/CI上で実行する場合も、Production用の `DATABASE_URL` と `DIRECT_URL` が読める状態で `npm run prisma:validate` と `npm run prisma:push` を実行します。現在のリポジトリはPrisma migrationディレクトリを持たないため、納品前のDB反映は `schema.prisma` を正本にした `prisma db push` で行います。
 
 ## 初期Owner登録
 
@@ -211,6 +212,7 @@ npm run delivery:gate
 セキュリティ基準チェック:
 
 ```bash
+npm run prisma:validate
 npm run security:baseline
 ```
 
@@ -278,6 +280,7 @@ npm run admin:routes -- https://<production-domain>
 - 納品ハンドオフが存在し、成果物、最終確認コマンド、本番で残る確認、共有時の注意を確認できる
 - 管理者マニュアルHTMLに古い制限文が残っていない
 - Runbookに本番env安全確認手順が記載されている
+- Prisma schemaをDB反映前に検証できる
 - CSP、private routeヘッダー、レート制限、管理画面Origin検証、本番env検査、E2E本番無効化の静的基準を確認できる
 - 管理Server ActionのOwner認可・リーグスコープ認可を静的確認できる
 - CSP違反レポート受信APIがnoindex/no-storeとレート制限付きで確認できる

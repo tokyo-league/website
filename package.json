@@ -28,7 +28,7 @@
     "security:headers": "node ./scripts/check-security-headers.mjs",
     "security:prod-env": "node ./scripts/check-production-env.mjs",
     "prisma:generate": "prisma generate",
-    "prisma:validate": "prisma validate",
+    "prisma:validate": "node ./scripts/run-with-env.mjs prisma validate",
     "prisma:push": "node ./scripts/run-with-env.mjs prisma db push",
     "prisma:migrate": "node ./scripts/run-with-env.mjs prisma migrate dev --name init",
     "prisma:seed-admin": "node ./scripts/run-with-env.mjs node ./scripts/seed-admin.mjs"

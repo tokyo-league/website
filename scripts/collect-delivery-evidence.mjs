@@ -26,6 +26,8 @@ const manualChecksContent = loadManualChecksContent(options.manualChecksFile);
 
 const gitCommit = runCommand("git", ["rev-parse", "--short", "HEAD"], { collectOnly: true });
 const gitStatus = runCommand("git", ["status", "--short"], { collectOnly: true });
+const gitUpstream = getGitUpstream();
+const gitUpstreamSync = getGitUpstreamSync(gitUpstream);
 
 sections.push(`## 基本情報
 
@@ -34,6 +36,8 @@ sections.push(`## 基本情報
 | 生成日時 | ${formatJstDateTime(generatedAt)} JST |
 | Git commit | ${inlineValue(gitCommit.stdout.trim() || "取得失敗")} |
 | Git status | ${inlineValue(gitStatus.stdout.trim() || "clean")} |
+| Git upstream | ${inlineValue(gitUpstream.name ?? "未設定")} |
+| Git upstream sync | ${inlineValue(gitUpstreamSync.summary)} |
 | Production URL | ${inlineValue(options.productionUrl ?? "未指定")} |
 | Production env file | ${inlineValue(options.envFile ?? "未指定")} |
 | Final evidence mode | ${inlineValue(options.final ? "enabled" : "disabled")} |`);
@@ -276,6 +280,17 @@ function assertFinalEvidenceOptions(options) {
 
   validateFinalManualChecksFile(options.manualChecksFile, errors);
 
+  validateFinalGitState(errors);
+
+  if (errors.length > 0) {
+    for (const error of errors) {
+      console.error(`[error] ${error}`);
+    }
+    process.exit(1);
+  }
+}
+
+function validateFinalGitState(errors) {
   const gitStatus = runCommand("git", ["status", "--short"], { collectOnly: true });
   if (gitStatus.status !== 0) {
     errors.push("git status を確認できませんでした。");
@@ -283,11 +298,16 @@ function assertFinalEvidenceOptions(options) {
     errors.push("--final はclean worktreeで実行してください。未コミット差分があります。");
   }
 
-  if (errors.length > 0) {
-    for (const error of errors) {
-      console.error(`[error] ${error}`);
-    }
-    process.exit(1);
+  const upstream = getGitUpstream();
+  if (!upstream.name) {
+    errors.push("--final はGit upstreamが設定されたブランチで実行してください。");
+    return;
+  }
+
+  const sync = getGitUpstreamSync(upstream);
+
+  if (!sync.ok) {
+    errors.push(`--final はGit upstreamと同期した状態で実行してください。${sync.summary}`);
   }
 }
 
@@ -374,6 +394,53 @@ function parseFinalProductionUrl(value) {
   }
 }
 
+function getGitUpstream() {
+  const result = runCommand("git", ["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"], {
+    collectOnly: true,
+  });
+  const name = result.status === 0 ? result.stdout.trim() : "";
+
+  return {
+    name: name || null,
+  };
+}
+
+function getGitUpstreamSync(upstream) {
+  if (!upstream.name) {
+    return {
+      ok: false,
+      summary: "upstream未設定",
+    };
+  }
+
+  const result = runCommand("git", ["rev-list", "--left-right", "--count", `HEAD...${upstream.name}`], {
+    collectOnly: true,
+  });
+
+  if (result.status !== 0) {
+    return {
+      ok: false,
+      summary: "upstream同期状態を確認できません",
+    };
+  }
+
+  const [aheadText, behindText] = result.stdout.trim().split(/\s+/);
+  const ahead = Number.parseInt(aheadText ?? "0", 10);
+  const behind = Number.parseInt(behindText ?? "0", 10);
+
+  if (ahead === 0 && behind === 0) {
+    return {
+      ok: true,
+      summary: "synced",
+    };
+  }
+
+  return {
+    ok: false,
+    summary: `ahead ${Number.isNaN(ahead) ? "?" : ahead}, behind ${Number.isNaN(behind) ? "?" : behind}`,
+  };
+}
+
 function requiredValue(args, index, optionName) {
   const value = args[index];
   if (!value || value.startsWith("--")) {
@@ -398,7 +465,7 @@ Options:
                           本番ログイン、Owner/Editor操作、PDF目視などの手動確認メモを取り込む
   --include-build         npm run build の結果も保存する
   --include-e2e           npm run test:e2e の結果も保存する
-  --final                 最終納品証跡としてclean worktree、https本番URL、env、build、E2E、公開・管理導線を必須化する
+  --final                 最終納品証跡としてclean worktree、Git upstream同期、https本番URL、env、build、E2E、公開・管理導線を必須化する
   --skip-public-routes    production-url指定時に公開導線チェックを省略する
   --skip-admin-routes     production-url指定時に管理者到達チェックを省略する
   --output <path>         出力先Markdownを指定する`);

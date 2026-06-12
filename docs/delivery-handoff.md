@@ -16,6 +16,7 @@
 | 本番Runbook | デプロイ、DB反映、初期Owner、OAuth、ロールバック | `docs/production-runbook.md` | 手順共有 |
 | 納品チェックリスト | 納品物、非機能要件、残確認 | `docs/delivery-checklist.md` | 手順共有 |
 | 納品前証跡 | コマンド結果と本番確認結果 | `docs/output/delivery-evidence-*.md` | `npm run delivery:evidence -- --final --production-url https://<production-domain> --production-env-file .env.production.local --manual-checks-file docs/output/manual-checks-YYYYMMDD.md --include-build --include-e2e` |
+| 納品パッケージManifest | ファイルサイズ、SHA-256、共有対象/除外対象 | `docs/output/delivery-package-manifest-*.md` | `npm run delivery:package`, `npm run delivery:package -- --check` |
 | 依存関係供給網 | lockfile、依存取得元、integrity、root install hook | `package.json`, `package-lock.json` | `npm run security:supply-chain` |
 
 ## 最終確認コマンド
@@ -45,6 +46,7 @@ curl -X POST https://<production-domain>/api/security/csp-report \
 管理認可・依存関係供給網の静的チェック:
 
 ```bash
+npm run delivery:package -- --check
 npm run prisma:validate
 npm run security:admin-actions
 npm run security:supply-chain
@@ -83,5 +85,6 @@ npm run delivery:evidence -- --final --production-url https://<production-domain
 
 - `.env.production.local`、OAuth Client Secret、DB接続URL、Blob token、初期Owner以外の管理者メール一覧は共有資料に含めない
 - `npm run security:prod-env` と `npm run security:secrets` の結果は値を含まないため、証跡として共有できる
+- `delivery-package-manifest-*.md` はサイズとSHA-256確認用であり、秘密情報を含めない
 - 初期Ownerメールアドレスは必要最小限の関係者にだけ共有する
 - 納品後の変更は `docs/production-runbook.md` のロールバック手順を確認してから本番反映する

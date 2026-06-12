@@ -679,13 +679,14 @@
 ### 納品物検査
 
 - 納品前に `npm run docs:delivery:check` を実行し、仕様書PDF、管理者ツール説明書PDF、QA画像、Runbook、納品チェックリストが揃っていることを確認する
+- 納品前に `npm run delivery:package` を実行し、納品パッケージManifestとしてPDFのSHA-256、サイズ、QAページ数、共有対象/除外対象を確認する
 - 納品時に `docs/delivery-handoff.md` を共有し、成果物、最終確認コマンド、本番で残る確認、共有時の注意をまとめて確認する
 - 納品前に `npm run security:baseline` を実行し、セキュリティ設定の必須条件がコード上で維持されていることを確認する
 - 納品前に `npm run security:admin-actions` を実行し、管理Server ActionのOwner認可・リーグスコープ認可が維持されていることを確認する
 - 納品前に `npm run security:secrets` を実行し、秘密情報と生成証跡の混入がないことを確認する
 - 納品前に `npm run security:supply-chain` を実行し、lockfile、依存取得元、integrity、root install hookを確認する
 - 納品前に `npm run prisma:validate` を実行し、DB反映前にPrisma schemaを確認する
-- 納品前に `npm run delivery:gate` を実行し、PDF生成、管理者説明書QA画像生成、納品物チェック、Prisma schema検証、セキュリティ基準、秘密情報管理、依存関係供給網、ビルド、E2Eを一括確認する
+- 納品前に `npm run delivery:gate` を実行し、PDF生成、管理者説明書QA画像生成、納品物チェック、納品パッケージManifest、Prisma schema検証、セキュリティ基準、秘密情報管理、依存関係供給網、ビルド、E2Eを一括確認する
 - 納品前にclean worktree、Git upstream同期済み、GitHub remote HEAD一致済みの状態で `npm run delivery:evidence -- --final --production-url https://<production-domain> --production-env-file .env.production.local --manual-checks-file docs/output/manual-checks-YYYYMMDD.md --include-build --include-e2e` を実行し、コマンド結果、PDFサイズ、QAページ数、本番URL/env確認、必須項目がすべて `実施済み` の手動確認メモの証跡をMarkdownとして保存する
 - 本番公開サイトは `npm run public:routes -- https://<production-domain>` で主要公開ページの200応答、見出し、主要リンクを確認する
 - 本番管理者ツールは `npm run admin:routes -- https://<production-domain>` でログイン画面、未ログイン管理画面redirect、認証session API、Google providerを確認する

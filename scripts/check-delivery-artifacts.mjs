@@ -97,6 +97,16 @@ checkTextContains({
   requiredText: "GitHub remote HEAD一致",
 });
 checkTextContains({
+  label: "納品パッケージManifest手順",
+  filePath: "docs/production-runbook.md",
+  requiredText: "npm run delivery:package",
+});
+checkTextContains({
+  label: "納品パッケージManifest確認手順",
+  filePath: "docs/production-runbook.md",
+  requiredText: "npm run delivery:package -- --check",
+});
+checkTextContains({
   label: "本番公開導線確認手順",
   filePath: "docs/production-runbook.md",
   requiredText: "npm run public:routes -- https://<production-domain>",

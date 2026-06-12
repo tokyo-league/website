@@ -16,6 +16,7 @@ website/
 downloads/
 tmp/
 docs/output/*.html
+docs/output/delivery-package-manifest-*.md
 docs/output/delivery-evidence-*.md
 docs/output/manual-checks-*.md
 docs/admin-manual/output/*.html

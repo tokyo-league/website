@@ -112,8 +112,9 @@ https://<production-domain>/api/auth/callback/google
 納品ゲート:
 
 - `npm run delivery:gate` が成功している
+- `npm run delivery:package -- --check` が成功し、納品パッケージManifestを生成できる
 - `main` のHEADが `origin/main` と同期し、GitHub上のremote HEADとも一致しており、最終証跡の対象commitがGitHubに反映済みである
-- `delivery:gate` で仕様書PDF生成、管理者ツール説明書PDF生成、QA画像生成、納品物チェック、セキュリティ基準チェック、秘密情報管理チェック、依存関係供給網チェック、ビルド、E2Eが実行されている
+- `delivery:gate` で仕様書PDF生成、管理者ツール説明書PDF生成、QA画像生成、納品物チェック、納品パッケージManifest確認、セキュリティ基準チェック、秘密情報管理チェック、依存関係供給網チェック、ビルド、E2Eが実行されている
 
 公開サイト:
 
@@ -204,6 +205,17 @@ npm run docs:admin:qa
 npm run docs:delivery:check
 ```
 
+納品パッケージManifest:
+
+```bash
+npm run delivery:package
+npm run delivery:package -- --check
+```
+
+出力:
+
+- `docs/output/delivery-package-manifest-YYYYMMDD-HHMMSS.md`
+
 納品ゲート:
 
 ```bash
@@ -280,6 +292,7 @@ npm run admin:routes -- https://<production-domain>
 - 管理者ツール説明書のQA画像が20ページ分生成されている
 - Runbookと納品チェックリストが存在する
 - 納品ハンドオフが存在し、成果物、最終確認コマンド、本番で残る確認、共有時の注意を確認できる
+- 納品パッケージManifestでPDFのSHA-256、サイズ、QAページ数、共有対象/除外対象を確認できる
 - 管理者マニュアルHTMLに古い制限文が残っていない
 - Runbookに本番env安全確認手順が記載されている
 - 最終証跡がGit upstream同期済みかつGitHub remote HEAD一致済みcommitを対象にしている
@@ -318,6 +331,7 @@ npm run admin:routes -- https://<production-domain>
 - `npm run security:supply-chain` の成功ログ
 - `npm run security:headers -- https://<production-domain>` の成功ログ
 - `npm run docs:delivery:check` の成功ログ
+- `npm run delivery:package` の出力Markdown
 - `npm run delivery:evidence -- --final --production-url https://<production-domain> --production-env-file .env.production.local --manual-checks-file docs/output/manual-checks-YYYYMMDD.md --include-build --include-e2e` の出力Markdown
 - 仕様書PDF
 - 管理者ツール説明書PDF

@@ -25,7 +25,8 @@
 - `npm run security:baseline`: CSP、CSPレポートログ秘匿、private routeヘッダー、レート制限、本番env検査、E2E本番無効化の静的確認
 - `npm run security:secrets`: env、納品証跡、秘密鍵、実トークンらしき値の混入確認
 - `npm run security:supply-chain`: lockfile、依存取得元、integrity、root install hookの確認
-- `npm run delivery:gate`: PDF生成、QA画像生成、納品物チェック、セキュリティ基準、秘密情報管理、依存関係供給網、ビルド、E2Eの一括確認
+- `npm run delivery:package`: 納品パッケージManifest生成
+- `npm run delivery:gate`: PDF生成、QA画像生成、納品物チェック、納品パッケージManifest、セキュリティ基準、秘密情報管理、依存関係供給網、ビルド、E2Eの一括確認
 - `npm run prisma:push`: `schema.prisma` をDBへ反映
 - `npm run docs:spec`: 仕様書PDF生成
 - `npm run docs:admin`: 管理者ツール説明書PDF生成

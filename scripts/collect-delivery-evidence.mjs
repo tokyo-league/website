@@ -41,6 +41,7 @@ sections.push(`## 納品物
 ${artifactRows().join("\n")}`);
 
 runAndCollect("納品物自動チェック", npmArgs("run", "docs:delivery:check"));
+runAndCollect("管理者説明書QA画像品質確認", npmArgs("run", "docs:admin:qa:check"));
 runAndCollect("納品パッケージManifest確認", npmArgs("run", "delivery:package", "--", "--check"));
 runAndCollect("Prismaスキーマ検証", npmArgs("run", "prisma:validate"));
 runAndCollect("セキュリティ基準チェック", npmArgs("run", "security:baseline"));

@@ -10,7 +10,7 @@
 | 管理者ツール | `app/admin/`, `components/admin-*`, `lib/admin-access.ts` | `npm run test:e2e` | E2Eモードで検証済み |
 | 仕様書PDF | `docs/output/tokyo-league-renewal-spec.pdf` | `npm run docs:spec` | 生成済み |
 | 管理者ツール説明書PDF | `docs/admin-manual/output/tokyo-league-admin-manual.pdf` | `npm run docs:admin` | 生成済み |
-| 管理者説明書QA画像 | `docs/admin-manual/output/qa-pages/` | `npm run docs:admin:qa` | 20ページ生成済み |
+| 管理者説明書QA画像 | `docs/admin-manual/output/qa-pages/` | `npm run docs:admin:qa`, `npm run docs:admin:qa:check` | 20ページ生成・品質確認済み |
 | 本番デプロイRunbook | `docs/production-runbook.md` | 手順確認 | 作成済み |
 | 納品ハンドオフ | `docs/delivery-handoff.md` | 手順確認 | 作成済み |
 | 納品物自動チェック | PDF、QA画像、Runbook、古い文言混入 | `npm run docs:delivery:check` | 実装済み |
@@ -59,6 +59,7 @@
 - `npm run docs:spec`: 成功
 - `npm run docs:admin`: 成功
 - `npm run docs:admin:qa`: 成功
+- `npm run docs:admin:qa:check`: 成功
 - `npm run docs:delivery:check`: 成功
 - `npm run delivery:manual-checks`: 成功
 - `npm run delivery:package`: 成功
@@ -77,6 +78,7 @@
 - 本番デプロイURLで `npm run admin:routes -- https://<production-domain>` を実行し、管理者ツールの到達・保護状態証跡を保存する
 - 本番デプロイURLで管理画面ログイン、Owner操作、Editor操作を確認する
 - 納品直前に `npm run delivery:gate` を実行し、PDF生成、QA画像生成、納品物チェック、納品パッケージManifest、Prisma schema検証、セキュリティ基準、秘密情報管理、依存関係供給網、ビルド、E2Eを一括確認する
+- `npm run docs:admin:qa:check` で管理者説明書QA画像の寸法、非白紙率、文字/濃色ピクセル、色数を確認する
 - `npm run delivery:package` で納品パッケージManifestを生成し、PDFのSHA-256、サイズ、QAページ数、共有対象/除外対象を確認する
 - `npm run prisma:validate` でDB反映前にPrisma schemaを確認する
 - `npm run security:admin-actions` で管理Server Actionの認可ガードが維持されていることを確認する

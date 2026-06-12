@@ -77,6 +77,11 @@ checkTextContains({
   requiredText: "npm run delivery:evidence -- --final --production-url https://<production-domain> --production-env-file .env.production.local --manual-checks-file",
 });
 checkTextContains({
+  label: "管理者説明書QA画像品質確認手順",
+  filePath: "docs/production-runbook.md",
+  requiredText: "npm run docs:admin:qa:check",
+});
+checkTextContains({
   label: "本番手動確認メモ生成手順",
   filePath: "docs/production-runbook.md",
   requiredText: "npm run delivery:manual-checks -- --output docs/output/manual-checks-YYYYMMDD.md",
@@ -150,6 +155,11 @@ checkTextContains({
   label: "納品ハンドオフ: 本番手動確認メモ",
   filePath: "docs/delivery-handoff.md",
   requiredText: "npm run delivery:manual-checks -- --check docs/output/manual-checks-YYYYMMDD.md",
+});
+checkTextContains({
+  label: "納品ハンドオフ: QA画像品質確認",
+  filePath: "docs/delivery-handoff.md",
+  requiredText: "npm run docs:admin:qa:check",
 });
 checkTextContains({
   label: "納品ハンドオフ: 共有注意",

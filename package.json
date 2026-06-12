@@ -16,6 +16,7 @@
     "docs:admin": "node ./docs/admin-manual/build-admin-manual.mjs",
     "docs:admin:screenshots": "node ./docs/admin-manual/capture-admin-screenshots.mjs",
     "docs:admin:qa": "node ./docs/admin-manual/render-manual-qa.mjs",
+    "docs:admin:qa:check": "node ./docs/admin-manual/check-manual-qa.mjs",
     "docs:delivery:check": "node ./scripts/check-delivery-artifacts.mjs",
     "delivery:manual-checks": "node ./scripts/build-manual-checks-template.mjs",
     "delivery:package": "node ./scripts/build-delivery-package-manifest.mjs",

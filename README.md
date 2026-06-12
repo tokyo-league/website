@@ -32,3 +32,4 @@
 - `npm run docs:spec`: 仕様書PDF生成
 - `npm run docs:admin`: 管理者ツール説明書PDF生成
 - `npm run docs:admin:qa`: 管理者ツール説明書のQA確認画像生成
+- `npm run docs:admin:qa:check`: 管理者ツール説明書QA画像の寸法・非白紙・色数確認

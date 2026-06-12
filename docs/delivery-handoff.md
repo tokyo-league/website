@@ -11,8 +11,8 @@
 | 公開サイト | 東京リーグ公開サイト | `app/`, `components/`, `public/site-assets/` | `npm run build`, `npm run test:e2e`, `npm run public:routes -- https://<production-domain>` |
 | 管理者ツール | Owner / Editor 管理画面 | `app/admin/`, `components/admin-*`, `lib/admin-access.ts` | `npm run test:e2e`, `npm run admin:routes -- https://<production-domain>` |
 | 仕様書PDF | データ設計・管理画面仕様・非機能要件 | `docs/output/tokyo-league-renewal-spec.pdf` | `npm run docs:spec`, `npm run docs:delivery:check` |
-| 管理者ツール説明書PDF | 操作説明・画面別手順 | `docs/admin-manual/output/tokyo-league-admin-manual.pdf` | `npm run docs:admin`, `npm run docs:admin:qa` |
-| 管理者説明書QA画像 | PDF目視確認用20ページ画像 | `docs/admin-manual/output/qa-pages/` | `npm run docs:admin:qa` |
+| 管理者ツール説明書PDF | 操作説明・画面別手順 | `docs/admin-manual/output/tokyo-league-admin-manual.pdf` | `npm run docs:admin`, `npm run docs:admin:qa`, `npm run docs:admin:qa:check` |
+| 管理者説明書QA画像 | PDF目視確認用20ページ画像 | `docs/admin-manual/output/qa-pages/` | `npm run docs:admin:qa`, `npm run docs:admin:qa:check` |
 | 本番Runbook | デプロイ、DB反映、初期Owner、OAuth、ロールバック | `docs/production-runbook.md` | 手順共有 |
 | 納品チェックリスト | 納品物、非機能要件、残確認 | `docs/delivery-checklist.md` | 手順共有 |
 | 本番手動確認メモ | 本番ログイン、Owner/Editor操作、OAuth、PDF目視確認 | `docs/output/manual-checks-*.md` | `npm run delivery:manual-checks`, `npm run delivery:manual-checks -- --check docs/output/manual-checks-YYYYMMDD.md` |
@@ -47,6 +47,7 @@ curl -X POST https://<production-domain>/api/security/csp-report \
 管理認可・依存関係供給網の静的チェック:
 
 ```bash
+npm run docs:admin:qa:check
 npm run delivery:package -- --check
 npm run prisma:validate
 npm run security:admin-actions

@@ -6,6 +6,7 @@ const steps = [
   ["仕様書PDF生成", ["run", "docs:spec"]],
   ["管理者ツール説明書PDF生成", ["run", "docs:admin"]],
   ["管理者ツール説明書QA画像生成", ["run", "docs:admin:qa"]],
+  ["管理者ツール説明書QA画像品質確認", ["run", "docs:admin:qa:check"]],
   ["納品物自動チェック", ["run", "docs:delivery:check"]],
   ["納品パッケージManifest確認", ["run", "delivery:package", "--", "--check"]],
   ["Prismaスキーマ検証", ["run", "prisma:validate"]],

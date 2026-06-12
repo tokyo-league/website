@@ -193,11 +193,14 @@ npm run docs:admin
 
 ```bash
 npm run docs:admin:qa
+npm run docs:admin:qa:check
 ```
 
 出力:
 
 - `docs/admin-manual/output/qa-pages/`
+
+`docs:admin:qa:check` は20ページ分のPNGについて、ページ寸法、非白紙率、文字/濃色ピクセル、色数を確認し、白紙化や極端なレンダリング崩れを検出します。
 
 納品物の自動チェック:
 
@@ -232,6 +235,7 @@ npm run security:baseline
 管理Server Action認可チェック:
 
 ```bash
+npm run docs:admin:qa:check
 npm run security:admin-actions
 ```
 
@@ -328,6 +332,7 @@ npm run admin:routes -- https://<production-domain>
 - `npm run admin:routes -- https://<production-domain>` の成功ログ
 - `npm run build` の成功ログ
 - `npm run test:e2e` の成功ログ
+- `npm run docs:admin:qa:check` の成功ログ
 - `npm run security:baseline` の成功ログ
 - `npm run security:secrets` の成功ログ
 - `npm run security:supply-chain` の成功ログ

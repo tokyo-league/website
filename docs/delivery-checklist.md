@@ -35,6 +35,7 @@
 | 管理Server Action認可チェック | `npm run security:admin-actions` でexport済みServer ActionのOwner認可・リーグスコープ認可を静的確認 | 実装済み |
 | Production環境変数検出 | Productionで必須環境変数の欠落を起動時検出 | 実装済み |
 | 本番env安全確認 | `npm run security:prod-env -- .env.production.local --production-url https://<production-domain>` で必須項目、E2E誤設定、OAuth/DB/Blob形式、AUTH_URL/NEXTAUTH_URLの本番URL一致を値非表示で確認 | 実装済み |
+| 本番DB/Blob疎通確認 | `npm run security:prod-services -- .env.production.local` でNeon DB主要テーブルread、Vercel Blob store到達を値非表示で確認 | 実装済み |
 | 秘密情報管理チェック | `npm run security:secrets` で追跡済みenv、納品証跡Markdown、秘密鍵、実トークンらしき値の混入を確認 | 実装済み |
 | 依存関係供給網チェック | `npm run security:supply-chain` でlockfile、依存取得元、integrity、root install hookを確認 | 実装済み |
 | E2Eバイパス本番無効化 | `lib/test-mode.ts`、`tests/e2e/security.spec.ts` | 実装済み |
@@ -69,6 +70,7 @@
 - `npm run security:admin-actions`: 成功
 - `npm run security:secrets`: 成功
 - `npm run security:supply-chain`: 成功
+- `npm run security:prod-services`: 本番env確定後に実行
 - `npm run public:routes`: ローカルE2Eモードで成功
 - `npm run admin:routes`: ローカルGoogle設定あり・未ログイン状態で成功
 
@@ -85,6 +87,7 @@
 - `npm run delivery:manual-checks -- --output docs/output/manual-checks-YYYYMMDD.md` で本番手動確認メモを生成し、確認後に `npm run delivery:manual-checks -- --check docs/output/manual-checks-YYYYMMDD.md` で全項目が `実施済み` になっていることを確認する
 - clean worktree、Git upstream同期済み、GitHub remote HEAD一致済みの状態で、本番デプロイURLに対して `npm run delivery:evidence -- --final --production-url https://<production-domain> --production-env-file .env.production.local --manual-checks-file docs/output/manual-checks-YYYYMMDD.md --include-build --include-e2e` を実行し、手動確認メモの必須項目がすべて `実施済み` の証跡レポートを保存する
 - 本番環境の `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `DATABASE_URL`, `DIRECT_URL`, `BLOB_READ_WRITE_TOKEN`, `AUTH_URL`, `NEXTAUTH_URL` を `npm run security:prod-env -- .env.production.local --production-url https://<production-domain>` で確認する
+- `npm run security:prod-services -- .env.production.local` でNeon DB主要テーブルreadとVercel Blob store到達を確認する。書き込みまで確認する場合は `--write-probe` を付ける
 - `npm run security:secrets` でリポジトリに秘密情報や納品証跡Markdownが混入していないことを確認する
 - Google OAuthのリダイレクトURIが本番ドメインだけに限定されていることを確認する
 - 初期Ownerメールアドレスを確定し、`npm run prisma:seed-admin` またはDB管理画面で登録する

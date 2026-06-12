@@ -59,6 +59,7 @@ npm run security:supply-chain
 ```bash
 vercel env pull .env.production.local --environment=production --yes
 npm run security:prod-env -- .env.production.local --production-url https://<production-domain>
+npm run security:prod-services -- .env.production.local
 ```
 
 納品前証跡レポート:
@@ -88,7 +89,7 @@ npm run delivery:evidence -- --final --production-url https://<production-domain
 ## 共有時の注意
 
 - `.env.production.local`、OAuth Client Secret、DB接続URL、Blob token、初期Owner以外の管理者メール一覧は共有資料に含めない
-- `npm run security:prod-env` と `npm run security:secrets` の結果は値を含まないため、証跡として共有できる
+- `npm run security:prod-env`、`npm run security:prod-services`、`npm run security:secrets` の結果は値を含まないため、証跡として共有できる
 - `delivery-package-manifest-*.md` はサイズとSHA-256確認用であり、秘密情報を含めない
 - 初期Ownerメールアドレスは必要最小限の関係者にだけ共有する
 - 納品後の変更は `docs/production-runbook.md` のロールバック手順を確認してから本番反映する

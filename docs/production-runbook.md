@@ -32,9 +32,12 @@ Production環境では `DATABASE_URL`, `DIRECT_URL`, `AUTH_SECRET`, `AUTH_GOOGLE
 ```bash
 vercel env pull .env.production.local --environment=production --yes
 npm run security:prod-env -- .env.production.local --production-url https://<production-domain>
+npm run security:prod-services -- .env.production.local
 ```
 
 このコマンドは `E2E_TEST_MODE` の誤設定、短すぎる `AUTH_SECRET`、Google OAuth Client ID形式、PostgreSQL URL形式、Vercel Blob read/write token形式、`AUTH_URL` / `NEXTAUTH_URL` が設定されている場合の本番URL origin一致を確認します。結果は値そのものを含まないため、納品前証跡として共有できます。
+
+`security:prod-services` はProduction envを使ってNeon DBへ接続し、主要テーブルをread確認します。Vercel Blobは `list` でstore到達を確認し、値やBlob URLは表示しません。書き込みまで確認する場合だけ `npm run security:prod-services -- .env.production.local --write-probe` を実行します。この場合は `delivery-healthcheck/` 配下へ小さな疎通ファイルを書き込み、すぐ削除します。
 
 リポジトリ側の秘密情報混入も納品前に確認します。
 
@@ -161,6 +164,7 @@ https://<production-domain>/api/auth/callback/google
 - `npm run security:secrets` が成功している
 - `npm run security:supply-chain` が成功している
 - `npm run security:prod-env -- .env.production.local --production-url https://<production-domain>` が成功している
+- `npm run security:prod-services -- .env.production.local` が成功し、本番DBとBlob storeの疎通を値非表示で確認している
 - `npm run security:headers -- https://<production-domain>` が成功し、CSPレポートAPIのPOST 204も確認している
 - `npm run public:routes -- https://<production-domain>` が成功している
 - `npm run admin:routes -- https://<production-domain>` が成功している
@@ -336,6 +340,7 @@ npm run admin:routes -- https://<production-domain>
 - `npm run security:baseline` の成功ログ
 - `npm run security:secrets` の成功ログ
 - `npm run security:supply-chain` の成功ログ
+- `npm run security:prod-services -- .env.production.local` の成功ログ
 - `npm run security:headers -- https://<production-domain>` の成功ログ
 - `npm run docs:delivery:check` の成功ログ
 - `npm run delivery:manual-checks -- --check docs/output/manual-checks-YYYYMMDD.md` の成功ログ
@@ -346,3 +351,4 @@ npm run admin:routes -- https://<production-domain>
 - 納品ハンドオフ
 - 初期Ownerメールアドレス
 - `npm run security:prod-env -- .env.production.local --production-url https://<production-domain>` の成功結果。値そのものは共有しない
+- `npm run security:prod-services -- .env.production.local` の成功結果。接続文字列、トークン、Blob URL、メールアドレスは共有しない

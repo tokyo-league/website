@@ -121,6 +121,7 @@ if (options.envFile) {
     : npmArgs("run", "security:prod-env", "--", options.envFile);
 
   runAndCollect("本番env安全確認", productionEnvArgs);
+  runAndCollect("本番データサービス疎通確認", npmArgs("run", "security:prod-services", "--", options.envFile));
 } else {
   sections.push(`## 本番env安全確認
 
@@ -493,7 +494,7 @@ function printHelpAndExit(code = 0) {
 Options:
   --production-url <url>  本番URLのセキュリティヘッダーを確認する
   --production-env-file <path>
-                          本番envファイルを値非表示で確認する
+                          本番envファイルとDB/Blob疎通を値非表示で確認する
   --manual-checks-file <path>
                           本番ログイン、Owner/Editor操作、PDF目視などの手動確認メモを取り込む
   --include-build         npm run build の結果も保存する

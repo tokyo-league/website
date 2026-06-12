@@ -15,6 +15,7 @@
 | 管理者説明書QA画像 | PDF目視確認用20ページ画像 | `docs/admin-manual/output/qa-pages/` | `npm run docs:admin:qa` |
 | 本番Runbook | デプロイ、DB反映、初期Owner、OAuth、ロールバック | `docs/production-runbook.md` | 手順共有 |
 | 納品チェックリスト | 納品物、非機能要件、残確認 | `docs/delivery-checklist.md` | 手順共有 |
+| 本番手動確認メモ | 本番ログイン、Owner/Editor操作、OAuth、PDF目視確認 | `docs/output/manual-checks-*.md` | `npm run delivery:manual-checks`, `npm run delivery:manual-checks -- --check docs/output/manual-checks-YYYYMMDD.md` |
 | 納品前証跡 | コマンド結果と本番確認結果 | `docs/output/delivery-evidence-*.md` | `npm run delivery:evidence -- --final --production-url https://<production-domain> --production-env-file .env.production.local --manual-checks-file docs/output/manual-checks-YYYYMMDD.md --include-build --include-e2e` |
 | 納品パッケージManifest | ファイルサイズ、SHA-256、共有対象/除外対象 | `docs/output/delivery-package-manifest-*.md` | `npm run delivery:package`, `npm run delivery:package -- --check` |
 | 依存関係供給網 | lockfile、依存取得元、integrity、root install hook | `package.json`, `package-lock.json` | `npm run security:supply-chain` |
@@ -62,6 +63,8 @@ npm run security:prod-env -- .env.production.local --production-url https://<pro
 納品前証跡レポート:
 
 ```bash
+npm run delivery:manual-checks -- --output docs/output/manual-checks-YYYYMMDD.md
+npm run delivery:manual-checks -- --check docs/output/manual-checks-YYYYMMDD.md
 npm run delivery:evidence -- --final --production-url https://<production-domain> --production-env-file .env.production.local --manual-checks-file docs/output/manual-checks-YYYYMMDD.md --include-build --include-e2e
 ```
 

@@ -1,17 +1,7 @@
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-
-const manualCheckItems = [
-  "本番公開サイト主要導線",
-  "本番管理者ログイン",
-  "Owner操作",
-  "Editor操作",
-  "Google OAuthリダイレクトURI",
-  "初期Owner",
-  "PDF目視確認",
-  "Runbook共有",
-];
+import { manualChecksTemplate, validateManualChecksContent } from "./delivery-manual-checks.mjs";
 
 const options = parseArgs(process.argv.slice(2));
 assertFinalEvidenceOptions(options);
@@ -340,54 +330,9 @@ function validateFinalManualChecksFile(filePath, errors) {
   }
 
   const content = fs.readFileSync(absolutePath, "utf8").trim();
-  if (content.length < 160) {
-    errors.push("--manual-checks-file の内容が短すぎます。各手動確認の結果を記録してください。");
+  for (const error of validateManualChecksContent(content)) {
+    errors.push(`--manual-checks-file ${error}`);
   }
-
-  const missingItems = manualCheckItems.filter((item) => !content.includes(item));
-  if (missingItems.length > 0) {
-    errors.push(`--manual-checks-file に手動確認項目が不足しています: ${missingItems.join(", ")}`);
-  }
-
-  const manualRows = parseManualCheckRows(content);
-  const incompleteItems = manualCheckItems.filter((item) => manualRows.get(item) !== "実施済み");
-
-  if (incompleteItems.length > 0) {
-    errors.push(`--manual-checks-file の状態は必ず「実施済み」にしてください: ${incompleteItems.join(", ")}`);
-  }
-
-  if (/(未記入|未実行|TODO|TBD)/i.test(content)) {
-    errors.push("--manual-checks-file に未記入/未実行/TODOが残っています。");
-  }
-}
-
-function parseManualCheckRows(content) {
-  const rows = new Map();
-
-  for (const rawLine of content.split(/\r?\n/)) {
-    const line = rawLine.trim();
-
-    if (!line.startsWith("|") || !line.endsWith("|")) {
-      continue;
-    }
-
-    const cells = line
-      .split("|")
-      .slice(1, -1)
-      .map((cell) => cell.trim());
-
-    if (cells.length < 2 || cells[0] === "項目" || /^:?-+:?$/.test(cells[0])) {
-      continue;
-    }
-
-    rows.set(stripInlineMarkdown(cells[0]), stripInlineMarkdown(cells[1]));
-  }
-
-  return rows;
-}
-
-function stripInlineMarkdown(value) {
-  return value.replaceAll("`", "").trim();
 }
 
 function loadManualChecksContent(filePath) {
@@ -557,19 +502,6 @@ Options:
   --skip-admin-routes     production-url指定時に管理者到達チェックを省略する
   --output <path>         出力先Markdownを指定する`);
   process.exit(code);
-}
-
-function manualChecksTemplate() {
-  return `| 項目 | 状態 | メモ |
-| --- | --- | --- |
-| 本番公開サイト主要導線 | 未記入 | /, /competitions, /news, /teams, /downloads, /contact |
-| 本番管理者ログイン | 未記入 | 登録済みOwnerメールでGoogleログイン |
-| Owner操作 | 未記入 | ニュース、チーム、資料、担当割当、更新履歴 |
-| Editor操作 | 未記入 | 割当済みリーグの結果管理 |
-| Google OAuthリダイレクトURI | 未記入 | 本番ドメインのみ許可 |
-| 初期Owner | 未記入 | メールアドレスを関係者へ共有。値は必要最小限 |
-| PDF目視確認 | 未記入 | ページ欠け、画像欠け、文字切れ |
-| Runbook共有 | 未記入 | 関係者へ共有 |`;
 }
 
 function artifactRows() {

@@ -250,10 +250,12 @@ npm run security:supply-chain
 納品前証跡レポート:
 
 ```bash
+npm run delivery:manual-checks -- --output docs/output/manual-checks-YYYYMMDD.md
+npm run delivery:manual-checks -- --check docs/output/manual-checks-YYYYMMDD.md
 npm run delivery:evidence -- --final --production-url https://<production-domain> --production-env-file .env.production.local --manual-checks-file docs/output/manual-checks-YYYYMMDD.md --include-build --include-e2e
 ```
 
-`--final` は clean worktree、Git upstream同期、GitHub remote HEAD一致、HTTPSの本番URL、存在するProduction envファイル、手動確認メモ、build、E2E、公開導線、管理者到達確認を必須にします。手動確認メモは必須項目がすべて揃い、状態が `実施済み` の場合だけ最終証跡として通過します。
+`delivery:manual-checks` は本番手動確認メモのテンプレートを生成し、`--check` で必須項目の不足、`未記入`、状態が `実施済み` ではない行を検出します。`delivery:evidence -- --final` は clean worktree、Git upstream同期、GitHub remote HEAD一致、HTTPSの本番URL、存在するProduction envファイル、手動確認メモ、build、E2E、公開導線、管理者到達確認を必須にします。手動確認メモは必須項目がすべて揃い、状態が `実施済み` の場合だけ最終証跡として通過します。
 
 手動確認メモは値や秘密情報を含めず、以下のような表を `docs/output/manual-checks-YYYYMMDD.md` に保存します。このファイルは `.gitignore` 対象です。
 
@@ -331,6 +333,7 @@ npm run admin:routes -- https://<production-domain>
 - `npm run security:supply-chain` の成功ログ
 - `npm run security:headers -- https://<production-domain>` の成功ログ
 - `npm run docs:delivery:check` の成功ログ
+- `npm run delivery:manual-checks -- --check docs/output/manual-checks-YYYYMMDD.md` の成功ログ
 - `npm run delivery:package` の出力Markdown
 - `npm run delivery:evidence -- --final --production-url https://<production-domain> --production-env-file .env.production.local --manual-checks-file docs/output/manual-checks-YYYYMMDD.md --include-build --include-e2e` の出力Markdown
 - 仕様書PDF

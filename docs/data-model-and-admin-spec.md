@@ -681,6 +681,7 @@
 - 納品前に `npm run docs:delivery:check` を実行し、仕様書PDF、管理者ツール説明書PDF、QA画像、Runbook、納品チェックリストが揃っていることを確認する
 - 納品前に `npm run delivery:package` を実行し、納品パッケージManifestとしてPDFのSHA-256、サイズ、QAページ数、共有対象/除外対象を確認する
 - 納品時に `docs/delivery-handoff.md` を共有し、成果物、最終確認コマンド、本番で残る確認、共有時の注意をまとめて確認する
+- 本番手動確認後に `npm run delivery:manual-checks -- --check docs/output/manual-checks-YYYYMMDD.md` を実行し、本番ログイン、Owner/Editor操作、Google OAuth、初期Owner、PDF目視、Runbook共有がすべて `実施済み` であることを確認する
 - 納品前に `npm run security:baseline` を実行し、セキュリティ設定の必須条件がコード上で維持されていることを確認する
 - 納品前に `npm run security:admin-actions` を実行し、管理Server ActionのOwner認可・リーグスコープ認可が維持されていることを確認する
 - 納品前に `npm run security:secrets` を実行し、秘密情報と生成証跡の混入がないことを確認する

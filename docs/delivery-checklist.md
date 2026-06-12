@@ -14,6 +14,7 @@
 | 本番デプロイRunbook | `docs/production-runbook.md` | 手順確認 | 作成済み |
 | 納品ハンドオフ | `docs/delivery-handoff.md` | 手順確認 | 作成済み |
 | 納品物自動チェック | PDF、QA画像、Runbook、古い文言混入 | `npm run docs:delivery:check` | 実装済み |
+| 本番手動確認メモ | `docs/output/manual-checks-*.md` | `npm run delivery:manual-checks` / `npm run delivery:manual-checks -- --check docs/output/manual-checks-YYYYMMDD.md` | 実装済み |
 | 納品前証跡レポート | `docs/output/delivery-evidence-*.md` | `npm run delivery:evidence -- --final --production-url https://<production-domain> --production-env-file .env.production.local --manual-checks-file docs/output/manual-checks-YYYYMMDD.md --include-build --include-e2e` | 実装済み |
 | 納品パッケージManifest | `docs/output/delivery-package-manifest-*.md` | `npm run delivery:package` / `npm run delivery:package -- --check` | 実装済み |
 | 納品ゲート | PDF生成、QA画像生成、納品物チェック、納品パッケージManifest、セキュリティ基準、秘密情報管理、依存関係供給網、ビルド、E2E | `npm run delivery:gate` | 実装済み |
@@ -59,6 +60,7 @@
 - `npm run docs:admin`: 成功
 - `npm run docs:admin:qa`: 成功
 - `npm run docs:delivery:check`: 成功
+- `npm run delivery:manual-checks`: 成功
 - `npm run delivery:package`: 成功
 - `npm run delivery:evidence`: 成功
 - `npm run delivery:gate`: 成功
@@ -78,6 +80,7 @@
 - `npm run delivery:package` で納品パッケージManifestを生成し、PDFのSHA-256、サイズ、QAページ数、共有対象/除外対象を確認する
 - `npm run prisma:validate` でDB反映前にPrisma schemaを確認する
 - `npm run security:admin-actions` で管理Server Actionの認可ガードが維持されていることを確認する
+- `npm run delivery:manual-checks -- --output docs/output/manual-checks-YYYYMMDD.md` で本番手動確認メモを生成し、確認後に `npm run delivery:manual-checks -- --check docs/output/manual-checks-YYYYMMDD.md` で全項目が `実施済み` になっていることを確認する
 - clean worktree、Git upstream同期済み、GitHub remote HEAD一致済みの状態で、本番デプロイURLに対して `npm run delivery:evidence -- --final --production-url https://<production-domain> --production-env-file .env.production.local --manual-checks-file docs/output/manual-checks-YYYYMMDD.md --include-build --include-e2e` を実行し、手動確認メモの必須項目がすべて `実施済み` の証跡レポートを保存する
 - 本番環境の `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `DATABASE_URL`, `DIRECT_URL`, `BLOB_READ_WRITE_TOKEN`, `AUTH_URL`, `NEXTAUTH_URL` を `npm run security:prod-env -- .env.production.local --production-url https://<production-domain>` で確認する
 - `npm run security:secrets` でリポジトリに秘密情報や納品証跡Markdownが混入していないことを確認する

@@ -92,6 +92,11 @@ checkTextContains({
   requiredText: "Git upstream同期",
 });
 checkTextContains({
+  label: "納品前証跡GitHub remote HEAD条件",
+  filePath: "docs/production-runbook.md",
+  requiredText: "GitHub remote HEAD一致",
+});
+checkTextContains({
   label: "本番公開導線確認手順",
   filePath: "docs/production-runbook.md",
   requiredText: "npm run public:routes -- https://<production-domain>",

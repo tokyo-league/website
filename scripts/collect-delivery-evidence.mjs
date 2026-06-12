@@ -28,6 +28,7 @@ const gitCommit = runCommand("git", ["rev-parse", "--short", "HEAD"], { collectO
 const gitStatus = runCommand("git", ["status", "--short"], { collectOnly: true });
 const gitUpstream = getGitUpstream();
 const gitUpstreamSync = getGitUpstreamSync(gitUpstream);
+const gitRemoteHead = options.final ? getGitRemoteHead(gitUpstream) : { summary: "final時のみ確認" };
 
 sections.push(`## 基本情報
 
@@ -38,6 +39,7 @@ sections.push(`## 基本情報
 | Git status | ${inlineValue(gitStatus.stdout.trim() || "clean")} |
 | Git upstream | ${inlineValue(gitUpstream.name ?? "未設定")} |
 | Git upstream sync | ${inlineValue(gitUpstreamSync.summary)} |
+| Git remote HEAD | ${inlineValue(gitRemoteHead.summary)} |
 | Production URL | ${inlineValue(options.productionUrl ?? "未指定")} |
 | Production env file | ${inlineValue(options.envFile ?? "未指定")} |
 | Final evidence mode | ${inlineValue(options.final ? "enabled" : "disabled")} |`);
@@ -292,10 +294,14 @@ function assertFinalEvidenceOptions(options) {
 
 function validateFinalGitState(errors) {
   const gitStatus = runCommand("git", ["status", "--short"], { collectOnly: true });
+  let hasLocalGitError = false;
+
   if (gitStatus.status !== 0) {
     errors.push("git status を確認できませんでした。");
+    hasLocalGitError = true;
   } else if (gitStatus.stdout.trim()) {
     errors.push("--final はclean worktreeで実行してください。未コミット差分があります。");
+    hasLocalGitError = true;
   }
 
   const upstream = getGitUpstream();
@@ -308,6 +314,16 @@ function validateFinalGitState(errors) {
 
   if (!sync.ok) {
     errors.push(`--final はGit upstreamと同期した状態で実行してください。${sync.summary}`);
+    hasLocalGitError = true;
+  }
+
+  if (hasLocalGitError) {
+    return;
+  }
+
+  const remoteHead = getGitRemoteHead(upstream);
+  if (!remoteHead.ok) {
+    errors.push(`--final はGitHub上の実リモートHEADと一致している必要があります。${remoteHead.summary}`);
   }
 }
 
@@ -441,6 +457,76 @@ function getGitUpstreamSync(upstream) {
   };
 }
 
+function getGitRemoteHead(upstream) {
+  if (!upstream.name) {
+    return {
+      ok: false,
+      summary: "upstream未設定",
+    };
+  }
+
+  const parsed = parseGitUpstreamName(upstream.name);
+  if (!parsed) {
+    return {
+      ok: false,
+      summary: `upstream名を解釈できません: ${upstream.name}`,
+    };
+  }
+
+  const head = runCommand("git", ["rev-parse", "HEAD"], { collectOnly: true });
+  if (head.status !== 0) {
+    return {
+      ok: false,
+      summary: "HEADを確認できません",
+    };
+  }
+
+  const result = runCommand("git", ["ls-remote", "--heads", parsed.remote, parsed.branch], { collectOnly: true });
+  if (result.status !== 0) {
+    return {
+      ok: false,
+      summary: `remote HEADを確認できません: ${parsed.remote}/${parsed.branch}`,
+    };
+  }
+
+  const remoteHash = result.stdout.trim().split(/\s+/)[0] ?? "";
+  const headHash = head.stdout.trim();
+
+  if (!remoteHash) {
+    return {
+      ok: false,
+      summary: `remote branchが見つかりません: ${parsed.remote}/${parsed.branch}`,
+    };
+  }
+
+  if (remoteHash === headHash) {
+    return {
+      ok: true,
+      summary: `matched ${shortHash(headHash)}`,
+    };
+  }
+
+  return {
+    ok: false,
+    summary: `remote ${shortHash(remoteHash)}, local ${shortHash(headHash)}`,
+  };
+}
+
+function parseGitUpstreamName(name) {
+  const [remote, ...branchParts] = name.split("/");
+  const branch = branchParts.join("/");
+
+  if (!remote || !branch) {
+    return null;
+  }
+
+  return { remote, branch };
+}
+
+function shortHash(value) {
+  return value ? value.slice(0, 7) : "unknown";
+}
+
 function requiredValue(args, index, optionName) {
   const value = args[index];
   if (!value || value.startsWith("--")) {
@@ -465,7 +551,7 @@ Options:
                           本番ログイン、Owner/Editor操作、PDF目視などの手動確認メモを取り込む
   --include-build         npm run build の結果も保存する
   --include-e2e           npm run test:e2e の結果も保存する
-  --final                 最終納品証跡としてclean worktree、Git upstream同期、https本番URL、env、build、E2E、公開・管理導線を必須化する
+  --final                 最終納品証跡としてclean worktree、Git upstream同期、GitHub remote HEAD一致、https本番URL、env、build、E2E、公開・管理導線を必須化する
   --skip-public-routes    production-url指定時に公開導線チェックを省略する
   --skip-admin-routes     production-url指定時に管理者到達チェックを省略する
   --output <path>         出力先Markdownを指定する`);

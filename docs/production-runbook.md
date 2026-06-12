@@ -112,7 +112,7 @@ https://<production-domain>/api/auth/callback/google
 納品ゲート:
 
 - `npm run delivery:gate` が成功している
-- `main` のHEADが `origin/main` と同期しており、最終証跡の対象commitがGitHubに反映済みである
+- `main` のHEADが `origin/main` と同期し、GitHub上のremote HEADとも一致しており、最終証跡の対象commitがGitHubに反映済みである
 - `delivery:gate` で仕様書PDF生成、管理者ツール説明書PDF生成、QA画像生成、納品物チェック、セキュリティ基準チェック、秘密情報管理チェック、依存関係供給網チェック、ビルド、E2Eが実行されている
 
 公開サイト:
@@ -241,7 +241,7 @@ npm run security:supply-chain
 npm run delivery:evidence -- --final --production-url https://<production-domain> --production-env-file .env.production.local --manual-checks-file docs/output/manual-checks-YYYYMMDD.md --include-build --include-e2e
 ```
 
-`--final` は clean worktree、Git upstream同期、HTTPSの本番URL、存在するProduction envファイル、手動確認メモ、build、E2E、公開導線、管理者到達確認を必須にします。手動確認メモは必須項目がすべて揃い、状態が `実施済み` の場合だけ最終証跡として通過します。
+`--final` は clean worktree、Git upstream同期、GitHub remote HEAD一致、HTTPSの本番URL、存在するProduction envファイル、手動確認メモ、build、E2E、公開導線、管理者到達確認を必須にします。手動確認メモは必須項目がすべて揃い、状態が `実施済み` の場合だけ最終証跡として通過します。
 
 手動確認メモは値や秘密情報を含めず、以下のような表を `docs/output/manual-checks-YYYYMMDD.md` に保存します。このファイルは `.gitignore` 対象です。
 
@@ -282,7 +282,7 @@ npm run admin:routes -- https://<production-domain>
 - 納品ハンドオフが存在し、成果物、最終確認コマンド、本番で残る確認、共有時の注意を確認できる
 - 管理者マニュアルHTMLに古い制限文が残っていない
 - Runbookに本番env安全確認手順が記載されている
-- 最終証跡がGit upstream同期済みcommitを対象にしている
+- 最終証跡がGit upstream同期済みかつGitHub remote HEAD一致済みcommitを対象にしている
 - Prisma schemaをDB反映前に検証できる
 - CSP、CSPレポートログ秘匿、private routeヘッダー、レート制限、管理画面Origin検証、本番env検査、E2E本番無効化の静的基準を確認できる
 - 管理Server ActionのOwner認可・リーグスコープ認可を静的確認できる

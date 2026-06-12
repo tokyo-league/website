@@ -46,6 +46,7 @@
 | セキュリティ基準チェック | `npm run security:baseline` でCSP、private routeヘッダー、レート制限、管理画面Origin検証、本番env検査、E2E本番無効化を静的確認 | 実装済み |
 | CSP違反レポート受信 | `Content-Security-Policy` の `report-uri /api/security/csp-report` とPOST受信API。noindex/no-store、レート制限、本文サイズ制限、ログ出力前のquery/hash除去・秘密値redaction付き | 実装済み |
 | 本番ヘッダー確認 | `npm run security:headers -- https://<production-domain>` で公開/ログイン/認証API/CSPレポートPOST/robotsを確認 | 実装済み |
+| 本番切替前統合確認 | `npm run production:readiness -- --production-url https://<production-domain> --production-env-file .env.production.local` で本番URL、env、DB/Blob、ヘッダー、公開/管理導線を一括確認 | 実装済み |
 | 本番公開導線確認 | `npm run public:routes -- https://<production-domain>` で主要公開ページの200応答、見出し、主要リンクを確認 | 実装済み |
 | 本番管理者到達確認 | `npm run admin:routes -- https://<production-domain>` で未ログイン時の管理画面保護とGoogle認証Providerを確認 | 実装済み |
 | 管理画面noindex/no-store | `/admin`, `/login`, `/api/auth/*` に `X-Robots-Tag` と `Cache-Control` | 実装済み |
@@ -71,6 +72,7 @@
 - `npm run security:secrets`: 成功
 - `npm run security:supply-chain`: 成功
 - `npm run security:prod-services`: 本番env確定後に実行
+- `npm run production:readiness`: 本番URL・env確定後に実行
 - `npm run public:routes`: ローカルE2Eモードで成功
 - `npm run admin:routes`: ローカルGoogle設定あり・未ログイン状態で成功
 
@@ -78,6 +80,7 @@
 
 - 本番デプロイURLで `npm run public:routes -- https://<production-domain>` を実行し、公開サイトの主要導線証跡を保存する
 - 本番デプロイURLで `npm run admin:routes -- https://<production-domain>` を実行し、管理者ツールの到達・保護状態証跡を保存する
+- 本番URLとProduction env確定後に `npm run production:readiness -- --production-url https://<production-domain> --production-env-file .env.production.local` を実行し、本番URL、env、DB/Blob、ヘッダー、公開/管理導線を一括確認する
 - 本番デプロイURLで管理画面ログイン、Owner操作、Editor操作を確認する
 - 納品直前に `npm run delivery:gate` を実行し、PDF生成、QA画像生成、納品物チェック、納品パッケージManifest、Prisma schema検証、セキュリティ基準、秘密情報管理、依存関係供給網、ビルド、E2Eを一括確認する
 - `npm run docs:admin:qa:check` で管理者説明書QA画像の寸法、非白紙率、文字/濃色ピクセル、色数を確認する

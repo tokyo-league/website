@@ -31,6 +31,7 @@
     "security:headers": "node ./scripts/check-security-headers.mjs",
     "security:prod-env": "node ./scripts/check-production-env.mjs",
     "security:prod-services": "node ./scripts/check-production-services.mjs",
+    "production:readiness": "node ./scripts/check-production-readiness.mjs",
     "prisma:generate": "prisma generate",
     "prisma:validate": "node ./scripts/run-with-env.mjs prisma validate",
     "prisma:push": "node ./scripts/run-with-env.mjs prisma db push",

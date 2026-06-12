@@ -688,6 +688,7 @@
 - 納品前に `npm run security:secrets` を実行し、秘密情報と生成証跡の混入がないことを確認する
 - 納品前に `npm run security:supply-chain` を実行し、lockfile、依存取得元、integrity、root install hookを確認する
 - 本番env確定後に `npm run security:prod-services -- .env.production.local` を実行し、Neon DB主要テーブルreadとVercel Blob store到達を値非表示で確認する
+- 本番URLとProduction env確定後に `npm run production:readiness -- --production-url https://<production-domain> --production-env-file .env.production.local` を実行し、本番URL、env、DB/Blob、セキュリティヘッダー、公開/管理導線を一括確認する
 - 納品前に `npm run prisma:validate` を実行し、DB反映前にPrisma schemaを確認する
 - 納品前に `npm run delivery:gate` を実行し、PDF生成、管理者説明書QA画像生成、納品物チェック、納品パッケージManifest、Prisma schema検証、セキュリティ基準、秘密情報管理、依存関係供給網、ビルド、E2Eを一括確認する
 - 納品前にclean worktree、Git upstream同期済み、GitHub remote HEAD一致済みの状態で `npm run delivery:evidence -- --final --production-url https://<production-domain> --production-env-file .env.production.local --manual-checks-file docs/output/manual-checks-YYYYMMDD.md --include-build --include-e2e` を実行し、コマンド結果、PDFサイズ、QAページ数、本番URL/env確認、必須項目がすべて `実施済み` の手動確認メモの証跡をMarkdownとして保存する

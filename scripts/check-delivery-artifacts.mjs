@@ -57,6 +57,11 @@ checkTextContains({
   requiredText: "npm run security:prod-services -- .env.production.local",
 });
 checkTextContains({
+  label: "本番切替前統合確認手順",
+  filePath: "docs/production-runbook.md",
+  requiredText: "npm run production:readiness -- --production-url https://<production-domain> --production-env-file .env.production.local",
+});
+checkTextContains({
   label: "セキュリティ基準チェック手順",
   filePath: "docs/production-runbook.md",
   requiredText: "npm run security:baseline",
@@ -175,6 +180,11 @@ checkTextContains({
   label: "納品ハンドオフ: 本番DB/Blob疎通確認",
   filePath: "docs/delivery-handoff.md",
   requiredText: "npm run security:prod-services -- .env.production.local",
+});
+checkTextContains({
+  label: "納品ハンドオフ: 本番切替前統合確認",
+  filePath: "docs/delivery-handoff.md",
+  requiredText: "npm run production:readiness -- --production-url https://<production-domain> --production-env-file .env.production.local",
 });
 checkTextContains({
   label: "CSPレポートAPI手順",

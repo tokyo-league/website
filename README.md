@@ -26,6 +26,7 @@
 - `npm run security:secrets`: env、納品証跡、秘密鍵、実トークンらしき値の混入確認
 - `npm run security:supply-chain`: lockfile、依存取得元、integrity、root install hookの確認
 - `npm run security:prod-services`: 本番DB/Blob疎通確認
+- `npm run production:readiness`: 本番URL・Production env・公開/管理/ヘッダー/DB/Blobの切替前確認
 - `npm run delivery:manual-checks`: 本番手動確認メモのテンプレート生成・完了チェック
 - `npm run delivery:package`: 納品パッケージManifest生成
 - `npm run delivery:gate`: PDF生成、QA画像生成、納品物チェック、納品パッケージManifest、セキュリティ基準、秘密情報管理、依存関係供給網、ビルド、E2Eの一括確認

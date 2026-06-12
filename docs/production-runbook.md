@@ -119,6 +119,14 @@ https://<production-domain>/api/auth/callback/google
 - `main` のHEADが `origin/main` と同期し、GitHub上のremote HEADとも一致しており、最終証跡の対象commitがGitHubに反映済みである
 - `delivery:gate` で仕様書PDF生成、管理者ツール説明書PDF生成、QA画像生成、納品物チェック、納品パッケージManifest確認、セキュリティ基準チェック、秘密情報管理チェック、依存関係供給網チェック、ビルド、E2Eが実行されている
 
+本番URL・Production env確定後の切替前チェック:
+
+```bash
+npm run production:readiness -- --production-url https://<production-domain> --production-env-file .env.production.local
+```
+
+このコマンドは `security:prod-env`、`security:prod-services`、`security:headers`、`public:routes`、`admin:routes` を順番に実行し、本番URL origin、Google OAuth callback、Production env、本番DB/Blob、公開導線、管理者ツール到達、セキュリティヘッダーをまとめて確認します。Blobの書き込みまで確認する場合は `--write-probe` を付けます。
+
 公開サイト:
 
 - `npm run public:routes -- https://<production-domain>` が成功している
@@ -165,6 +173,7 @@ https://<production-domain>/api/auth/callback/google
 - `npm run security:supply-chain` が成功している
 - `npm run security:prod-env -- .env.production.local --production-url https://<production-domain>` が成功している
 - `npm run security:prod-services -- .env.production.local` が成功し、本番DBとBlob storeの疎通を値非表示で確認している
+- `npm run production:readiness -- --production-url https://<production-domain> --production-env-file .env.production.local` が成功している
 - `npm run security:headers -- https://<production-domain>` が成功し、CSPレポートAPIのPOST 204も確認している
 - `npm run public:routes -- https://<production-domain>` が成功している
 - `npm run admin:routes -- https://<production-domain>` が成功している
@@ -341,6 +350,7 @@ npm run admin:routes -- https://<production-domain>
 - `npm run security:secrets` の成功ログ
 - `npm run security:supply-chain` の成功ログ
 - `npm run security:prod-services -- .env.production.local` の成功ログ
+- `npm run production:readiness -- --production-url https://<production-domain> --production-env-file .env.production.local` の成功ログ
 - `npm run security:headers -- https://<production-domain>` の成功ログ
 - `npm run docs:delivery:check` の成功ログ
 - `npm run delivery:manual-checks -- --check docs/output/manual-checks-YYYYMMDD.md` の成功ログ

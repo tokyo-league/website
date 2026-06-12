@@ -31,6 +31,7 @@ npm run delivery:gate
 本番URL確定後の公開・管理・ヘッダー確認:
 
 ```bash
+npm run production:readiness -- --production-url https://<production-domain> --production-env-file .env.production.local
 npm run public:routes -- https://<production-domain>
 npm run admin:routes -- https://<production-domain>
 npm run security:headers -- https://<production-domain>
@@ -60,6 +61,7 @@ npm run security:supply-chain
 vercel env pull .env.production.local --environment=production --yes
 npm run security:prod-env -- .env.production.local --production-url https://<production-domain>
 npm run security:prod-services -- .env.production.local
+npm run production:readiness -- --production-url https://<production-domain> --production-env-file .env.production.local
 ```
 
 納品前証跡レポート:

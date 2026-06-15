@@ -216,6 +216,7 @@ const sections = [
   {
     title: "8. 結果管理: 順位表入力・試合更新",
     image: "results-standings.png",
+    compact: true,
     markers: [
       ["①", 48, 26],
       ["②", 88, 18],
@@ -470,7 +471,7 @@ function listItems(items) {
 function sectionHtml(section) {
   const imgSrc = pathToFileURL(path.join(assetsDir, section.image)).href;
   return `
-    <section class="page section-page">
+    <section class="page section-page${section.compact ? " compact-section" : ""}">
       <header class="section-header">
         <p>Tokyo League Admin Manual</p>
         <h2>${escapeHtml(section.title)}</h2>
@@ -641,6 +642,21 @@ const html = `<!doctype html>
     }
     ol, ul { margin: 0; padding-left: 18px; }
     li { margin: 0 0 3px; }
+    .compact-section .shot {
+      height: 82mm;
+      margin-bottom: 3mm;
+    }
+    .compact-section .callout-grid {
+      margin-bottom: 3mm;
+      font-size: 8pt;
+    }
+    .compact-section .content-grid {
+      font-size: 8.1pt;
+      gap: 8mm;
+    }
+    .compact-section li {
+      margin-bottom: 1px;
+    }
     code {
       font-family: "SFMono-Regular", Menlo, Consolas, monospace;
       background: #eef2f6;

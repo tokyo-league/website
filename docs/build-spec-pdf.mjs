@@ -43,13 +43,13 @@ function renderDocument(source) {
   <style>
     :root {
       color: #172033;
-      background: #f4f6f8;
+      background: #ffffff;
       font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", "YuGothic", "Noto Sans JP", sans-serif;
       line-height: 1.72;
     }
     body {
       margin: 0;
-      background: #f4f6f8;
+      background: #ffffff;
     }
     main {
       box-sizing: border-box;
@@ -136,6 +136,7 @@ function renderDocument(source) {
       size: A4;
     }
     @media print {
+      html,
       body {
         background: #ffffff;
       }
@@ -144,6 +145,7 @@ function renderDocument(source) {
         min-height: auto;
         margin: 0;
         padding: 0;
+        background: #ffffff;
       }
     }
   </style>

@@ -17,6 +17,26 @@ export function AdminDashboard({ scope }: { scope: AdminScope }) {
           </article>
         ))}
       </div>
+
+      {scope.admin.role !== "OWNER" ? (
+        <article className="admin-card">
+          <h3>担当リーグ一覧</h3>
+          {scope.accessibleDivisions.length > 0 ? (
+            <ul className="admin-list">
+              {scope.accessibleDivisions.slice(0, 4).map((division) => (
+                <li key={division.id}>
+                  <strong>
+                    {division.competitionName} / {division.name}
+                  </strong>
+                  <span>{division.permissions.join(" / ")}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="admin-muted">担当リーグがまだ割り当てられていません。</p>
+          )}
+        </article>
+      ) : null}
     </>
   );
 }

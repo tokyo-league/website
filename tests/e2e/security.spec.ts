@@ -160,7 +160,6 @@ test("Production環境では必須環境変数の欠落を検出する", () => {
     AUTH_SECRET: "0123456789abcdef0123456789abcdef",
     AUTH_GOOGLE_ID: "tokyo-league.apps.googleusercontent.com",
     DATABASE_URL: "postgres://example",
-    DIRECT_URL: "postgres://example-direct",
     BLOB_READ_WRITE_TOKEN: "vercel_blob_rw_token",
   };
 

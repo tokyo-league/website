@@ -25,7 +25,7 @@
 | `SEED_ADMIN_EMAIL` | Local / one-off command | 初期Owner登録 | 本番常駐は不要。実行時だけ使う |
 | `SEED_ADMIN_NAME` | Local / one-off command | 初期Owner表示名 | 未設定時は `Tokyo League Admin` |
 
-Production環境では `DATABASE_URL`, `DIRECT_URL`, `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `BLOB_READ_WRITE_TOKEN` の欠落をアプリ起動時に検出します。Preview / Development ではローカル検証や画面確認を優先し、未設定時はログイン画面に設定メモを表示します。
+Production環境では `DATABASE_URL`, `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `BLOB_READ_WRITE_TOKEN` の欠落をアプリ起動時に検出します。`DIRECT_URL` はPrisma schema反映などのDB運用コマンドで必要なため、納品前チェックで確認します。Preview / Development ではローカル検証や画面確認を優先し、未設定時はログイン画面に設定メモを表示します。
 
 納品前にはVercel Production環境変数をpullし、値を表示せずに必須項目と主要な形式だけを検査します。
 

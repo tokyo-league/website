@@ -3,7 +3,6 @@ export const productionRequiredEnv = [
   "AUTH_GOOGLE_ID",
   "AUTH_GOOGLE_SECRET",
   "DATABASE_URL",
-  "DIRECT_URL",
   "BLOB_READ_WRITE_TOKEN",
 ] as const;
 

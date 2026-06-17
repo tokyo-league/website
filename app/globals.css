@@ -1468,6 +1468,30 @@ button {
   grid-template-columns: repeat(6, minmax(0, 1fr));
 }
 
+.admin-match-edit-grid {
+  grid-template-columns: minmax(180px, 0.85fr) minmax(260px, 1.25fr) minmax(260px, 1.25fr);
+}
+
+.admin-match-edit-grid .admin-field,
+.admin-match-edit-grid .admin-field select,
+.admin-match-edit-grid .admin-field input {
+  min-width: 0;
+}
+
+.admin-match-edit-grid .admin-field select,
+.admin-match-edit-grid .admin-field input {
+  width: 100%;
+}
+
+.admin-match-edit-grid .admin-field:nth-child(4) input,
+.admin-match-edit-grid .admin-field:nth-child(5) input {
+  max-width: 160px;
+}
+
+.admin-match-edit-grid .admin-field:nth-child(6) {
+  grid-column: span 2;
+}
+
 .admin-form-preview__grid--three {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }

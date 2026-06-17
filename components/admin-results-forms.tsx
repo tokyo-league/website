@@ -580,7 +580,7 @@ function ExistingMatchEditor({
       <form action={updateAction} className="admin-form-stack">
         <input type="hidden" name="matchId" value={match.id} />
         <input type="hidden" name="divisionId" value={divisionId} />
-        <div className="admin-form-preview__grid admin-form-preview__grid--compact">
+        <div className="admin-form-preview__grid admin-match-edit-grid">
           <label className="admin-field">
             <span>試合日</span>
             <input type="date" name="matchDate" defaultValue={match.matchDate} required />

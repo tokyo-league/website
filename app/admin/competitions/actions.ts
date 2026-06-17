@@ -56,7 +56,7 @@ export async function createSeason(
     });
   });
 
-  revalidatePath("/admin/competitions");
+  revalidateCompetitionAdminPaths();
 
   return {
     status: "success",
@@ -108,7 +108,7 @@ export async function updateSeason(
   }
 
   revalidatePath("/admin");
-  revalidatePath("/admin/competitions");
+  revalidateCompetitionAdminPaths();
   revalidatePath("/admin/results");
 
   return {
@@ -161,7 +161,7 @@ export async function deleteSeason(
     where: { id: seasonId },
   });
 
-  revalidatePath("/admin/competitions");
+  revalidateCompetitionAdminPaths();
 
   return {
     status: "success",
@@ -241,7 +241,7 @@ export async function createCompetition(
     };
   }
 
-  revalidatePath("/admin/competitions");
+  revalidateCompetitionAdminPaths();
 
   return {
     status: "success",
@@ -323,7 +323,7 @@ export async function updateCompetition(
   }
 
   revalidatePath("/admin");
-  revalidatePath("/admin/competitions");
+  revalidateCompetitionAdminPaths(competitionId);
   revalidatePath("/admin/results");
 
   return {
@@ -380,7 +380,7 @@ export async function deleteCompetition(
     where: { id: competitionId },
   });
 
-  revalidatePath("/admin/competitions");
+  revalidateCompetitionAdminPaths(competitionId);
 
   return {
     status: "success",
@@ -435,7 +435,7 @@ export async function createDivision(
     };
   }
 
-  revalidatePath("/admin/competitions");
+  revalidateCompetitionAdminPaths(competitionId);
   revalidatePath("/admin/assignments");
 
   return {
@@ -493,7 +493,7 @@ export async function updateDivision(
   }
 
   revalidatePath("/admin");
-  revalidatePath("/admin/competitions");
+  revalidateCompetitionAdminPaths(competitionId);
   revalidatePath("/admin/results");
   revalidatePath("/admin/assignments");
 
@@ -554,7 +554,7 @@ export async function deleteDivision(
   });
 
   revalidatePath("/admin");
-  revalidatePath("/admin/competitions");
+  revalidateCompetitionAdminPaths(division.competitionId);
   revalidatePath("/admin/results");
   revalidatePath("/admin/assignments");
 
@@ -581,6 +581,22 @@ export async function assignTeamToDivision(
     };
   }
 
+  const division = await prisma.division.findUnique({
+    where: {
+      id: divisionId,
+    },
+    select: {
+      competitionId: true,
+    },
+  });
+
+  if (!division) {
+    return {
+      status: "error",
+      message: "リーグを選択してください。",
+    };
+  }
+
   const existing = await prisma.divisionTeam.findFirst({
     where: {
       divisionId,
@@ -600,7 +616,7 @@ export async function assignTeamToDivision(
     });
   }
 
-  revalidatePath("/admin/competitions");
+  revalidateCompetitionAdminPaths(division.competitionId);
 
   return {
     status: "success",
@@ -623,13 +639,33 @@ export async function removeTeamFromDivision(
     };
   }
 
+  const assignment = await prisma.divisionTeam.findUnique({
+    where: {
+      id: assignmentId,
+    },
+    select: {
+      division: {
+        select: {
+          competitionId: true,
+        },
+      },
+    },
+  });
+
+  if (!assignment) {
+    return {
+      status: "error",
+      message: "解除対象の所属情報が見つかりませんでした。",
+    };
+  }
+
   await prisma.divisionTeam.delete({
     where: {
       id: assignmentId,
     },
   });
 
-  revalidatePath("/admin/competitions");
+  revalidateCompetitionAdminPaths(assignment.division.competitionId);
 
   return {
     status: "success",
@@ -685,4 +721,13 @@ function parseDateInput(value: string, mode: "date" | "jstDateTime") {
 
 function isInvalidDateValue(value: Date | null) {
   return value instanceof Date && Number.isNaN(value.getTime());
+}
+
+function revalidateCompetitionAdminPaths(competitionId?: string | null) {
+  revalidatePath("/admin/competitions");
+  revalidatePath("/admin/competitions/list");
+
+  if (competitionId) {
+    revalidatePath(`/admin/competitions/${competitionId}`);
+  }
 }

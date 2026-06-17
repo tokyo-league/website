@@ -1503,6 +1503,47 @@ button {
   gap: 10px;
 }
 
+.admin-linked-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.admin-linked-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 14px;
+  background: #fbfcfe;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.admin-linked-row:hover {
+  border-color: rgba(26, 91, 191, 0.28);
+  background: #f7fbff;
+}
+
+.admin-linked-row span {
+  display: grid;
+  gap: 4px;
+}
+
+.admin-linked-row small {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.admin-linked-row em {
+  flex: 0 0 auto;
+  color: var(--accent);
+  font-style: normal;
+  font-weight: 700;
+}
+
 .admin-item-card {
   display: grid;
   gap: 14px;
@@ -1701,6 +1742,15 @@ button {
   align-items: center;
   padding: 14px 0;
   border-bottom: 1px solid var(--line);
+}
+
+.admin-table__row--link {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.admin-table__row--link:hover {
+  background: #f7fbff;
 }
 
 .admin-table__row--head {

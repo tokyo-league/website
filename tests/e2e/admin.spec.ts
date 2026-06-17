@@ -37,20 +37,27 @@ test("結果管理で年度・大会・リーグ絞り込みと編集UIが表示
   await expect(page.locator(".admin-standings-summary form").getByRole("button", { name: "削除" }).first()).toBeVisible();
 });
 
-test("大会管理では大会編集を先に表示し年度管理を折りたたむ", async ({ page }) => {
+test("大会管理はトップをコンパクトにして大会編集へ遷移できる", async ({ page }) => {
   await page.goto("/admin/competitions");
 
   await expect(page.getByRole("heading", { name: "大会管理" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "大会を編集・削除" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "編集中の大会" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "年度管理" })).toBeVisible();
   await expect(page.locator("details.admin-disclosure")).not.toHaveAttribute("open", "");
-  await expect(page.locator("details.admin-item-card--disclosure").first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: "リーグを編集・削除" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "リーグ所属チーム一覧" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "大会運用メモ" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "登録済み大会一覧" })).toHaveCount(0);
 
-  const headingOrder = await page.locator("h3").evaluateAll((nodes) =>
-    nodes.map((node) => node.textContent?.trim()).filter(Boolean),
-  );
+  await page.getByRole("link", { name: "全大会一覧" }).click();
+  await expect(page.getByRole("heading", { name: "大会一覧", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "登録済み大会一覧" })).toBeVisible();
 
-  expect(headingOrder.indexOf("大会を編集・削除")).toBeLessThan(headingOrder.indexOf("年度管理"));
+  const leagueRows = page.locator("a.admin-table__row--link").filter({ hasText: "東京リーグ向け" });
+  await expect(leagueRows.first()).toBeVisible();
+  await leagueRows.first().click();
+  await expect(page.getByRole("heading", { name: "大会を更新・削除" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "リーグを編集・削除" })).toBeVisible();
 });
 
 test("資料管理ページが表示できる", async ({ page }) => {

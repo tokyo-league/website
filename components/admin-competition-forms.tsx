@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import type { CompetitionStatus, CompetitionType, PublishStatus } from "@prisma/client";
 import { useActionState, useEffect, useState } from "react";
 import {
@@ -78,33 +79,41 @@ type DivisionTeamRow = {
   region: string | null;
 };
 
+function AdminCompetitionToast({
+  toast,
+  onClose,
+}: {
+  toast: CompetitionActionState;
+  onClose: () => void;
+}) {
+  if (toast.status === "idle") {
+    return null;
+  }
+
+  return (
+    <div className={`admin-toast admin-toast--${toast.status}`} role="status" aria-live="polite">
+      <p>{toast.message}</p>
+      <button type="button" className="button button--ghost" onClick={onClose}>
+        閉じる
+      </button>
+    </div>
+  );
+}
+
 export function AdminCompetitionForms({
   seasons,
-  competitions,
-  divisions,
-  teams,
-  divisionTeams,
+  activeCompetitions,
+  closedCompetitionCount,
+  totalCompetitionCount,
 }: {
   seasons: SeasonOption[];
-  competitions: CompetitionOption[];
-  divisions: DivisionOption[];
-  teams: TeamOption[];
-  divisionTeams: DivisionTeamRow[];
+  activeCompetitions: CompetitionOption[];
+  closedCompetitionCount: number;
+  totalCompetitionCount: number;
 }) {
-  const [seasonState, seasonAction, seasonPending] = useActionState(
-    createSeason,
-    initialCompetitionActionState,
-  );
+  const [seasonState, seasonAction, seasonPending] = useActionState(createSeason, initialCompetitionActionState);
   const [competitionState, competitionAction, competitionPending] = useActionState(
     createCompetition,
-    initialCompetitionActionState,
-  );
-  const [divisionState, divisionAction, divisionPending] = useActionState(
-    createDivision,
-    initialCompetitionActionState,
-  );
-  const [teamAssignmentState, teamAssignmentAction, teamAssignmentPending] = useActionState(
-    assignTeamToDivision,
     initialCompetitionActionState,
   );
   const [toast, setToast] = useState<CompetitionActionState>(initialCompetitionActionState);
@@ -117,52 +126,52 @@ export function AdminCompetitionForms({
     if (competitionState.status !== "idle") setToast(competitionState);
   }, [competitionState]);
 
-  useEffect(() => {
-    if (divisionState.status !== "idle") setToast(divisionState);
-  }, [divisionState]);
-
-  useEffect(() => {
-    if (teamAssignmentState.status !== "idle") setToast(teamAssignmentState);
-  }, [teamAssignmentState]);
-
   return (
     <>
-      {toast.status !== "idle" ? (
-        <div className={`admin-toast admin-toast--${toast.status}`} role="status" aria-live="polite">
-          <p>{toast.message}</p>
-          <button type="button" className="button button--ghost" onClick={() => setToast(initialCompetitionActionState)}>
-            閉じる
-          </button>
-        </div>
-      ) : null}
+      <AdminCompetitionToast toast={toast} onClose={() => setToast(initialCompetitionActionState)} />
 
       <article className="admin-card">
         <div className="card__header">
           <div>
-            <p className="section-kicker">Competitions</p>
-            <h3>大会を編集・削除</h3>
+            <p className="section-kicker">Edit</p>
+            <h3>編集中の大会</h3>
           </div>
+          <Link href="/admin/competitions/list" className="button button--ghost">
+            全大会一覧
+          </Link>
         </div>
-        <div className="admin-item-list">
-          {competitions.length > 0 ? (
-            competitions.map((competition) => (
-              <CompetitionEditor key={competition.id} competition={competition} seasons={seasons} onDone={setToast} />
+        <div className="admin-linked-list">
+          {activeCompetitions.length > 0 ? (
+            activeCompetitions.map((competition) => (
+              <Link key={competition.id} href={`/admin/competitions/${competition.id}`} className="admin-linked-row">
+                <span>
+                  <strong>{competition.name}</strong>
+                  <small>
+                    {competition.seasonLabel} / {competitionStatusLabel[competition.status]} / リーグ{" "}
+                    {competition.divisionCount}件
+                  </small>
+                </span>
+                <em>編集</em>
+              </Link>
             ))
           ) : (
-            <p className="admin-muted">まだ大会は登録されていません。</p>
+            <p className="admin-muted">編集中の大会はありません。必要な場合は下のフォームから追加してください。</p>
           )}
         </div>
+        <p className="admin-muted">
+          終了済み大会 {closedCompetitionCount}件を含む全{totalCompetitionCount}件は、全大会一覧から確認・編集できます。
+        </p>
       </article>
 
-      <div className="admin-columns">
-        <article className="admin-card">
-          <div className="card__header">
-            <div>
-              <p className="section-kicker">Competition</p>
-              <h3>大会を追加</h3>
-            </div>
+      <article className="admin-card">
+        <div className="card__header">
+          <div>
+            <p className="section-kicker">Competition</p>
+            <h3>大会を追加</h3>
           </div>
-          <form action={competitionAction} className="admin-form-stack">
+        </div>
+        <form action={competitionAction} className="admin-form-stack">
+          <div className="admin-form-preview__grid">
             <label className="admin-field">
               <span>年度</span>
               <select name="seasonId" defaultValue="" required>
@@ -193,27 +202,21 @@ export function AdminCompetitionForms({
               <input type="number" name="edition" min="1" placeholder="103" />
             </label>
             <label className="admin-field">
-              <span>補足</span>
-              <input type="text" name="summary" placeholder="山藤杯はPDF掲載中心 / 東京リーグは画像+補助入力" />
+              <span>開始日</span>
+              <input type="date" name="startDate" />
             </label>
-            <div className="admin-form-preview__grid">
-              <label className="admin-field">
-                <span>開始日</span>
-                <input type="date" name="startDate" />
-              </label>
-              <label className="admin-field">
-                <span>終了日</span>
-                <input type="date" name="endDate" />
-              </label>
-              <label className="admin-field">
-                <span>公開日</span>
-                <input type="date" name="publishedAt" />
-              </label>
-              <label className="admin-field">
-                <span>表示順</span>
-                <input type="number" name="sortOrder" min="0" defaultValue={0} />
-              </label>
-            </div>
+            <label className="admin-field">
+              <span>終了日</span>
+              <input type="date" name="endDate" />
+            </label>
+            <label className="admin-field">
+              <span>公開日</span>
+              <input type="date" name="publishedAt" />
+            </label>
+            <label className="admin-field">
+              <span>表示順</span>
+              <input type="number" name="sortOrder" min="0" defaultValue={0} />
+            </label>
             <label className="admin-field">
               <span>状態</span>
               <select name="status" defaultValue="DRAFT">
@@ -222,109 +225,16 @@ export function AdminCompetitionForms({
                 <option value="CLOSED">終了</option>
               </select>
             </label>
-            <button type="submit" className="button" disabled={competitionPending}>
-              {competitionPending ? "保存中..." : "大会を保存"}
-            </button>
-          </form>
-        </article>
-
-        <article className="admin-card">
-          <div className="card__header">
-            <div>
-              <p className="section-kicker">Division</p>
-              <h3>リーグを追加</h3>
-            </div>
           </div>
-          <form action={divisionAction} className="admin-form-stack">
-            <label className="admin-field">
-              <span>大会</span>
-              <select name="competitionId" defaultValue="" required>
-                <option value="" disabled>
-                  大会を選択
-                </option>
-                {competitions
-                  .filter((competition) => competition.competitionType === "LEAGUE")
-                  .map((competition) => (
-                    <option key={competition.id} value={competition.id}>
-                      {competition.seasonLabel} / {competition.name}
-                    </option>
-                  ))}
-              </select>
-            </label>
-            <label className="admin-field">
-              <span>リーグ名</span>
-              <input type="text" name="name" placeholder="Aリーグ" required />
-            </label>
-            <div className="admin-form-preview__grid">
-              <label className="admin-field">
-                <span>状態</span>
-                <select name="status" defaultValue="DRAFT">
-                  <option value="DRAFT">下書き</option>
-                  <option value="PUBLISHED">公開</option>
-                  <option value="ARCHIVED">非公開</option>
-                </select>
-              </label>
-              <label className="admin-field">
-                <span>表示順</span>
-                <input type="number" name="sortOrder" min="0" placeholder="未入力なら自動" />
-              </label>
-            </div>
-            <label className="admin-field">
-              <span>説明</span>
-              <textarea name="description" rows={3} />
-            </label>
-            <p className="admin-muted">URL用の識別子はリーグ名から自動生成されます。</p>
-            <button type="submit" className="button" disabled={divisionPending}>
-              {divisionPending ? "保存中..." : "リーグを保存"}
-            </button>
-          </form>
-        </article>
-
-        <article className="admin-card">
-          <div className="card__header">
-            <div>
-              <p className="section-kicker">Teams</p>
-              <h3>リーグ所属チームを追加</h3>
-            </div>
-          </div>
-          <form action={teamAssignmentAction} className="admin-form-stack">
-            <label className="admin-field">
-              <span>リーグ</span>
-              <select name="divisionId" defaultValue="" required>
-                <option value="" disabled>
-                  リーグを選択
-                </option>
-                {divisions.map((division) => (
-                  <option key={division.id} value={division.id}>
-                    {division.competitionLabel} / {division.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="admin-field">
-              <span>チーム</span>
-              <select name="teamId" defaultValue="" required>
-                <option value="" disabled>
-                  チームを選択
-                </option>
-                {teams.map((team) => (
-                  <option key={team.id} value={team.id}>
-                    {team.name}{team.region ? ` / ${team.region}` : ""}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="admin-field">
-              <span>表示順</span>
-              <input type="number" name="sortOrder" min="0" placeholder="1" />
-            </label>
-            <p className="admin-muted">未入力の場合は末尾へ自動で追加します。</p>
-            <button type="submit" className="button" disabled={teamAssignmentPending}>
-              {teamAssignmentPending ? "追加中..." : "所属チームを追加"}
-            </button>
-          </form>
-        </article>
-      </div>
+          <label className="admin-field">
+            <span>補足</span>
+            <input type="text" name="summary" placeholder="山藤杯はPDF掲載中心 / 東京リーグは画像+補助入力" />
+          </label>
+          <button type="submit" className="button" disabled={competitionPending}>
+            {competitionPending ? "保存中..." : "大会を保存"}
+          </button>
+        </form>
+      </article>
 
       <details className="admin-disclosure">
         <summary>
@@ -364,51 +274,208 @@ export function AdminCompetitionForms({
           </div>
         </div>
       </details>
+    </>
+  );
+}
+
+export function AdminCompetitionEditForms({
+  seasons,
+  competition,
+  leagueCompetitions,
+  divisions,
+  teams,
+  divisionTeams,
+}: {
+  seasons: SeasonOption[];
+  competition: CompetitionOption;
+  leagueCompetitions: CompetitionOption[];
+  divisions: DivisionOption[];
+  teams: TeamOption[];
+  divisionTeams: DivisionTeamRow[];
+}) {
+  const [divisionState, divisionAction, divisionPending] = useActionState(createDivision, initialCompetitionActionState);
+  const [teamAssignmentState, teamAssignmentAction, teamAssignmentPending] = useActionState(
+    assignTeamToDivision,
+    initialCompetitionActionState,
+  );
+  const [toast, setToast] = useState<CompetitionActionState>(initialCompetitionActionState);
+  const isClosed = competition.status === "CLOSED";
+
+  useEffect(() => {
+    if (divisionState.status !== "idle") setToast(divisionState);
+  }, [divisionState]);
+
+  useEffect(() => {
+    if (teamAssignmentState.status !== "idle") setToast(teamAssignmentState);
+  }, [teamAssignmentState]);
+
+  return (
+    <>
+      <AdminCompetitionToast toast={toast} onClose={() => setToast(initialCompetitionActionState)} />
 
       <article className="admin-card">
         <div className="card__header">
           <div>
-            <p className="section-kicker">Divisions</p>
-            <h3>リーグを編集・削除</h3>
+            <p className="section-kicker">Competition</p>
+            <h3>大会を更新・削除</h3>
           </div>
+          <Link href="/admin/competitions/list" className="button button--ghost">
+            全大会一覧
+          </Link>
         </div>
-        <div className="admin-item-list">
-          {divisions.length > 0 ? (
-            divisions.map((division) => (
-              <DivisionEditor key={division.id} division={division} competitions={competitions} onDone={setToast} />
-            ))
-          ) : (
-            <p className="admin-muted">まだリーグは登録されていません。</p>
-          )}
-        </div>
+        {isClosed ? (
+          <p className="admin-muted">この大会は終了済みです。必要な修正だけ行ってください。</p>
+        ) : null}
+        <CompetitionEditor competition={competition} seasons={seasons} onDone={setToast} defaultOpen />
       </article>
 
-      <article className="admin-card">
-        <div className="card__header">
-          <div>
-            <p className="section-kicker">Assignments</p>
-            <h3>リーグ所属チーム一覧</h3>
-          </div>
-        </div>
-        <div className="admin-table">
-          <div className="admin-table__row admin-table__row--head admin-table__row--five">
-            <span>リーグ</span>
-            <span>チーム名</span>
-            <span>地域</span>
-            <span>状態</span>
-            <span>操作</span>
-          </div>
-          {divisionTeams.length > 0 ? (
-            divisionTeams.map((assignment) => (
-              <DivisionTeamDeleteRow key={assignment.id} assignment={assignment} onDone={setToast} />
-            ))
-          ) : (
-            <div className="admin-empty-state">
-              <p>まだリーグにチームは割り当てられていません。</p>
+      {competition.competitionType === "LEAGUE" ? (
+        <div className="admin-columns">
+          <article className="admin-card">
+            <div className="card__header">
+              <div>
+                <p className="section-kicker">Division</p>
+                <h3>リーグを追加</h3>
+              </div>
             </div>
-          )}
+            {isClosed ? (
+              <p className="admin-muted">終了済み大会のため、通常運用ではリーグ追加は使いません。</p>
+            ) : null}
+            <form action={divisionAction} className="admin-form-stack">
+              <input type="hidden" name="competitionId" value={competition.id} />
+              <label className="admin-field">
+                <span>リーグ名</span>
+                <input type="text" name="name" placeholder="Aリーグ" required />
+              </label>
+              <div className="admin-form-preview__grid">
+                <label className="admin-field">
+                  <span>状態</span>
+                  <select name="status" defaultValue="DRAFT">
+                    <option value="DRAFT">下書き</option>
+                    <option value="PUBLISHED">公開</option>
+                    <option value="ARCHIVED">非公開</option>
+                  </select>
+                </label>
+                <label className="admin-field">
+                  <span>表示順</span>
+                  <input type="number" name="sortOrder" min="0" placeholder="未入力なら自動" />
+                </label>
+              </div>
+              <label className="admin-field">
+                <span>説明</span>
+                <textarea name="description" rows={3} />
+              </label>
+              <p className="admin-muted">URL用の識別子はリーグ名から自動生成されます。</p>
+              <button type="submit" className="button" disabled={divisionPending}>
+                {divisionPending ? "保存中..." : "リーグを保存"}
+              </button>
+            </form>
+          </article>
+
+          <article className="admin-card">
+            <div className="card__header">
+              <div>
+                <p className="section-kicker">Teams</p>
+                <h3>リーグ所属チームを追加</h3>
+              </div>
+            </div>
+            {isClosed ? (
+              <p className="admin-muted">終了済み大会のため、通常運用では所属追加は使いません。</p>
+            ) : null}
+            <form action={teamAssignmentAction} className="admin-form-stack">
+              <label className="admin-field">
+                <span>リーグ</span>
+                <select name="divisionId" defaultValue="" required>
+                  <option value="" disabled>
+                    リーグを選択
+                  </option>
+                  {divisions.map((division) => (
+                    <option key={division.id} value={division.id}>
+                      {division.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="admin-field">
+                <span>チーム</span>
+                <select name="teamId" defaultValue="" required>
+                  <option value="" disabled>
+                    チームを選択
+                  </option>
+                  {teams.map((team) => (
+                    <option key={team.id} value={team.id}>
+                      {team.name}
+                      {team.region ? ` / ${team.region}` : ""}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="admin-field">
+                <span>表示順</span>
+                <input type="number" name="sortOrder" min="0" placeholder="1" />
+              </label>
+              <p className="admin-muted">未入力の場合は末尾へ自動で追加します。</p>
+              <button type="submit" className="button" disabled={teamAssignmentPending}>
+                {teamAssignmentPending ? "追加中..." : "所属チームを追加"}
+              </button>
+            </form>
+          </article>
         </div>
-      </article>
+      ) : null}
+
+      {competition.competitionType === "LEAGUE" ? (
+        <article className="admin-card">
+          <div className="card__header">
+            <div>
+              <p className="section-kicker">Divisions</p>
+              <h3>リーグを編集・削除</h3>
+            </div>
+          </div>
+          <div className="admin-item-list">
+            {divisions.length > 0 ? (
+              divisions.map((division) => (
+                <DivisionEditor
+                  key={division.id}
+                  division={division}
+                  competitions={leagueCompetitions}
+                  onDone={setToast}
+                />
+              ))
+            ) : (
+              <p className="admin-muted">まだリーグは登録されていません。</p>
+            )}
+          </div>
+        </article>
+      ) : null}
+
+      {competition.competitionType === "LEAGUE" ? (
+        <article className="admin-card">
+          <div className="card__header">
+            <div>
+              <p className="section-kicker">Assignments</p>
+              <h3>リーグ所属チーム一覧</h3>
+            </div>
+          </div>
+          <div className="admin-table">
+            <div className="admin-table__row admin-table__row--head admin-table__row--five">
+              <span>リーグ</span>
+              <span>チーム名</span>
+              <span>地域</span>
+              <span>状態</span>
+              <span>操作</span>
+            </div>
+            {divisionTeams.length > 0 ? (
+              divisionTeams.map((assignment) => (
+                <DivisionTeamDeleteRow key={assignment.id} assignment={assignment} onDone={setToast} />
+              ))
+            ) : (
+              <div className="admin-empty-state">
+                <p>まだリーグにチームは割り当てられていません。</p>
+              </div>
+            )}
+          </div>
+        </article>
+      ) : null}
     </>
   );
 }
@@ -420,14 +487,8 @@ function SeasonEditor({
   season: SeasonOption;
   onDone: (state: CompetitionActionState) => void;
 }) {
-  const [updateState, updateAction, updatePending] = useActionState(
-    updateSeason,
-    initialCompetitionActionState,
-  );
-  const [deleteState, deleteAction, deletePending] = useActionState(
-    deleteSeason,
-    initialCompetitionActionState,
-  );
+  const [updateState, updateAction, updatePending] = useActionState(updateSeason, initialCompetitionActionState);
+  const [deleteState, deleteAction, deletePending] = useActionState(deleteSeason, initialCompetitionActionState);
   const deletable = season.competitionCount === 0;
 
   useEffect(() => {
@@ -485,19 +546,15 @@ function CompetitionEditor({
   competition,
   seasons,
   onDone,
+  defaultOpen = false,
 }: {
   competition: CompetitionOption;
   seasons: SeasonOption[];
   onDone: (state: CompetitionActionState) => void;
+  defaultOpen?: boolean;
 }) {
-  const [updateState, updateAction, updatePending] = useActionState(
-    updateCompetition,
-    initialCompetitionActionState,
-  );
-  const [deleteState, deleteAction, deletePending] = useActionState(
-    deleteCompetition,
-    initialCompetitionActionState,
-  );
+  const [updateState, updateAction, updatePending] = useActionState(updateCompetition, initialCompetitionActionState);
+  const [deleteState, deleteAction, deletePending] = useActionState(deleteCompetition, initialCompetitionActionState);
   const referenceCount = competition.divisionCount + competition.fileCount + competition.newsPostCount;
   const deletable = referenceCount === 0;
 
@@ -510,7 +567,7 @@ function CompetitionEditor({
   }, [deleteState, onDone]);
 
   return (
-    <details className="admin-item-card admin-item-card--disclosure">
+    <details className="admin-item-card admin-item-card--disclosure" open={defaultOpen}>
       <summary className="admin-item-card__summary">
         <strong>{competition.seasonLabel} / {competition.name}</strong>
         <p>
@@ -604,14 +661,8 @@ function DivisionEditor({
   competitions: CompetitionOption[];
   onDone: (state: CompetitionActionState) => void;
 }) {
-  const [updateState, updateAction, updatePending] = useActionState(
-    updateDivision,
-    initialCompetitionActionState,
-  );
-  const [deleteState, deleteAction, deletePending] = useActionState(
-    deleteDivision,
-    initialCompetitionActionState,
-  );
+  const [updateState, updateAction, updatePending] = useActionState(updateDivision, initialCompetitionActionState);
+  const [deleteState, deleteAction, deletePending] = useActionState(deleteDivision, initialCompetitionActionState);
   const referenceCount = division.teamCount + division.matchCount + division.standingCount + division.assignmentCount;
   const deletable = referenceCount === 0;
   const leagueCompetitions = competitions.filter((competition) => competition.competitionType === "LEAGUE");
@@ -625,14 +676,14 @@ function DivisionEditor({
   }, [deleteState, onDone]);
 
   return (
-    <div className="admin-item-card">
-      <div className="admin-item-card__summary">
+    <details className="admin-item-card admin-item-card--disclosure">
+      <summary className="admin-item-card__summary">
         <strong>{division.competitionLabel} / {division.name}</strong>
         <p>
           {publishStatusLabel[division.status]} / 所属{division.teamCount}チーム / 試合{division.matchCount}件 /
           順位表{division.standingCount}行
         </p>
-      </div>
+      </summary>
       <form action={updateAction} className="admin-form-stack">
         <input type="hidden" name="divisionId" value={division.id} />
         <div className="admin-form-preview__grid">
@@ -684,7 +735,7 @@ function DivisionEditor({
           ) : null}
         </div>
       </ConfirmForm>
-    </div>
+    </details>
   );
 }
 
@@ -695,10 +746,7 @@ function DivisionTeamDeleteRow({
   assignment: DivisionTeamRow;
   onDone: (state: CompetitionActionState) => void;
 }) {
-  const [state, formAction, pending] = useActionState(
-    removeTeamFromDivision,
-    initialCompetitionActionState,
-  );
+  const [state, formAction, pending] = useActionState(removeTeamFromDivision, initialCompetitionActionState);
 
   useEffect(() => {
     if (state.status !== "idle") {

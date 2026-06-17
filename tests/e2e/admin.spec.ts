@@ -6,7 +6,7 @@ test("管理ダッシュボードがE2Eモードで表示できる", async ({ pa
   await expect(page.getByRole("heading", { name: "ダッシュボード" })).toBeVisible();
   await expect(page.getByRole("link", { name: "ニュース", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "資料", exact: true })).toBeVisible();
-  await expect(page.getByText("公開リーグ一覧")).toBeVisible();
+  await expect(page.getByText("公開リーグ一覧")).toHaveCount(0);
 });
 
 test("管理ニュース一覧が表示できる", async ({ page }) => {
@@ -35,6 +35,22 @@ test("結果管理で年度・大会・リーグ絞り込みと編集UIが表示
   await expect(page.getByRole("button", { name: "入力をクリア" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "登録済み順位表の確認" })).toBeVisible();
   await expect(page.locator(".admin-standings-summary form").getByRole("button", { name: "削除" }).first()).toBeVisible();
+});
+
+test("大会管理では大会編集を先に表示し年度管理を折りたたむ", async ({ page }) => {
+  await page.goto("/admin/competitions");
+
+  await expect(page.getByRole("heading", { name: "大会管理" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "大会を編集・削除" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "年度管理" })).toBeVisible();
+  await expect(page.locator("details.admin-disclosure")).not.toHaveAttribute("open", "");
+  await expect(page.locator("details.admin-item-card--disclosure").first()).toBeVisible();
+
+  const headingOrder = await page.locator("h3").evaluateAll((nodes) =>
+    nodes.map((node) => node.textContent?.trim()).filter(Boolean),
+  );
+
+  expect(headingOrder.indexOf("大会を編集・削除")).toBeLessThan(headingOrder.indexOf("年度管理"));
 });
 
 test("資料管理ページが表示できる", async ({ page }) => {
@@ -73,23 +89,27 @@ test("Ownerは更新履歴を確認できる", async ({ page }) => {
 });
 
 test("ニュース作成フローが完了できる", async ({ page }) => {
+  const title = `E2Eニュース-${Date.now()}`;
+
   await page.goto("/admin/news/new");
 
   await expect(page.getByRole("heading", { name: "ニュース管理" })).toBeVisible();
-  await page.getByLabel("タイトル").fill("E2Eニュース");
+  await page.getByLabel("タイトル").fill(title);
   await page.getByLabel("本文").fill("E2Eニュース本文です。");
   await page.getByRole("button", { name: "ニュースを保存" }).click();
 
-  await expect(page.getByText("ニュース「E2Eニュース」を作成しました。")).toBeVisible();
+  await expect(page.getByText(`ニュース「${title}」を作成しました。`)).toBeVisible();
 });
 
 test("チーム作成フローが完了できる", async ({ page }) => {
+  const teamName = `E2E FC ${Date.now()}`;
+
   await page.goto("/admin/teams/new");
 
   await expect(page.getByRole("heading", { name: "チーム管理" })).toBeVisible();
-  await page.getByLabel("チーム名").fill("E2E FC");
+  await page.getByLabel("チーム名").fill(teamName);
   await page.getByLabel("Instagram URL").fill("@e2e_fc");
   await page.getByRole("button", { name: "チームを保存" }).click();
 
-  await expect(page.getByText("E2E FC を追加しました。")).toBeVisible();
+  await expect(page.getByText(`${teamName} を追加しました。`)).toBeVisible();
 });

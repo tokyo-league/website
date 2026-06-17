@@ -1499,6 +1499,10 @@ button {
   gap: 16px;
 }
 
+.admin-item-list--compact {
+  gap: 10px;
+}
+
 .admin-item-card {
   display: grid;
   gap: 14px;
@@ -1506,6 +1510,29 @@ button {
   border: 1px solid rgba(17, 24, 39, 0.08);
   border-radius: 20px;
   background: #fbfcfe;
+}
+
+.admin-item-card--disclosure {
+  padding: 0;
+}
+
+.admin-item-card--disclosure[open] {
+  padding-bottom: 16px;
+}
+
+.admin-item-card--disclosure > summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 14px 16px;
+}
+
+.admin-item-card--disclosure > summary::-webkit-details-marker {
+  display: none;
+}
+
+.admin-item-card--disclosure > form,
+.admin-item-card--disclosure > form + form {
+  padding: 0 16px;
 }
 
 .admin-item-card__actions {
@@ -1523,6 +1550,57 @@ button {
   margin: 0;
   color: var(--muted);
   font-size: 13px;
+}
+
+.admin-disclosure {
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 18px;
+  background: white;
+  box-shadow: 0 14px 36px rgba(15, 23, 42, 0.06);
+}
+
+.admin-disclosure > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  cursor: pointer;
+  list-style: none;
+  padding: 18px 20px;
+}
+
+.admin-disclosure > summary::-webkit-details-marker {
+  display: none;
+}
+
+.admin-disclosure > summary h3,
+.admin-disclosure > summary p {
+  margin: 0;
+}
+
+.admin-disclosure > summary span {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.admin-disclosure > summary > strong {
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.admin-disclosure__body {
+  display: grid;
+  gap: 18px;
+  padding: 18px 20px 20px;
+  border-top: 1px solid rgba(17, 24, 39, 0.08);
+}
+
+.admin-season-create {
+  display: grid;
+  gap: 14px;
 }
 
 .admin-form-preview__grid div {

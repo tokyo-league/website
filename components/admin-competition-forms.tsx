@@ -136,33 +136,25 @@ export function AdminCompetitionForms({
         </div>
       ) : null}
 
-      <div className="admin-columns">
-        <article className="admin-card">
-          <div className="card__header">
-            <div>
-              <p className="section-kicker">Season</p>
-              <h3>年度を追加</h3>
-            </div>
+      <article className="admin-card">
+        <div className="card__header">
+          <div>
+            <p className="section-kicker">Competitions</p>
+            <h3>大会を編集・削除</h3>
           </div>
-          <form action={seasonAction} className="admin-form-stack">
-            <label className="admin-field">
-              <span>年度</span>
-              <input type="number" name="year" min="2000" max="2100" placeholder="2026" required />
-            </label>
-            <label className="admin-field">
-              <span>表示名</span>
-              <input type="text" name="label" placeholder="2026年度" required />
-            </label>
-            <label className="admin-check">
-              <input type="checkbox" name="isCurrent" />
-              <span>現在の年度にする</span>
-            </label>
-            <button type="submit" className="button" disabled={seasonPending}>
-              {seasonPending ? "保存中..." : "年度を保存"}
-            </button>
-          </form>
-        </article>
+        </div>
+        <div className="admin-item-list">
+          {competitions.length > 0 ? (
+            competitions.map((competition) => (
+              <CompetitionEditor key={competition.id} competition={competition} seasons={seasons} onDone={setToast} />
+            ))
+          ) : (
+            <p className="admin-muted">まだ大会は登録されていません。</p>
+          )}
+        </div>
+      </article>
 
+      <div className="admin-columns">
         <article className="admin-card">
           <div className="card__header">
             <div>
@@ -334,39 +326,44 @@ export function AdminCompetitionForms({
         </article>
       </div>
 
-      <article className="admin-card">
-        <div className="card__header">
+      <details className="admin-disclosure">
+        <summary>
           <div>
-            <p className="section-kicker">Seasons</p>
-            <h3>年度を編集・削除</h3>
+            <p className="section-kicker">Season</p>
+            <h3>年度管理</h3>
+            <span>追加・更新・削除は必要な時だけ開きます。</span>
+          </div>
+          <strong>{seasons.length}件</strong>
+        </summary>
+        <div className="admin-disclosure__body">
+          <form action={seasonAction} className="admin-season-create">
+            <div className="admin-form-preview__grid admin-form-preview__grid--three">
+              <label className="admin-field">
+                <span>年度</span>
+                <input type="number" name="year" min="2000" max="2100" placeholder="2026" required />
+              </label>
+              <label className="admin-field">
+                <span>表示名</span>
+                <input type="text" name="label" placeholder="2026年度" required />
+              </label>
+              <label className="admin-check">
+                <input type="checkbox" name="isCurrent" />
+                <span>現在の年度にする</span>
+              </label>
+            </div>
+            <button type="submit" className="button" disabled={seasonPending}>
+              {seasonPending ? "保存中..." : "年度を保存"}
+            </button>
+          </form>
+          <div className="admin-item-list admin-item-list--compact">
+            {seasons.length > 0 ? (
+              seasons.map((season) => <SeasonEditor key={season.id} season={season} onDone={setToast} />)
+            ) : (
+              <p className="admin-muted">まだ年度は登録されていません。</p>
+            )}
           </div>
         </div>
-        <div className="admin-item-list">
-          {seasons.length > 0 ? (
-            seasons.map((season) => <SeasonEditor key={season.id} season={season} onDone={setToast} />)
-          ) : (
-            <p className="admin-muted">まだ年度は登録されていません。</p>
-          )}
-        </div>
-      </article>
-
-      <article className="admin-card">
-        <div className="card__header">
-          <div>
-            <p className="section-kicker">Competitions</p>
-            <h3>大会を編集・削除</h3>
-          </div>
-        </div>
-        <div className="admin-item-list">
-          {competitions.length > 0 ? (
-            competitions.map((competition) => (
-              <CompetitionEditor key={competition.id} competition={competition} seasons={seasons} onDone={setToast} />
-            ))
-          ) : (
-            <p className="admin-muted">まだ大会は登録されていません。</p>
-          )}
-        </div>
-      </article>
+      </details>
 
       <article className="admin-card">
         <div className="card__header">
@@ -442,13 +439,13 @@ function SeasonEditor({
   }, [deleteState, onDone]);
 
   return (
-    <div className="admin-item-card">
-      <div className="admin-item-card__summary">
+    <details className="admin-item-card admin-item-card--disclosure">
+      <summary className="admin-item-card__summary">
         <strong>{season.label}</strong>
         <p>
           {season.year} / {season.isCurrent ? "現在年度" : "通常年度"} / 大会 {season.competitionCount}件
         </p>
-      </div>
+      </summary>
       <form action={updateAction} className="admin-form-stack">
         <input type="hidden" name="seasonId" value={season.id} />
         <div className="admin-form-preview__grid admin-form-preview__grid--three">
@@ -480,7 +477,7 @@ function SeasonEditor({
           {!deletable ? <span className="admin-inline-message">大会が紐づく年度は削除できません。</span> : null}
         </div>
       </ConfirmForm>
-    </div>
+    </details>
   );
 }
 
@@ -513,14 +510,14 @@ function CompetitionEditor({
   }, [deleteState, onDone]);
 
   return (
-    <div className="admin-item-card">
-      <div className="admin-item-card__summary">
+    <details className="admin-item-card admin-item-card--disclosure">
+      <summary className="admin-item-card__summary">
         <strong>{competition.seasonLabel} / {competition.name}</strong>
         <p>
           {competitionTypeLabel[competition.competitionType]} / {competitionStatusLabel[competition.status]} / リーグ{" "}
           {competition.divisionCount}件
         </p>
-      </div>
+      </summary>
       <form action={updateAction} className="admin-form-stack">
         <input type="hidden" name="competitionId" value={competition.id} />
         <div className="admin-form-preview__grid">
@@ -594,7 +591,7 @@ function CompetitionEditor({
           ) : null}
         </div>
       </ConfirmForm>
-    </div>
+    </details>
   );
 }
 

@@ -11,6 +11,7 @@ export function ResultImageLightbox({
   alt: string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const isSvg = isSvgImagePath(src);
 
   useEffect(() => {
     if (!isOpen) {
@@ -31,7 +32,7 @@ export function ResultImageLightbox({
     <>
       <button type="button" className="result-image-trigger" onClick={() => setIsOpen(true)}>
         <div className="result-feature__image result-feature__image--large">
-          <Image src={src} alt={alt} fill sizes="(max-width: 960px) 100vw, 60vw" />
+          <Image src={src} alt={alt} fill sizes="(max-width: 960px) 100vw, 60vw" unoptimized={isSvg} />
         </div>
         <span className="result-image-trigger__hint">タップして拡大</span>
       </button>
@@ -47,10 +48,14 @@ export function ResultImageLightbox({
             閉じる
           </button>
           <div className="result-lightbox__inner" onClick={(event) => event.stopPropagation()}>
-            <Image src={src} alt={alt} fill sizes="100vw" className="result-lightbox__image" />
+            <Image src={src} alt={alt} fill sizes="100vw" className="result-lightbox__image" unoptimized={isSvg} />
           </div>
         </div>
       ) : null}
     </>
   );
+}
+
+function isSvgImagePath(path: string) {
+  return path.toLowerCase().split("?")[0].endsWith(".svg");
 }

@@ -7,6 +7,8 @@ import { getAdminScope } from "@/lib/admin-access";
 import { assertImageFileAllowed } from "@/lib/image-file-validation";
 import { prisma } from "@/lib/prisma";
 import { isValidUuid, parseInteger, sanitizePlainText } from "@/lib/security";
+import { getStarTableDivisionById } from "@/lib/standings-star-table-data";
+import { renderStandingsStarTableSvg } from "@/lib/standings-star-table";
 
 export type ResultActionState = {
   status: "idle" | "success" | "error";
@@ -58,6 +60,65 @@ export async function updateDivisionResultImage(
     status: "success",
     message: "結果画像を更新しました。",
   };
+}
+
+export async function useGeneratedStarTableAsResultImage(
+  _prevState: ResultActionState,
+  formData: FormData,
+): Promise<ResultActionState> {
+  const scope = await getAdminScope();
+  const divisionId = sanitizePlainText(String(formData.get("divisionId") ?? ""), 64);
+  const description = sanitizePlainText(String(formData.get("description") ?? ""), 400);
+
+  if (!isValidUuid(divisionId)) {
+    return { status: "error", message: "対象リーグが見つかりませんでした。" };
+  }
+
+  if (!canEditDivision(scope, divisionId)) {
+    return { status: "error", message: "このリーグを編集する権限がありません。" };
+  }
+
+  const division = await getStarTableDivisionById(divisionId);
+
+  if (!division || division.teams.length === 0) {
+    return { status: "error", message: "星取表を作成できるチームがありません。" };
+  }
+
+  try {
+    const svg = renderStandingsStarTableSvg(division);
+    const safeName = `${division.competitionName}-${division.divisionName}-star-table.svg`
+      .replace(/[\\/:*?"<>|]/g, "-")
+      .replace(/[^a-zA-Z0-9._\-\u3040-\u30ff\u3400-\u9fff]/g, "-");
+    const file = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
+    const blob = await put(`results/${Date.now()}-${safeName}`, file, {
+      access: "public",
+      addRandomSuffix: true,
+      contentType: "image/svg+xml;charset=utf-8",
+    });
+
+    await prisma.division.update({
+      where: { id: divisionId },
+      data: {
+        resultImagePath: blob.url,
+        description: description || null,
+        status: PublishStatus.PUBLISHED,
+        lastUpdatedAt: new Date(),
+      },
+    });
+
+    revalidatePath("/admin/results");
+
+    return {
+      status: "success",
+      message: "星取表画像を結果画像として登録しました。",
+    };
+  } catch (error) {
+    console.error("useGeneratedStarTableAsResultImage failed", error);
+    return {
+      status: "error",
+      message: "星取表画像の登録に失敗しました。Blob設定を確認してください。",
+    };
+  }
 }
 
 export async function createMatch(

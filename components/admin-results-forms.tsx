@@ -12,6 +12,7 @@ import {
   type ResultActionState,
   updateDivisionResultImage,
   updateMatch,
+  useGeneratedStarTableAsResultImage,
 } from "@/app/admin/results/actions";
 import { ConfirmForm } from "@/components/confirm-form";
 
@@ -111,19 +112,20 @@ export function AdminResultsForms({
   const [standingState, standingAction, standingPending] = useActionState(replaceStandings, initialState);
   const [addStandingState, addStandingAction, addStandingPending] = useActionState(addStandingRow, initialState);
   const [regenState, regenerateAction, regeneratePending] = useActionState(regenerateStandingsFromMatches, initialState);
+  const [generatedImageState, generatedImageAction, generatedImagePending] = useActionState(useGeneratedStarTableAsResultImage, initialState);
   const [toast, setToast] = useState(initialState);
   const [resultPreview, setResultPreview] = useState<string | null>(null);
   const [resultFileName, setResultFileName] = useState("");
   const [resultUploadError, setResultUploadError] = useState("");
 
   useEffect(() => {
-    const states = [resultState, matchState, standingState, addStandingState, regenState];
+    const states = [resultState, matchState, standingState, addStandingState, regenState, generatedImageState];
     const latest = [...states].reverse().find((state) => state.status !== "idle");
 
     if (latest) {
       setToast(latest);
     }
-  }, [resultState, matchState, standingState, addStandingState, regenState]);
+  }, [resultState, matchState, standingState, addStandingState, regenState, generatedImageState]);
 
   useEffect(() => {
     if (resultPreview) {
@@ -259,6 +261,7 @@ export function AdminResultsForms({
                       alt={`${selectedDivision.label} の結果画像`}
                       fill
                       sizes="(max-width: 768px) 100vw, 640px"
+                      unoptimized={isSvgImagePath(selectedDivision.resultImagePath)}
                     />
                   </div>
                 </div>
@@ -274,6 +277,9 @@ export function AdminResultsForms({
                 <a href={`${standingsImageHref}?download=1`} className="button button--ghost">
                   SVGを保存
                 </a>
+                <button type="submit" formAction={generatedImageAction} className="button" disabled={generatedImagePending}>
+                  {generatedImagePending ? "登録中..." : "この星取表を結果画像にする"}
+                </button>
               </div>
             ) : null}
             <label className="admin-field">
@@ -871,4 +877,8 @@ function UploadField({
 
 function isAllowedImageFile(file: File) {
   return ["image/jpeg", "image/png", "image/webp"].includes(file.type);
+}
+
+function isSvgImagePath(path: string) {
+  return path.toLowerCase().split("?")[0].endsWith(".svg");
 }

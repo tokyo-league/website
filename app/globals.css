@@ -1387,8 +1387,19 @@ button {
 }
 
 .admin-main {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
   padding: 28px;
   background: linear-gradient(180deg, #fbfdff 0%, #f3f7fc 100%);
+}
+
+.admin-main > .admin-heading {
+  margin-bottom: 0;
+}
+
+.admin-main > .admin-columns {
+  gap: 28px;
 }
 
 .admin-heading p {
@@ -1398,7 +1409,7 @@ button {
 
 .admin-stats {
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin: 24px 0;
+  margin: 0;
 }
 
 .admin-card span {

@@ -147,6 +147,7 @@ export function AdminResultsForms({
 
   const assignedTeamIds = new Set(selectedDivision.teams.map((team) => team.id));
   const addableTeams = teams.filter((team) => !assignedTeamIds.has(team.id));
+  const standingsImageHref = `/api/admin/divisions/${selectedDivision.id}/standings-image`;
 
   return (
     <>
@@ -265,6 +266,16 @@ export function AdminResultsForms({
             ) : (
               <p className="admin-muted">このリーグには結果画像がまだ登録されていません。</p>
             )}
+            {selectedDivision.teams.length > 0 ? (
+              <div className="admin-item-card__actions">
+                <a href={standingsImageHref} target="_blank" rel="noreferrer" className="button button--ghost">
+                  星取表画像を開く
+                </a>
+                <a href={`${standingsImageHref}?download=1`} className="button button--ghost">
+                  SVGを保存
+                </a>
+              </div>
+            ) : null}
             <label className="admin-field">
               <span>結果画像</span>
               <UploadField

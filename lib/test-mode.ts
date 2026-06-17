@@ -43,6 +43,8 @@ export const e2eMockCompetition = {
           status: "PLAYED" as const,
           note: "E2Eテスト用のサンプルデータ",
           venue: { name: "会場未設定" },
+          homeTeamId: "team-a1",
+          awayTeamId: "team-a2",
           homeTeam: { name: "クリアージュFCジュニア" },
           awayTeam: { name: "バディサッカークラブ" },
           homeScore: 2,

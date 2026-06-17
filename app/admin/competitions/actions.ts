@@ -185,7 +185,8 @@ export async function createCompetition(
   const startDateText = sanitizePlainText(String(formData.get("startDate") ?? ""), 20);
   const endDateText = sanitizePlainText(String(formData.get("endDate") ?? ""), 20);
   const publishedAtText = sanitizePlainText(String(formData.get("publishedAt") ?? ""), 20);
-  const sortOrder = parseInteger(String(formData.get("sortOrder") ?? "0"));
+  const sortOrderText = sanitizePlainText(String(formData.get("sortOrder") ?? ""), 10);
+  const sortOrderInput = parseInteger(sortOrderText);
   const status = String(formData.get("status") ?? "DRAFT") as CompetitionStatus;
   const startDate = parseDateInput(startDateText, "date");
   const endDate = parseDateInput(endDateText, "date");
@@ -198,7 +199,7 @@ export async function createCompetition(
     !isValidSlug(slug) ||
     !["LEAGUE", "CUP", "OTHER"].includes(type) ||
     !["DRAFT", "PUBLISHED", "CLOSED"].includes(status) ||
-    Number.isNaN(sortOrder ?? Number.NaN) ||
+    isInvalidOptionalSortOrder(sortOrderText, sortOrderInput) ||
     isInvalidDateValue(startDate) ||
     isInvalidDateValue(endDate) ||
     isInvalidDateValue(publishedAt)
@@ -217,6 +218,8 @@ export async function createCompetition(
   }
 
   try {
+    const sortOrder = sortOrderInput ?? (await getNextCompetitionSortOrder(seasonId));
+
     await prisma.competition.create({
       data: {
         seasonId,
@@ -228,7 +231,7 @@ export async function createCompetition(
         startDate,
         endDate,
         publishedAt,
-        sortOrder: sortOrder ?? 0,
+        sortOrder,
         status,
         createdById: scope.admin.id,
         updatedById: scope.admin.id,
@@ -265,7 +268,8 @@ export async function updateCompetition(
   const startDateText = sanitizePlainText(String(formData.get("startDate") ?? ""), 20);
   const endDateText = sanitizePlainText(String(formData.get("endDate") ?? ""), 20);
   const publishedAtText = sanitizePlainText(String(formData.get("publishedAt") ?? ""), 20);
-  const sortOrder = parseInteger(String(formData.get("sortOrder") ?? "0"));
+  const sortOrderText = sanitizePlainText(String(formData.get("sortOrder") ?? ""), 10);
+  const sortOrderInput = parseInteger(sortOrderText);
   const status = String(formData.get("status") ?? "DRAFT") as CompetitionStatus;
   const startDate = parseDateInput(startDateText, "date");
   const endDate = parseDateInput(endDateText, "date");
@@ -279,7 +283,7 @@ export async function updateCompetition(
     !isValidSlug(slug) ||
     !["LEAGUE", "CUP", "OTHER"].includes(type) ||
     !["DRAFT", "PUBLISHED", "CLOSED"].includes(status) ||
-    Number.isNaN(sortOrder ?? Number.NaN) ||
+    isInvalidOptionalSortOrder(sortOrderText, sortOrderInput) ||
     isInvalidDateValue(startDate) ||
     isInvalidDateValue(endDate) ||
     isInvalidDateValue(publishedAt)
@@ -298,6 +302,8 @@ export async function updateCompetition(
   }
 
   try {
+    const sortOrder = sortOrderInput ?? (await getNextCompetitionSortOrder(seasonId));
+
     await prisma.competition.update({
       where: { id: competitionId },
       data: {
@@ -310,7 +316,7 @@ export async function updateCompetition(
         startDate,
         endDate,
         publishedAt,
-        sortOrder: sortOrder ?? 0,
+        sortOrder,
         status,
         updatedById: scope.admin.id,
       },
@@ -689,6 +695,16 @@ async function getNextDivisionSortOrder(competitionId: string, divisionName: str
   return (lastDivision?.sortOrder ?? 0) + 1;
 }
 
+async function getNextCompetitionSortOrder(seasonId: string) {
+  const lastCompetition = await prisma.competition.findFirst({
+    where: { seasonId },
+    orderBy: [{ sortOrder: "desc" }],
+    select: { sortOrder: true },
+  });
+
+  return (lastCompetition?.sortOrder ?? 0) + 1;
+}
+
 async function getNextDivisionTeamSortOrder(divisionId: string) {
   const lastAssignment = await prisma.divisionTeam.findFirst({
     where: { divisionId },
@@ -721,6 +737,10 @@ function parseDateInput(value: string, mode: "date" | "jstDateTime") {
 
 function isInvalidDateValue(value: Date | null) {
   return value instanceof Date && Number.isNaN(value.getTime());
+}
+
+function isInvalidOptionalSortOrder(value: string, parsed: number | null) {
+  return value !== "" && (parsed === null || parsed < 0);
 }
 
 function revalidateCompetitionAdminPaths(competitionId?: string | null) {

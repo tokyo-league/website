@@ -215,7 +215,7 @@ export function AdminCompetitionForms({
             </label>
             <label className="admin-field">
               <span>表示順</span>
-              <input type="number" name="sortOrder" min="0" defaultValue={0} />
+              <input type="number" name="sortOrder" min="0" placeholder="未入力なら自動" />
             </label>
             <label className="admin-field">
               <span>状態</span>

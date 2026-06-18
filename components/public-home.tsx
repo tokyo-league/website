@@ -125,7 +125,7 @@ export async function PublicHome() {
                 <p className="section-kicker">Teams</p>
                 <h2>参加チーム紹介</h2>
               </div>
-              <Link href="/teams" className="button button--ghost home-section-link-button">
+              <Link href="/teams" className="button home-section-link-button">
                 参加チーム一覧
               </Link>
             </div>

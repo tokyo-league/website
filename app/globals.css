@@ -1281,6 +1281,11 @@ button {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.teams-list-section {
+  display: grid;
+  gap: 20px;
+}
+
 .team-summary {
   display: flex;
   gap: 10px;
@@ -2498,6 +2503,10 @@ button {
 
   .home-intro__links .button:first-child {
     grid-column: 1 / -1;
+  }
+
+  .page-intro--teams .page-intro__actions {
+    justify-content: center;
   }
 
   .home-about-link-card {

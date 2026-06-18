@@ -26,6 +26,15 @@ test("公開ダウンロードページが表示できる", async ({ page }) => 
   await expect(page.getByRole("heading", { name: "資料ダウンロード" })).toBeVisible();
 });
 
+test("参加チームページで主要導線とチーム一覧が表示できる", async ({ page }) => {
+  await page.goto("/teams");
+
+  await expect(page.getByRole("heading", { level: 1, name: "参加チーム" })).toBeVisible();
+  await expect(page.getByRole("main").getByRole("link", { name: "試合情報へ" })).toBeVisible();
+  await expect(page.getByRole("main").getByRole("link", { name: "お問い合わせ" })).toBeVisible();
+  await expect(page.getByText(/掲載チーム \d+/)).toBeVisible();
+});
+
 test("試合情報一覧からリーグ詳細まで辿れる", async ({ page }) => {
   await page.goto("/competitions");
 

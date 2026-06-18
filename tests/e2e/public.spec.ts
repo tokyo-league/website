@@ -6,6 +6,12 @@ test("公開トップで主要導線とニュースモーダルが開く", async
   await expect(page.getByRole("heading", { level: 1, name: "第103回 東京リーグ" })).toBeVisible();
   await expect(page.getByRole("main").getByRole("link", { name: "試合情報", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "最新ニュース" })).toBeVisible();
+  await expect(page.getByText("最新の試合結果や各チームの勝敗を確認できます。")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Aリーグを見る 更新 03.22" })).toHaveAttribute(
+    "href",
+    "/competitions/tokyo-league-103/a-league",
+  );
+  await expect(page.getByRole("link", { name: "参加チーム一覧" })).toBeVisible();
 
   const detailButton = page.getByRole("button", { name: "詳細を見る" }).first();
   await detailButton.click();

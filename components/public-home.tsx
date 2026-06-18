@@ -94,12 +94,13 @@ export async function PublicHome() {
               </div>
               <div className="home-results-feature__body">
                 <p className="home-results-feature__eyebrow">開催中のリーグ結果</p>
-                <p className="home-results-feature__title">リーグ別の結果画像と詳細ページを確認できます。</p>
-                <div className="mini-meta">
+                <p className="home-results-feature__title">最新の試合結果や各チームの勝敗を確認できます。</p>
+                <div className="home-results-division-links" aria-label="リーグ別の試合結果">
                   {divisionCards.map((division) => (
-                    <span key={division.name}>
-                      {division.name} / 更新 {division.updatedAt}
-                    </span>
+                    <Link key={division.name} href={division.href} className="home-results-division-link">
+                      <strong>{division.name}を見る</strong>
+                      <span>更新 {division.updatedAt}</span>
+                    </Link>
                   ))}
                 </div>
                 <div className="button-row home-results-feature__actions">
@@ -124,7 +125,9 @@ export async function PublicHome() {
                 <p className="section-kicker">Teams</p>
                 <h2>参加チーム紹介</h2>
               </div>
-              <Link href="/teams">参加チーム一覧</Link>
+              <Link href="/teams" className="button button--ghost home-section-link-button">
+                参加チーム一覧
+              </Link>
             </div>
             {featuredTeams.length > 0 ? (
               <div className="home-team-grid">

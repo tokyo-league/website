@@ -42,9 +42,9 @@ export const newsItems = [
 ];
 
 export const divisionCards = [
-  { name: "Aリーグ", teams: "8チーム", updatedAt: "03.22" },
-  { name: "Bリーグ", teams: "8チーム", updatedAt: "03.20" },
-  { name: "Cリーグ", teams: "7チーム", updatedAt: "03.18" },
+  { name: "Aリーグ", teams: "8チーム", updatedAt: "03.22", href: "/competitions/tokyo-league-103/a-league" },
+  { name: "Bリーグ", teams: "8チーム", updatedAt: "03.20", href: "/competitions/tokyo-league-103/b-league" },
+  { name: "Cリーグ", teams: "7チーム", updatedAt: "03.18", href: "/competitions/tokyo-league-103/c-league" },
 ];
 
 export const standings = [

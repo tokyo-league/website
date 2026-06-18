@@ -2505,6 +2505,73 @@ button {
     grid-column: 1 / -1;
   }
 
+  .about-board {
+    gap: 10px;
+    border-top: 0;
+  }
+
+  .about-board__row--head {
+    display: none;
+  }
+
+  .about-board__row:not(.about-board__row--head) {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      "role name"
+      "duty duty";
+    gap: 10px 14px;
+    align-items: center;
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--surface-soft);
+  }
+
+  .about-board__role {
+    grid-area: role;
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    min-height: 28px;
+    padding: 2px 10px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .about-board__name {
+    grid-area: name;
+    min-width: 0;
+    font-size: 16px;
+  }
+
+  .about-board__duty {
+    grid-area: duty;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--line);
+    font-size: 14px;
+  }
+
+  .about-board__duty::before {
+    content: "担当";
+    flex-shrink: 0;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+  }
+
+  .about-board__duty.is-empty {
+    display: none;
+  }
+
   .page-intro--teams .page-intro__actions {
     justify-content: center;
   }

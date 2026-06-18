@@ -106,9 +106,11 @@ export default function AboutPage() {
                   </div>
                   {boardMembers.map((member) => (
                     <div key={`${member.role}-${member.name}`} className="about-board__row">
-                      <span>{member.role}</span>
-                      <strong>{member.name}</strong>
-                      <span>{member.duty || "-"}</span>
+                      <span className="about-board__role">{member.role}</span>
+                      <strong className="about-board__name">{member.name}</strong>
+                      <span className={`about-board__duty${member.duty ? "" : " is-empty"}`}>
+                        {member.duty || "-"}
+                      </span>
                     </div>
                   ))}
                 </div>

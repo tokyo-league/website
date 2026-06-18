@@ -492,7 +492,7 @@ function escapeHtml(value) {
 
 function markerHtml(markers) {
   return markers
-    .map(([label, left, top]) => `<span class="marker" style="left:${left}%;top:${top}%">${label}</span>`)
+    .map(([, left, top], index) => `<span class="marker" style="left:${left}%;top:${top}%">${index + 1}</span>`)
     .join("");
 }
 

@@ -5,6 +5,7 @@ import { ResultImageLightbox } from "@/components/result-image-lightbox";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { normalizeDivisionSlug } from "@/lib/league-slug";
+import { getPublishedHistoricalMatches, getPublishedHistoricalStandings } from "@/lib/historical-results";
 import { prisma } from "@/lib/prisma";
 import { e2eMockCompetition, isE2ETestMode } from "@/lib/test-mode";
 
@@ -71,6 +72,8 @@ export default async function DivisionDetailPage({
 
   const resultImageSrc = division.resultImagePath;
   const logoTeams = division.teams.filter((assignment) => assignment.team.logoPath).slice(0, 8);
+  const publishedStandings = getPublishedHistoricalStandings(resultImageSrc, division.standings);
+  const publishedMatches = getPublishedHistoricalMatches(resultImageSrc, division.matches);
 
   return (
     <>
@@ -164,7 +167,7 @@ export default async function DivisionDetailPage({
                   <h2>順位表</h2>
                 </div>
               </div>
-              {division.standings.length > 0 ? (
+              {publishedStandings.length > 0 ? (
                 <div className="standing-table">
                   <div className="standing-table__row standing-table__row--head">
                     <span>順位</span>
@@ -173,7 +176,7 @@ export default async function DivisionDetailPage({
                     <span>勝点</span>
                     <span>得失点</span>
                   </div>
-                  {division.standings.map((standing) => (
+                  {publishedStandings.map((standing) => (
                     <div key={standing.id} className="standing-table__row">
                       <strong>{standing.rank}</strong>
                       <span>{standing.team.name}</span>
@@ -184,7 +187,7 @@ export default async function DivisionDetailPage({
                   ))}
                 </div>
               ) : (
-                <p className="admin-muted">順位表データは準備中です。現時点では結果画像を掲載しています。</p>
+                <p className="admin-muted">目視照合済みの順位表データは準備中です。公式結果は上の結果画像をご確認ください。</p>
               )}
             </article>
 
@@ -195,9 +198,9 @@ export default async function DivisionDetailPage({
                   <h2>試合一覧</h2>
                 </div>
               </div>
-              {division.matches.length > 0 ? (
+              {publishedMatches.length > 0 ? (
                 <div className="list-stack">
-                  {division.matches.map((match) => (
+                  {publishedMatches.map((match) => (
                     <article key={match.id} className="list-row division-match-row">
                       <p className="list-row__meta">
                         <span>{formatDate(match.matchDate)}</span>
@@ -218,7 +221,7 @@ export default async function DivisionDetailPage({
                   ))}
                 </div>
               ) : (
-                <p className="admin-muted">個別スコア入力はまだありません。過去大会は結果画像を正本として扱います。</p>
+                <p className="admin-muted">目視照合済みの個別スコアは準備中です。過去大会は結果画像を正本として扱います。</p>
               )}
             </article>
           </div>

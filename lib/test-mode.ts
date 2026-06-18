@@ -33,15 +33,15 @@ export const e2eMockCompetition = {
         { id: "team-a3", sortOrder: 3, team: { id: "team-a3", name: "暁星アストラ・ジュニア", region: "千代田区", logoPath: "/site-assets/teams/logos/retouched/suginami-cedars-logo-512.png" } },
       ],
       standings: [
-        { id: "standing-1", rank: 1, played: 10, points: 30, goalDifference: 20, team: { name: "クリアージュFCジュニア" } },
-        { id: "standing-2", rank: 2, played: 10, points: 22, goalDifference: 11, team: { name: "バディサッカークラブ" } },
+        { id: "standing-1", rank: 1, played: 10, points: 30, goalDifference: 20, note: "公式結果画像目視照合済み" as string | null, team: { name: "クリアージュFCジュニア" } },
+        { id: "standing-2", rank: 2, played: 10, points: 22, goalDifference: 11, note: "公式結果画像目視照合済み" as string | null, team: { name: "バディサッカークラブ" } },
       ],
       matches: [
         {
           id: "match-1",
           matchDate: new Date("2026-04-01T00:00:00+09:00"),
           status: "PLAYED" as const,
-          note: "E2Eテスト用のサンプルデータ",
+          note: "E2Eテスト用のサンプルデータ" as string | null,
           venue: { name: "会場未設定" },
           homeTeamId: "team-a1",
           awayTeamId: "team-a2",

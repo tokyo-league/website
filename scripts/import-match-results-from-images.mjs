@@ -154,17 +154,9 @@ for (const entry of results) {
     });
   }
 
-  const normalizedStandings = [...entry.result.standings]
-    .sort((left, right) => {
-      if (right.points !== left.points) return right.points - left.points;
-      if (right.goalDifference !== left.goalDifference) return right.goalDifference - left.goalDifference;
-      if (right.goalsFor !== left.goalsFor) return right.goalsFor - left.goalsFor;
-      return left.teamName.localeCompare(right.teamName, "ja");
-    })
-    .map((standing, index) => ({
-      ...standing,
-      rank: index + 1,
-    }));
+  // 公式結果画像に記載された順位を正本とする。OCR値から順位を再計算しない。
+  // 取り込み直後の行は目視照合が済むまで公開画面に表示しない。
+  const normalizedStandings = [...entry.result.standings].sort((left, right) => left.rank - right.rank);
 
   for (const standing of normalizedStandings) {
     const team = await findOrCreateTeam(standing.teamName);
@@ -182,6 +174,7 @@ for (const entry of results) {
         goalsAgainst: standing.goalsAgainst,
         goalDifference: standing.goalDifference,
         points: standing.points,
+        note: "過去結果画像OCR未照合",
       },
     });
   }

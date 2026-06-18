@@ -1971,10 +1971,12 @@ button {
   background: #fbfcfe;
 }
 
-.admin-standing-summary__team {
+.admin-card .admin-standing-summary__team {
+  margin-top: 0;
   font-size: 14px;
   line-height: 1.35;
   font-weight: 600;
+  letter-spacing: 0;
 }
 
 .admin-asset-preview {

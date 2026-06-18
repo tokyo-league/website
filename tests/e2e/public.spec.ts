@@ -24,6 +24,15 @@ test("公開ダウンロードページが表示できる", async ({ page }) => 
   await page.goto("/downloads");
 
   await expect(page.getByRole("heading", { name: "資料ダウンロード" })).toBeVisible();
+  await expect(page.locator(".download-list-item").first()).toBeVisible();
+});
+
+test("ニュースページでニュースカードが表示できる", async ({ page }) => {
+  await page.goto("/news");
+
+  await expect(page.getByRole("heading", { level: 1, name: "ニュース" })).toBeVisible();
+  await expect(page.locator(".news-index .news-list-item").first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: "関連資料" })).toHaveCount(0);
 });
 
 test("東京リーグ紹介ページで理事会情報が表示できる", async ({ page }) => {

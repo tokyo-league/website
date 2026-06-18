@@ -1,5 +1,4 @@
 import Image from "next/image";
-import Link from "next/link";
 import { PublishStatus } from "@prisma/client";
 import { NewsModalList } from "@/components/news-modal-list";
 import { SiteFooter } from "@/components/site-footer";
@@ -7,7 +6,7 @@ import { SiteHeader } from "@/components/site-header";
 import { resolveAssetUrl } from "@/lib/asset-url";
 import { buildNewsExcerpt } from "@/lib/news-text";
 import { prisma } from "@/lib/prisma";
-import { downloadItems, newsItems as fallbackNewsItems, siteAssets } from "@/lib/site-data";
+import { newsItems as fallbackNewsItems, siteAssets } from "@/lib/site-data";
 
 export const dynamic = "force-dynamic";
 
@@ -17,8 +16,8 @@ export default async function NewsPage() {
   return (
     <>
       <SiteHeader />
-      <main className="page-main">
-        <section className="page-intro page-intro--feature">
+      <main className="page-main page-main--news">
+        <section className="page-intro page-intro--feature page-intro--news">
           <div className="container page-intro__inner">
             <div>
               <p className="section-kicker">News</p>
@@ -35,31 +34,12 @@ export default async function NewsPage() {
         </section>
 
         <section className="section-block">
-          <div className="container news-layout">
-            <div className="news-layout__main">
-              <div className="filter-row">
-                <span className="filter-pill is-active">すべて</span>
-                <span className="filter-pill">お知らせ</span>
-              </div>
-              <NewsModalList items={posts} />
+          <div className="container narrow news-index">
+            <div className="filter-row">
+              <span className="filter-pill is-active">すべて</span>
+              <span className="filter-pill">お知らせ</span>
             </div>
-
-            <aside className="news-layout__side">
-              <article className="card">
-                <div className="card__header">
-                  <div>
-                    <p className="section-kicker">Documents</p>
-                    <h2>関連資料</h2>
-                  </div>
-                  <Link href="/downloads">資料一覧へ</Link>
-                </div>
-                <div className="download-shortcuts">
-                  {downloadItems.map((item) => (
-                    <span key={item.title}>{item.title}</span>
-                  ))}
-                </div>
-              </article>
-            </aside>
+            <NewsModalList items={posts} />
           </div>
         </section>
       </main>

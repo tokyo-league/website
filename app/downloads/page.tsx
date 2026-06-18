@@ -30,7 +30,7 @@ export default async function DownloadsPage() {
   return (
     <>
       <SiteHeader />
-      <main className="page-main">
+      <main className="page-main page-main--downloads">
         <section className="page-intro page-intro--compact">
           <div className="container narrow">
             <p className="section-kicker">Downloads</p>
@@ -41,10 +41,10 @@ export default async function DownloadsPage() {
 
         <section className="section-block">
           <div className="container narrow">
-            <div className="list-stack">
+            <div className="list-stack download-list">
               {items.length > 0 ? (
                 items.map((item) => (
-                  <article key={item.id} className="list-row list-row--large">
+                  <article key={item.id} className="list-row list-row--large download-list-item">
                     <p className="list-row__meta">
                       <span>{item.category}</span>
                       <span>{item.updatedAt}</span>
@@ -67,7 +67,7 @@ export default async function DownloadsPage() {
                   </article>
                 ))
               ) : (
-                <article className="list-row list-row--large">
+                <article className="list-row list-row--large download-list-item">
                   <h2>公開資料は準備中です</h2>
                   <p>公開設定された資料が表示されます。</p>
                 </article>

@@ -15,6 +15,7 @@ import {
   useGeneratedStarTableAsResultImage,
 } from "@/app/admin/results/actions";
 import { ConfirmForm } from "@/components/confirm-form";
+import { IMAGE_UPLOAD_MAX_BYTES, formatUploadLimit } from "@/lib/upload-limits";
 
 const initialState: ResultActionState = {
   status: "idle",
@@ -288,7 +289,7 @@ export function AdminResultsForms({
                 name="resultImageFile"
                 fileName={resultFileName}
                 label="結果画像を選択"
-                hint="画像をアップロードすると現在の結果画像を置き換えます。"
+                hint={`JPG / PNG / WebP、${formatUploadLimit(IMAGE_UPLOAD_MAX_BYTES)}以下。画像をアップロードすると現在の結果画像を置き換えます。`}
                 errorMessage={resultUploadError}
                 onFileChange={(file) => {
                   if (resultPreview) {
@@ -309,8 +310,8 @@ export function AdminResultsForms({
                     return;
                   }
 
-                  if (file.size > 10 * 1024 * 1024) {
-                    setResultUploadError("結果画像は 10MB 以下にしてください。");
+                  if (file.size > IMAGE_UPLOAD_MAX_BYTES) {
+                    setResultUploadError(`結果画像は ${formatUploadLimit(IMAGE_UPLOAD_MAX_BYTES)} 以下にしてください。`);
                     setResultFileName("");
                     setResultPreview(null);
                     return;

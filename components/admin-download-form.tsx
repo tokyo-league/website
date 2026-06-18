@@ -7,6 +7,7 @@ import {
   updateDownload,
   type DownloadActionState,
 } from "@/app/admin/downloads/actions";
+import { DOWNLOAD_UPLOAD_MAX_BYTES, formatUploadLimit } from "@/lib/upload-limits";
 
 const initialState: DownloadActionState = {
   status: "idle",
@@ -34,6 +35,7 @@ export function AdminDownloadForm({ mode = "create", initialValues }: AdminDownl
   const [toast, setToast] = useState(initialState);
   const inputId = useId();
   const [fileName, setFileName] = useState("");
+  const [uploadError, setUploadError] = useState("");
 
   useEffect(() => {
     if (state.status !== "idle") {
@@ -93,7 +95,18 @@ export function AdminDownloadForm({ mode = "create", initialValues }: AdminDownl
                 name="file"
                 accept=".pdf,.xlsx,.xls,.doc,.docx"
                 className="upload-field__input"
-                onChange={(event) => setFileName(event.target.files?.[0]?.name ?? "")}
+                onChange={(event) => {
+                  const file = event.target.files?.[0] ?? null;
+
+                  if (file && file.size > DOWNLOAD_UPLOAD_MAX_BYTES) {
+                    setFileName("");
+                    setUploadError(`資料ファイルは ${formatUploadLimit(DOWNLOAD_UPLOAD_MAX_BYTES)} 以下にしてください。`);
+                    return;
+                  }
+
+                  setUploadError("");
+                  setFileName(file?.name ?? "");
+                }}
                 required={mode === "create"}
               />
               <label htmlFor={inputId} className="upload-field__label">
@@ -102,6 +115,10 @@ export function AdminDownloadForm({ mode = "create", initialValues }: AdminDownl
                   {fileName || currentFileLabel || "PDF / Excel / Word をアップロード"}
                 </span>
               </label>
+              <small className="admin-field__help">
+                PDF / Excel / Word、{formatUploadLimit(DOWNLOAD_UPLOAD_MAX_BYTES)}以下。
+              </small>
+              {uploadError ? <small className="admin-field__error">{uploadError}</small> : null}
             </div>
             {mode === "edit" && initialValues?.assetUrl ? (
               <a

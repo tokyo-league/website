@@ -8,6 +8,7 @@ import { assertImageFileAllowed } from "@/lib/image-file-validation";
 import { prisma } from "@/lib/prisma";
 import { ensureSlug, isValidUuid, sanitizeMultilineText, sanitizePlainText } from "@/lib/security";
 import { isE2ETestMode } from "@/lib/test-mode";
+import { IMAGE_UPLOAD_MAX_BYTES } from "@/lib/upload-limits";
 
 export type NewsActionState = {
   status: "idle" | "success" | "error";
@@ -232,7 +233,7 @@ async function uploadEyecatchAsset(fileValue: FormDataEntryValue | null, userId:
     buffer: fileBuffer,
     rules: {
       label: "アイキャッチ画像",
-      maxSizeBytes: 10 * 1024 * 1024,
+      maxSizeBytes: IMAGE_UPLOAD_MAX_BYTES,
     },
   });
 

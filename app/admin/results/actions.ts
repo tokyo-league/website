@@ -9,6 +9,7 @@ import { prisma } from "@/lib/prisma";
 import { isValidUuid, parseInteger, sanitizePlainText } from "@/lib/security";
 import { getStarTableDivisionById } from "@/lib/standings-star-table-data";
 import { renderStandingsStarTableSvg } from "@/lib/standings-star-table";
+import { IMAGE_UPLOAD_MAX_BYTES } from "@/lib/upload-limits";
 
 export type ResultActionState = {
   status: "idle" | "success" | "error";
@@ -758,7 +759,7 @@ async function uploadResultImage(fileValue: FormDataEntryValue | null) {
     buffer: fileBuffer,
     rules: {
       label: "結果画像",
-      maxSizeBytes: 10 * 1024 * 1024,
+      maxSizeBytes: IMAGE_UPLOAD_MAX_BYTES,
     },
   });
 

@@ -8,6 +8,7 @@ import { requireOwner } from "@/lib/admin-access";
 import { assertDownloadFileAllowed } from "@/lib/download-file-validation";
 import { prisma } from "@/lib/prisma";
 import { ensureSlug, sanitizePlainText } from "@/lib/security";
+import { DOWNLOAD_UPLOAD_MAX_BYTES, formatUploadLimit } from "@/lib/upload-limits";
 
 export type DownloadActionState = {
   status: "idle" | "success" | "error";
@@ -226,8 +227,8 @@ async function uploadDownloadAsset(fileValue: FormDataEntryValue | null, userId:
     return null;
   }
 
-  if (fileValue.size > 20 * 1024 * 1024) {
-    throw new Error("資料ファイルは 20MB 以下にしてください。");
+  if (fileValue.size > DOWNLOAD_UPLOAD_MAX_BYTES) {
+    throw new Error(`資料ファイルは ${formatUploadLimit(DOWNLOAD_UPLOAD_MAX_BYTES)} 以下にしてください。`);
   }
 
   const ext = path.extname(fileValue.name).toLowerCase();

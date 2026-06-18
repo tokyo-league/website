@@ -8,6 +8,7 @@ import {
   type NewsActionState,
 } from "@/app/admin/news/actions";
 import { formatDateTimeLocal } from "@/lib/news-datetime";
+import { IMAGE_UPLOAD_MAX_BYTES, formatUploadLimit } from "@/lib/upload-limits";
 
 const initialState: NewsActionState = {
   status: "idle",
@@ -35,6 +36,7 @@ export function AdminNewsForm({
   const [toast, setToast] = useState(initialState);
   const inputId = useId();
   const [fileName, setFileName] = useState("");
+  const [uploadError, setUploadError] = useState("");
 
   useEffect(() => {
     if (state.status !== "idle") {
@@ -84,12 +86,27 @@ export function AdminNewsForm({
                 name="eyecatchFile"
                 accept=".jpg,.jpeg,.png,.webp"
                 className="upload-field__input"
-                onChange={(event) => setFileName(event.target.files?.[0]?.name ?? "")}
+                onChange={(event) => {
+                  const file = event.target.files?.[0] ?? null;
+
+                  if (file && file.size > IMAGE_UPLOAD_MAX_BYTES) {
+                    setFileName("");
+                    setUploadError(`アイキャッチ画像は ${formatUploadLimit(IMAGE_UPLOAD_MAX_BYTES)} 以下にしてください。`);
+                    return;
+                  }
+
+                  setUploadError("");
+                  setFileName(file?.name ?? "");
+                }}
               />
               <label htmlFor={inputId} className="upload-field__label">
                 <span className="upload-field__button">画像を選択</span>
-                <span className="upload-field__meta">{fileName || "任意。JPG / PNG / WebP など"}</span>
+                <span className="upload-field__meta">{fileName || "任意。JPG / PNG / WebP"}</span>
               </label>
+              <small className="admin-field__help">
+                JPG / PNG / WebP、{formatUploadLimit(IMAGE_UPLOAD_MAX_BYTES)}以下。
+              </small>
+              {uploadError ? <small className="admin-field__error">{uploadError}</small> : null}
             </div>
           </label>
           <div className="admin-form-preview__grid">

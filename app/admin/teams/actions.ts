@@ -9,6 +9,7 @@ import { prisma } from "@/lib/prisma";
 import { ensureSlug, isValidUuid, sanitizePlainText } from "@/lib/security";
 import { isE2ETestMode } from "@/lib/test-mode";
 import { normalizeOptionalAssetPath, normalizeOptionalHttpUrl } from "@/lib/url-validation";
+import { IMAGE_UPLOAD_MAX_BYTES } from "@/lib/upload-limits";
 
 export type TeamActionState = {
   status: "idle" | "success" | "error";
@@ -315,16 +316,20 @@ async function uploadTeamImage(fileValue: FormDataEntryValue | null, folder: "lo
 
   const rules = IMAGE_RULES[folder];
   const fileBuffer = Buffer.from(await fileValue.arrayBuffer());
-  assertImageFileAllowed({
-    filename: fileValue.name,
-    mimeType: fileValue.type,
-    size: fileValue.size,
-    buffer: fileBuffer,
-    rules: {
-      ...rules,
-      maxSizeBytes: 5 * 1024 * 1024,
-    },
-  });
+  try {
+    assertImageFileAllowed({
+      filename: fileValue.name,
+      mimeType: fileValue.type,
+      size: fileValue.size,
+      buffer: fileBuffer,
+      rules: {
+        ...rules,
+        maxSizeBytes: IMAGE_UPLOAD_MAX_BYTES,
+      },
+    });
+  } catch (error) {
+    throw new TeamInputError(error instanceof Error ? error.message : `${rules.label}を確認してください。`);
+  }
 
   const safeName = sanitizePlainText(fileValue.name, 120).replace(/[^a-zA-Z0-9._-]/g, "-");
   const blob = await put(`teams/${folder}/${Date.now()}-${safeName}`, fileValue, {

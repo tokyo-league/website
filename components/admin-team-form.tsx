@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useActionState, useEffect, useId, useState } from "react";
 import { createTeam, type TeamActionState, updateTeam } from "@/app/admin/teams/actions";
+import { IMAGE_UPLOAD_MAX_BYTES, formatUploadLimit } from "@/lib/upload-limits";
 
 const initialTeamActionState: TeamActionState = {
   status: "idle",
@@ -125,7 +126,7 @@ export function AdminTeamForm({
               name="logoFile"
               fileName={logoFileName}
               label="ロゴ画像を選択"
-              hint={mode === "edit" ? "アップロードすると現在のロゴ画像を置き換えます。" : "PNG / JPG / WebP などの画像をアップロードできます。"}
+              hint={`JPG / PNG / WebP、${formatUploadLimit(IMAGE_UPLOAD_MAX_BYTES)}以下、240x240px以上。${mode === "edit" ? "アップロードすると現在のロゴ画像を置き換えます。" : ""}`}
               errorMessage={logoUploadError}
               onFileChange={async (file) => {
                 const result = await validateImageFile(file, "logos");
@@ -164,7 +165,7 @@ export function AdminTeamForm({
               name="photoFile"
               fileName={photoFileName}
               label="チーム画像を選択"
-              hint={mode === "edit" ? "アップロードすると現在のチーム画像を置き換えます。" : "横長の画像だと一覧で見やすく表示されます。"}
+              hint={`JPG / PNG / WebP、${formatUploadLimit(IMAGE_UPLOAD_MAX_BYTES)}以下、1200x675px以上の横長画像。${mode === "edit" ? "アップロードすると現在のチーム画像を置き換えます。" : ""}`}
               errorMessage={photoUploadError}
               onFileChange={async (file) => {
                 const result = await validateImageFile(file, "photos");
@@ -323,8 +324,11 @@ async function validateImageFile(file: File | null, kind: "logos" | "photos") {
     return { status: "error" as const, message: "JPG / PNG / WebP のみ選択できます。" };
   }
 
-  if (file.size > 5 * 1024 * 1024) {
-    return { status: "error" as const, message: "画像サイズは 5MB 以下にしてください。" };
+  if (file.size > IMAGE_UPLOAD_MAX_BYTES) {
+    return {
+      status: "error" as const,
+      message: `${CLIENT_IMAGE_RULES[kind].label}は ${formatUploadLimit(IMAGE_UPLOAD_MAX_BYTES)} 以下にしてください。`,
+    };
   }
 
   const rules = CLIENT_IMAGE_RULES[kind];

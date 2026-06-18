@@ -402,8 +402,8 @@ const sections = [
       "「チームを保存」または「更新を保存」を押します。",
     ],
     notes: [
-      "ロゴ画像はJPG / PNG / WebPのみ、240x240px以上、5MB以下です。",
-      "チーム画像はJPG / PNG / WebPのみ、1200x675px以上、横長、5MB以下です。",
+      "ロゴ画像はJPG / PNG / WebPのみ、240x240px以上、10MB以下です。",
+      "チーム画像はJPG / PNG / WebPのみ、1200x675px以上、横長、10MB以下です。",
       "画像アップロード時はMIME typeと画像内容を確認します。",
       "公式サイトURLは http / https のURLのみ登録できます。",
       "Instagram URLはURL、@アカウント名、アカウント名のみの入力に対応します。",

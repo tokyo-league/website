@@ -120,3 +120,35 @@ test("チーム作成フローが完了できる", async ({ page }) => {
 
   await expect(page.getByText(`${teamName} を追加しました。`)).toBeVisible();
 });
+
+test("アップロード欄に容量上限を表示し、超過時は具体的なエラーを表示する", async ({ page }) => {
+  const oversizedImage = {
+    name: "oversized.png",
+    mimeType: "image/png",
+    buffer: Buffer.alloc(10 * 1024 * 1024 + 1),
+  };
+
+  await page.goto("/admin/results");
+  await expect(page.getByText("JPG / PNG / WebP、10MB以下。", { exact: false })).toBeVisible();
+  await page.locator('input[name="resultImageFile"]').setInputFiles(oversizedImage);
+  await expect(page.getByText("結果画像は 10MB 以下にしてください。")).toBeVisible();
+
+  await page.goto("/admin/news/new");
+  await expect(page.getByText("JPG / PNG / WebP、10MB以下。", { exact: true })).toBeVisible();
+  await page.locator('input[name="eyecatchFile"]').setInputFiles(oversizedImage);
+  await expect(page.getByText("アイキャッチ画像は 10MB 以下にしてください。")).toBeVisible();
+
+  await page.goto("/admin/teams/new");
+  await expect(page.getByText(/JPG \/ PNG \/ WebP、10MB以下、240x240px以上/)).toBeVisible();
+  await page.locator('input[name="logoFile"]').setInputFiles(oversizedImage);
+  await expect(page.getByText("ロゴ画像は 10MB 以下にしてください。")).toBeVisible();
+
+  await page.goto("/admin/downloads");
+  await expect(page.getByText("PDF / Excel / Word、20MB以下。", { exact: true })).toBeVisible();
+  await page.locator('input[name="file"]').setInputFiles({
+    name: "oversized.pdf",
+    mimeType: "application/pdf",
+    buffer: Buffer.alloc(20 * 1024 * 1024 + 1),
+  });
+  await expect(page.getByText("資料ファイルは 20MB 以下にしてください。")).toBeVisible();
+});

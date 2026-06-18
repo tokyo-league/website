@@ -1956,27 +1956,65 @@ button {
 }
 
 .admin-standings-summary {
-  display: grid;
-  gap: 10px;
+  overflow-x: auto;
+  border: 1px solid rgba(17, 24, 39, 0.1);
+  border-radius: 14px;
 }
 
-.admin-standings-summary__row {
-  display: grid;
-  grid-template-columns: 64px minmax(180px, 1.6fr) repeat(3, minmax(90px, 1fr));
-  gap: 12px;
-  align-items: center;
-  padding: 14px 16px;
-  border: 1px solid rgba(17, 24, 39, 0.08);
-  border-radius: 18px;
+.admin-standings-summary__table {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: collapse;
+  background: white;
+}
+
+.admin-standings-summary__table th,
+.admin-standings-summary__table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(17, 24, 39, 0.08);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.admin-standings-summary__table th {
+  background: #f7f8fa;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.admin-standings-summary__table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.admin-standings-summary__table tbody tr:hover {
   background: #fbfcfe;
 }
 
 .admin-card .admin-standing-summary__team {
   margin-top: 0;
-  font-size: 14px;
-  line-height: 1.35;
-  font-weight: 600;
+  font-size: 16px;
+  line-height: 1.4;
+  font-weight: 700;
   letter-spacing: 0;
+}
+
+.admin-standings-summary__rank,
+.admin-standings-summary__points {
+  font-weight: 700;
+}
+
+.admin-standings-summary__action {
+  width: 1%;
+  text-align: right !important;
+  white-space: nowrap;
+}
+
+.admin-standings-summary__delete {
+  min-height: 36px;
+  padding: 7px 12px;
+  font-size: 13px;
 }
 
 .admin-asset-preview {

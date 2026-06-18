@@ -485,14 +485,28 @@ export function AdminResultsForms({
           <p className="admin-muted">まだ順位表は登録されていません。</p>
         ) : (
           <div className="admin-standings-summary">
-            {selectedDivision.standings.map((standing) => (
-              <ExistingStandingEditor
-                key={standing.id}
-                divisionId={selectedDivision.id}
-                standing={standing}
-                onToast={setToast}
-              />
-            ))}
+            <table className="admin-standings-summary__table">
+              <thead>
+                <tr>
+                  <th scope="col">順位</th>
+                  <th scope="col">チーム</th>
+                  <th scope="col">試合</th>
+                  <th scope="col">得失点差</th>
+                  <th scope="col">勝点</th>
+                  <th scope="col">操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                {selectedDivision.standings.map((standing) => (
+                  <ExistingStandingEditor
+                    key={standing.id}
+                    divisionId={selectedDivision.id}
+                    standing={standing}
+                    onToast={setToast}
+                  />
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </article>
@@ -791,24 +805,28 @@ function ExistingStandingEditor({
   }, [deleteState, onToast]);
 
   return (
-    <div className="admin-item-card">
-      <div className="admin-item-card__summary">
-        <strong className="admin-standing-summary__team">
-          {standing.rank}位 {standing.teamName}
-        </strong>
-        <p>
-          {standing.points} pt / {standing.played}試合 / 得失点差{" "}
-          {standing.goalDifference >= 0 ? `+${standing.goalDifference}` : standing.goalDifference}
-        </p>
-      </div>
-      <ConfirmForm action={deleteAction} message="この順位表の行を削除します。よろしいですか？">
-        <input type="hidden" name="standingId" value={standing.id} />
-        <input type="hidden" name="divisionId" value={divisionId} />
-        <button type="submit" className="button button--ghost" disabled={deletePending}>
-          {deletePending ? "削除中..." : "削除"}
-        </button>
-      </ConfirmForm>
-    </div>
+    <tr>
+      <td className="admin-standings-summary__rank">{standing.rank}</td>
+      <td>
+        <strong className="admin-standing-summary__team">{standing.teamName}</strong>
+      </td>
+      <td>{standing.played}</td>
+      <td>{standing.goalDifference >= 0 ? `+${standing.goalDifference}` : standing.goalDifference}</td>
+      <td className="admin-standings-summary__points">{standing.points}</td>
+      <td className="admin-standings-summary__action">
+        <ConfirmForm action={deleteAction} message="この順位表の行を削除します。よろしいですか？">
+          <input type="hidden" name="standingId" value={standing.id} />
+          <input type="hidden" name="divisionId" value={divisionId} />
+          <button
+            type="submit"
+            className="button button--ghost admin-standings-summary__delete"
+            disabled={deletePending}
+          >
+            {deletePending ? "削除中..." : "削除"}
+          </button>
+        </ConfirmForm>
+      </td>
+    </tr>
   );
 }
 

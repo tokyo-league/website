@@ -187,7 +187,7 @@ export default async function DivisionDetailPage({
                   ))}
                 </div>
               ) : (
-                <p className="admin-muted">目視照合済みの順位表データは準備中です。公式結果は上の結果画像をご確認ください。</p>
+                <p className="admin-muted">公式結果は上の結果画像をご確認ください。</p>
               )}
             </article>
 
@@ -221,7 +221,7 @@ export default async function DivisionDetailPage({
                   ))}
                 </div>
               ) : (
-                <p className="admin-muted">目視照合済みの個別スコアは準備中です。過去大会は結果画像を正本として扱います。</p>
+                <p className="admin-muted">過去大会は結果画像を正本として扱います。</p>
               )}
             </article>
           </div>

@@ -519,7 +519,7 @@ async function findOrCreateTeam(name, createdPlaceholderTeams) {
       slug: slugify(`${sanitizedName}-${randomUUID().slice(0, 8)}`),
       status: PublishStatus.ARCHIVED,
       sortOrder: 9999,
-      profile: "過去大会OCR取り込み用の仮登録チームです。",
+      profile: "過去大会結果取り込み用の仮登録チームです。",
     },
     select: {
       id: true,

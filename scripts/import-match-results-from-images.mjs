@@ -147,7 +147,7 @@ for (const entry of results) {
         homeScore: match.homeScore,
         awayScore: match.awayScore,
         status: MatchStatus.PLAYED,
-        note: "過去結果画像OCR取り込み",
+        note: "過去結果画像取込（未確認）",
         createdById: owner.id,
         updatedById: owner.id,
       },
@@ -174,7 +174,7 @@ for (const entry of results) {
         goalsAgainst: standing.goalsAgainst,
         goalDifference: standing.goalDifference,
         points: standing.points,
-        note: "過去結果画像OCR未照合",
+        note: "過去結果画像取込（未確認）",
       },
     });
   }
@@ -239,7 +239,7 @@ async function findOrCreateTeam(name) {
       slug: slugify(`${name}-${randomUUID().slice(0, 8)}`),
       status: PublishStatus.ARCHIVED,
       sortOrder: 9999,
-      profile: "過去大会OCR取り込み用の仮登録チームです。",
+      profile: "過去大会結果取り込み用の仮登録チームです。",
     },
     select: { id: true, name: true },
   });

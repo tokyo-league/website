@@ -1,6 +1,4 @@
 export const VERIFIED_FROM_RESULT_IMAGE_NOTE = "公式結果画像目視照合済み";
-export const UNVERIFIED_OCR_STANDING_NOTE = "過去結果画像OCR未照合";
-export const UNVERIFIED_OCR_MATCH_NOTE = "過去結果画像OCR取り込み";
 
 type HistoricalStanding = {
   note?: string | null;
@@ -25,5 +23,5 @@ export function getPublishedHistoricalMatches<T extends readonly HistoricalMatch
 ): Array<T[number]> {
   if (!resultImagePath) return [...matches];
 
-  return matches.filter((match) => match.note !== UNVERIFIED_OCR_MATCH_NOTE) as Array<T[number]>;
+  return matches.filter((match) => !match.note?.startsWith("過去結果画像")) as Array<T[number]>;
 }

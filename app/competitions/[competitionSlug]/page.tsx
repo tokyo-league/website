@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { LeagueTeamPopup } from "@/components/league-team-popup";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { normalizeDivisionSlug } from "@/lib/league-slug";
@@ -92,7 +93,18 @@ export default async function CompetitionDetailPage({
                   <article key={division.id} className="card competition-card">
                     <p className="section-kicker">{competition.name}</p>
                     <h2>{division.name}</h2>
-                    <p>{division.teams.length > 0 ? `所属 ${division.teams.length}チーム` : "所属チーム情報を準備中です。"}</p>
+                    {division.teams.length > 0 ? (
+                      <LeagueTeamPopup
+                        divisionName={division.name}
+                        teams={division.teams.map(({ team }) => ({
+                          id: team.id,
+                          name: team.name,
+                          region: team.region,
+                        }))}
+                      />
+                    ) : (
+                      <p>所属チーム情報を準備中です。</p>
+                    )}
                     <div className="mini-meta">
                       {division.resultImagePath ? <span>結果画像あり</span> : null}
                       <span>{division.status === "PUBLISHED" ? "公開" : "非公開"}</span>

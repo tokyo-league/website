@@ -90,6 +90,18 @@ button {
   border-color: var(--line-strong);
 }
 
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .site-header {
   position: sticky;
   top: 0;
@@ -658,6 +670,144 @@ button {
 
 .competition-card-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.league-team-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  min-height: 42px;
+  margin: 14px 0 0;
+  padding: 0 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--surface-soft);
+  color: var(--text);
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease;
+}
+
+.league-team-trigger span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.league-team-trigger:hover {
+  border-color: var(--text);
+  background: #fff;
+  transform: translateY(-1px);
+}
+
+.league-team-trigger:focus-visible,
+.league-team-dialog__close:focus-visible {
+  outline: 3px solid rgba(29, 29, 31, 0.2);
+  outline-offset: 3px;
+}
+
+.league-team-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(10, 15, 26, 0.72);
+  backdrop-filter: blur(5px);
+}
+
+.league-team-dialog {
+  width: min(620px, 100%);
+  max-height: min(82vh, 760px);
+  overflow: auto;
+  padding: 28px;
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  background: #fff;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.22);
+}
+
+.league-team-dialog__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.league-team-dialog__header h2 {
+  margin: 0;
+  font-size: clamp(24px, 4vw, 34px);
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+}
+
+.league-team-dialog__header > div > p:last-child {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.league-team-dialog__close {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--surface-soft);
+  color: var(--text);
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.league-team-list {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: team;
+}
+
+.league-team-list li {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  min-height: 62px;
+  border-bottom: 1px solid var(--line);
+  counter-increment: team;
+}
+
+.league-team-list li:last-child {
+  border-bottom: 0;
+}
+
+.league-team-list__number::before {
+  content: counter(team, decimal-leading-zero);
+  color: #8a9098;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.league-team-list strong {
+  min-width: 0;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.league-team-list li > span:last-child:not(.league-team-list__number) {
+  color: var(--muted);
+  font-size: 12px;
+  text-align: right;
 }
 
 .news-layout {
@@ -2420,6 +2570,28 @@ button {
 @media (max-width: 720px) {
   .container {
     width: min(100% - 24px, 1120px);
+  }
+
+  .league-team-overlay {
+    align-items: end;
+    padding: 12px;
+  }
+
+  .league-team-dialog {
+    max-height: 86vh;
+    padding: 22px 18px 12px;
+    border-radius: 24px;
+  }
+
+  .league-team-list li {
+    grid-template-columns: 30px minmax(0, 1fr);
+    gap: 10px;
+    padding: 12px 0;
+  }
+
+  .league-team-list li > span:last-child:not(.league-team-list__number) {
+    grid-column: 2;
+    text-align: left;
   }
 
   .site-header__inner {

@@ -63,6 +63,15 @@ test("試合情報一覧からリーグ詳細まで辿れる", async ({ page }) 
   await expect(page.getByRole("heading", { name: "リーグ一覧" })).toBeVisible();
   await expect(page.getByRole("link", { name: "リーグ結果を見る" }).first()).toBeVisible();
 
+  await page.getByRole("button", { name: "所属 3チーム", exact: true }).click();
+  const teamDialog = page.getByRole("dialog", { name: "Aリーグ 所属チーム" });
+  await expect(teamDialog).toBeVisible();
+  await expect(teamDialog.getByText("クリアージュFCジュニア", { exact: true })).toBeVisible();
+  await expect(teamDialog.getByText("バディサッカークラブ", { exact: true })).toBeVisible();
+  await expect(teamDialog.getByText("暁星アストラ・ジュニア", { exact: true })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(teamDialog).toBeHidden();
+
   await page.goto("/competitions/tokyo-league-103/a-league");
 
   await expect(page.getByRole("heading", { level: 1, name: "Aリーグ" })).toBeVisible();

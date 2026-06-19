@@ -3,99 +3,39 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>東京リーグ UI案 B</title>
+    <title>案02 Urban Matchday | 東京リーグ</title>
     <link rel="stylesheet" href="./variants.css" />
   </head>
-  <body class="variant-body variant-b">
-    <div class="variant-shell">
-      <header class="variant-topbar terminal-topbar">
-        <div class="variant-brandline">
-          <img class="variant-logo" src="../public/site-assets/common/logo_head.svg" alt="東京リーグ ロゴ" />
-          <strong>TOKYO Junior Soccer League</strong>
+  <body class="urban-body">
+    <header class="site-header urban-header">
+      <a class="site-logo" href="./variants.html"><img src="../public/site-assets/common/logo_head.svg" alt="東京リーグ" /></a>
+      <nav><a href="#match">MATCH</a><a href="#news">NEWS</a><a href="#teams">TEAMS</a><a href="#about">ABOUT</a></nav>
+      <button class="urban-menu" aria-label="メニュー"><i></i><i></i></button>
+    </header>
+    <main>
+      <section class="urban-hero">
+        <div class="urban-photo"><img src="../public/site-assets/mv/mv_game.jpg" alt="東京リーグの試合" /></div>
+        <div class="urban-stripe"></div>
+        <div class="urban-copy"><p>TOKYO LEAGUE / 2026</p><h1>東京中の<br />週末が、<br /><em>動き出す。</em></h1><div><a href="#match">試合結果を見る ↗</a><span>SCROLL<br />FOR MORE ↓</span></div></div>
+        <div class="urban-stamp"><strong>103</strong><span>THE<br />SEASON</span></div>
+      </section>
+
+      <section class="urban-score" id="match">
+        <div class="urban-score-title"><p>LAST UPDATED / 06.18 20:30 JST</p><h2>LATEST<br />RESULTS</h2></div>
+        <div class="urban-score-card"><span>A LEAGUE</span><div><strong>旭FC</strong><b>3</b><em>FT</em><b>1</b><strong>アミーゴFC</strong></div><a href="#">試合詳細 →</a></div>
+        <div class="urban-score-card urban-score-card--gold"><span>B LEAGUE</span><div><strong>南綾瀬FC</strong><b>2</b><em>FT</em><b>2</b><strong>FC北野</strong></div><a href="#">試合詳細 →</a></div>
+      </section>
+
+      <section class="urban-manifesto" id="about"><p class="eyebrow">OUR SPIRIT</p><h2>勝ちたい。<br />うまくなりたい。<br /><span>仲間と笑いたい。</span></h2><p>全部、本気でいい。東京リーグは、子どもたちのまっすぐな気持ちがぶつかり合う場所です。</p></section>
+
+      <section class="urban-news" id="news">
+        <div class="urban-news-head"><h2>THE LATEST</h2><a href="#">VIEW ALL ↗</a></div>
+        <div class="urban-news-grid">
+          <article class="urban-news-feature"><img src="../public/site-assets/mv/mv_team.jpg" alt="参加チーム" /><div><small>06.18 / COMPETITION</small><h3>第103回東京リーグ、<br />組み合わせ発表。</h3><a href="#">READ STORY →</a></div></article>
+          <div class="urban-news-stack"><article><small>06.12 / INFO</small><h3>大会要項・規約細則を更新</h3><b>↗</b></article><article><small>06.05 / TEAM</small><h3>参加チーム紹介を公開しました</h3><b>↗</b></article><article class="urban-yellow"><strong>84</strong><span>TEAMS<br />ONE TOKYO</span></article></div>
         </div>
-        <nav>
-          <span>結果一覧</span>
-          <span>大会情報</span>
-          <span>ニュース</span>
-          <span>資料</span>
-        </nav>
-      </header>
-
-      <main class="variant-main">
-        <section class="variant-hero terminal-hero">
-          <div class="terminal-copy">
-            <p class="variant-eyebrow">TOKYO Junior Soccer League</p>
-            <h1>試合情報</h1>
-            <p>リーグ結果 / 更新日 / 順位表 / 直近の試合結果</p>
-          </div>
-          <div class="terminal-stats">
-            <div><span>公開中大会</span><strong>02</strong></div>
-            <div><span>更新済リーグ</span><strong>06</strong></div>
-            <div><span>最終更新</span><strong>03.22</strong></div>
-          </div>
-        </section>
-
-        <section class="variant-section terminal-panels">
-          <article class="terminal-panel terminal-panel--image">
-            <img src="../public/site-assets/results/Aリーグ-3.jpg" alt="Aリーグ結果" />
-          </article>
-          <article class="terminal-panel">
-            <div>
-              <p class="variant-eyebrow">Competition</p>
-              <h2>第103回 東京リーグ</h2>
-            </div>
-            <ul class="terminal-keylines">
-              <li><span>Aリーグ</span><strong>更新済</strong></li>
-              <li><span>Bリーグ</span><strong>更新済</strong></li>
-              <li><span>Cリーグ</span><strong>03.18</strong></li>
-              <li><span>資料</span><strong>要項 / 規約</strong></li>
-            </ul>
-          </article>
-        </section>
-
-        <section class="variant-section terminal-layout">
-          <article class="terminal-sheet">
-            <p class="variant-eyebrow">Standings</p>
-            <h2>Aリーグ順位表</h2>
-            <table>
-              <thead>
-                <tr><th>順位</th><th>チーム</th><th>試</th><th>勝点</th><th>得失点</th></tr>
-              </thead>
-              <tbody>
-                <tr><td>1</td><td>FC EAST</td><td>5</td><td>13</td><td>+8</td></tr>
-                <tr><td>2</td><td>CITY CLUB</td><td>5</td><td>10</td><td>+3</td></tr>
-                <tr><td>3</td><td>MINATO SC</td><td>5</td><td>8</td><td>+1</td></tr>
-                <tr><td>4</td><td>SETAGAYA</td><td>5</td><td>6</td><td>-2</td></tr>
-              </tbody>
-            </table>
-          </article>
-          <article class="terminal-sheet">
-            <p class="variant-eyebrow">Fixture Log</p>
-            <h2>直近の結果</h2>
-            <div class="terminal-log">
-              <div><span>03.22</span><strong>FC EAST 2 - 1 CITY CLUB</strong><em>江東競技場</em></div>
-              <div><span>03.21</span><strong>MINATO SC 1 - 1 SETAGAYA</strong><em>大井ふ頭</em></div>
-              <div><span>03.15</span><strong>FC EAST 3 - 0 SETAGAYA</strong><em>世田谷公園</em></div>
-              <div><span>03.14</span><strong>CITY CLUB 2 - 2 MINATO SC</strong><em>夢の島</em></div>
-            </div>
-          </article>
-        </section>
-
-        <section class="variant-section terminal-bottom">
-          <article class="terminal-strip">
-            <span>DOCUMENT</span>
-            <strong>リーグ戦要項</strong>
-            <strong>規約</strong>
-            <strong>規約細則</strong>
-          </article>
-          <article class="terminal-strip">
-            <span>NEWS</span>
-            <strong>03.21 春季大会の要項を公開しました</strong>
-            <strong>03.18 第103回東京リーグの組み合わせを掲載</strong>
-            <strong>03.10 新規参加チーム募集のお知らせ</strong>
-          </article>
-        </section>
-      </main>
-    </div>
+      </section>
+    </main>
+    <footer class="concept-footer concept-footer--dark"><a href="./variants.html">← 3案の比較へ</a><span>CONCEPT 02 / URBAN MATCHDAY</span></footer>
   </body>
 </html>

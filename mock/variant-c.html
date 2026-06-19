@@ -3,134 +3,34 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>東京リーグ UI案 C</title>
+    <title>案03 League Hub | 東京リーグ</title>
     <link rel="stylesheet" href="./variants.css" />
   </head>
-  <body class="variant-body variant-c">
-    <div class="variant-shell">
-      <header class="variant-topbar civic-topbar">
-        <div class="variant-brandline">
-          <img class="variant-logo" src="../public/site-assets/common/logo_head.svg" alt="東京リーグ ロゴ" />
+  <body class="hub-body">
+    <div class="hub-alert"><span>第103回東京リーグ開催中</span><p>最終更新：2026年6月18日 20:30 JST</p><a href="#result">最新結果を確認 →</a></div>
+    <header class="site-header hub-header">
+      <a class="site-logo" href="./variants.html"><img src="../public/site-assets/common/logo_head.svg" alt="東京リーグ" /></a>
+      <nav><a href="#result">試合・結果</a><a href="#schedule">日程</a><a href="#news">お知らせ</a><a href="#teams">参加チーム</a><a href="#docs">資料</a></nav>
+      <button class="hub-search" aria-label="サイト内検索">⌕</button>
+    </header>
+    <main>
+      <section class="hub-hero">
+        <div class="hub-hero-copy"><p class="eyebrow">TOKYO LEAGUE OFFICIAL</p><h1>知りたい情報へ、<br /><span>最短で。</span></h1><p>東京都内の少年サッカーチームが集う東京リーグ。大会日程、試合結果、参加チームの最新情報をお届けします。</p><div><a class="hub-primary" href="#result">試合結果を見る <b>→</b></a><a class="hub-secondary" href="#schedule">大会日程を見る</a></div></div>
+        <div class="hub-hero-image"><img src="../public/site-assets/mv/mv_top.jpg" alt="東京リーグ参加選手" /><div><strong>84</strong><span>参加チーム</span></div><div><strong>43</strong><span>年の歴史</span></div></div>
+      </section>
+
+      <section class="hub-quick" aria-label="クイックメニュー"><a href="#result"><span>01</span><strong>試合結果</strong><b>RESULTS →</b></a><a href="#schedule"><span>02</span><strong>大会日程</strong><b>SCHEDULE →</b></a><a href="#teams"><span>03</span><strong>参加チーム</strong><b>TEAMS →</b></a><a href="#docs"><span>04</span><strong>資料一覧</strong><b>DOCUMENTS →</b></a></section>
+
+      <section class="hub-content" id="result">
+        <div class="hub-section-head"><div><p class="eyebrow">COMPETITION</p><h2>第103回 東京リーグ</h2></div><div class="hub-tabs"><button class="active">試合結果</button><button>順位表</button><button>大会日程</button></div></div>
+        <div class="hub-leagues">
+          <article class="hub-league-main"><div><span>A LEAGUE</span><small>2026.06.18 更新</small></div><img src="../public/site-assets/results/Aリーグ-3.jpg" alt="Aリーグ試合結果" /><a href="#">Aリーグの結果を見る →</a></article>
+          <div class="hub-league-list"><a href="#"><span>B</span><strong>Bリーグ</strong><small>06.18 更新</small><b>→</b></a><a href="#"><span>C</span><strong>Cリーグ</strong><small>06.17 更新</small><b>→</b></a><a href="#"><span>D</span><strong>Dリーグ</strong><small>06.15 更新</small><b>→</b></a><a href="#"><span>E</span><strong>Eリーグ</strong><small>06.15 更新</small><b>→</b></a><a class="hub-more" href="#">全リーグを見る ↗</a></div>
         </div>
-        <nav>
-          <span>東京リーグについて</span>
-          <span>年間予定</span>
-          <span>大会情報</span>
-          <span>資料室</span>
-          <span>参加チーム</span>
-        </nav>
-      </header>
+      </section>
 
-      <main class="variant-main">
-        <section class="variant-section civic-board">
-          <article class="notice-hero civic-sheet civic-sheet--hero">
-            <div class="notice-tag">TOKYO Junior Soccer League</div>
-            <h2>第103回 東京リーグ</h2>
-            <p>2026年度 / 年間予定 / 大会情報 / 資料室 / 参加チーム</p>
-            <div class="notice-actions">
-              <a href="#">年間要項を見る</a>
-              <a href="#">大会結果を見る</a>
-            </div>
-          </article>
-
-          <article class="notice-photo civic-sheet civic-sheet--photo">
-            <img src="../public/site-assets/teams/photos/池2全体.jpg" alt="池2フットボールクラブ" />
-            <span>会場風景</span>
-          </article>
-
-          <article class="notice-sheet civic-sheet civic-sheet--memo">
-            <p class="variant-eyebrow">Public Documents</p>
-            <strong>リーグ戦要項</strong>
-            <strong>規約</strong>
-            <strong>規約細則</strong>
-          </article>
-        </section>
-
-        <section class="variant-section civic-columns">
-          <article class="civic-panel civic-panel--calendar">
-            <div class="section-heading-row">
-              <div>
-                <p class="variant-eyebrow">Annual Schedule</p>
-                <h2>年間の主な予定</h2>
-              </div>
-              <span>2026年度</span>
-            </div>
-            <div class="season-rail">
-              <div class="season-rail__month">
-                <strong>4月</strong>
-                <p>開幕 / 組み合わせ公開</p>
-              </div>
-              <div class="season-rail__month active">
-                <strong>5月</strong>
-                <p>A〜Cリーグ進行中</p>
-              </div>
-              <div class="season-rail__month">
-                <strong>6月</strong>
-                <p>山藤杯</p>
-              </div>
-              <div class="season-rail__month">
-                <strong>7月</strong>
-                <p>前期終了</p>
-              </div>
-              <div class="season-rail__month">
-                <strong>9月</strong>
-                <p>最終結果公開</p>
-              </div>
-            </div>
-          </article>
-
-          <article class="civic-panel civic-panel--news civic-sheet civic-sheet--news">
-            <p class="variant-eyebrow">Latest Information</p>
-            <div class="notice-stack">
-              <article>
-                <span>03.21</span>
-                <strong>春季大会の要項を公開しました</strong>
-              </article>
-              <article>
-                <span>03.18</span>
-                <strong>第103回東京リーグの組み合わせを掲載</strong>
-              </article>
-              <article>
-                <span>03.10</span>
-                <strong>新規参加チーム募集のお知らせ</strong>
-              </article>
-            </div>
-          </article>
-        </section>
-
-        <section class="variant-section civic-split">
-          <article class="civic-panel civic-panel--results civic-sheet civic-sheet--results">
-            <div class="section-heading-row">
-              <div>
-                <p class="variant-eyebrow">Competition Results</p>
-                <h2>Aリーグ結果</h2>
-              </div>
-              <span>03.22 更新</span>
-            </div>
-            <img src="../public/site-assets/results/Aリーグ-3.jpg" alt="Aリーグ結果" />
-          </article>
-
-          <article class="civic-panel civic-panel--teams civic-sheet civic-sheet--teams">
-            <div class="section-heading-row">
-              <div>
-                <p class="variant-eyebrow">Team Introduction</p>
-                <h2>参加チーム紹介</h2>
-              </div>
-              <span>一覧へ</span>
-            </div>
-            <div class="civic-team-list">
-              <article>
-                <img src="../public/site-assets/teams/photos/17上段_旭フットボールクラブ.jpg" alt="旭フットボールクラブ" />
-                <strong>旭フットボールクラブ</strong>
-              </article>
-              <article>
-                <img src="../public/site-assets/teams/photos/33上段_アミーゴFCジュニア.jpg" alt="アミーゴフットボールクラブ" />
-                <strong>アミーゴフットボールクラブ</strong>
-              </article>
-            </div>
-          </article>
-        </section>
-      </main>
-    </div>
+      <section class="hub-news" id="news"><div class="hub-section-head"><div><p class="eyebrow">INFORMATION</p><h2>お知らせ</h2></div><a href="#">一覧を見る →</a></div><div class="hub-news-list"><a href="#"><time>2026.06.18</time><span>大会情報</span><strong>第103回東京リーグ 組み合わせを公開しました</strong><b>→</b></a><a href="#"><time>2026.06.12</time><span>お知らせ</span><strong>大会要項・規約細則を更新しました</strong><b>→</b></a><a href="#"><time>2026.06.05</time><span>チーム</span><strong>参加チーム情報を更新しました</strong><b>→</b></a></div></section>
+    </main>
+    <footer class="concept-footer"><a href="./variants.html">← 3案の比較へ</a><span>CONCEPT 03 / LEAGUE HUB</span></footer>
   </body>
 </html>

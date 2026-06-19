@@ -49,9 +49,9 @@ h1,h2,h3,p { margin:0; }
 .heritage-body { background:#f4f1e9; }
 .heritage-header { position:absolute; top:0; left:0; right:0; color:#fff; }
 .heritage-header .site-logo,
-.urban-header .site-logo { width:78px; height:78px; padding:9px; justify-content:center; flex:0 0 78px; border-radius:50%; background:rgba(255,255,255,.94); }
+.urban-header .site-logo { width:78px; height:78px; padding:9px; justify-content:center; flex:0 0 78px; border-radius:50%; background:#fff; box-shadow:0 0 0 1px rgba(255,255,255,.55),0 8px 24px rgba(0,0,0,.16); }
 .heritage-header .site-logo img,
-.urban-header .site-logo img { width:auto; height:60px; filter:none; }
+.urban-header .site-logo img { width:auto; height:60px; filter:saturate(1.65) contrast(1.08); }
 .heritage-header .menu-button { height:100%; margin-left:42px; padding:0 34px; display:flex; align-items:center; gap:28px; font-size:13px; font-weight:800; color:#111; background:var(--gold-light); }
 .heritage-hero { min-height:780px; height:94vh; position:relative; color:#fff; overflow:hidden; }
 .heritage-hero>img { width:100%; height:100%; object-fit:cover; filter:saturate(.68) contrast(1.05); }

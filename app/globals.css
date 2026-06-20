@@ -200,7 +200,11 @@ body:has(.heritage-home) .site-header {
 .news-index .news-list-item,
 .download-list-item,
 .news-index .news-list-item:first-child,
-.download-list-item:first-child { border-radius: 0; box-shadow: none; }
+.download-list-item:first-child {
+  padding: 24px;
+  border-radius: 0;
+  box-shadow: none;
+}
 .filter-pill,
 .team-summary span,
 .mini-meta span { border-radius: 0; }
@@ -294,6 +298,8 @@ body:has(.heritage-home) .site-header {
   .page-intro__visual--teams,
   .page-intro__visual--feature { min-height: 280px; }
   .page-intro--compact .narrow { width: min(100% - 32px, 1180px); min-height: 280px; padding: 38px 24px; }
+  .download-list-item,
+  .download-list-item:first-child { padding: 20px; }
   .section-block { padding: 30px 0; }
   .section-block:last-child { padding-bottom: 72px; }
   .competition-card-grid { grid-template-columns: 1fr; }

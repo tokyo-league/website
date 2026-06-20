@@ -41,6 +41,9 @@ test("公開ダウンロードページが表示できる", async ({ page }) => 
 
   await expect(page.getByRole("heading", { name: "資料ダウンロード" })).toBeVisible();
   await expect(page.locator(".download-list-item").first()).toBeVisible();
+  const downloadItems = page.locator(".download-list-item");
+  await expect(downloadItems.nth(0)).toHaveCSS("padding-left", "24px");
+  await expect(downloadItems.nth(1)).toHaveCSS("padding-left", "24px");
 });
 
 test("ニュースページでニュースカードが表示できる", async ({ page }) => {

@@ -8,7 +8,7 @@ import { assertImageFileAllowed } from "@/lib/image-file-validation";
 import { prisma } from "@/lib/prisma";
 import { ensureSlug, isValidUuid, sanitizePlainText } from "@/lib/security";
 import { isE2ETestMode } from "@/lib/test-mode";
-import { normalizeOptionalAssetPath, normalizeOptionalHttpUrl } from "@/lib/url-validation";
+import { normalizeOptionalAssetPath } from "@/lib/url-validation";
 import { IMAGE_UPLOAD_MAX_BYTES } from "@/lib/upload-limits";
 
 export type TeamActionState = {
@@ -21,12 +21,6 @@ const IMAGE_RULES = {
     label: "ロゴ画像",
     minWidth: 240,
     minHeight: 240,
-  },
-  photos: {
-    label: "チーム画像",
-    minWidth: 1200,
-    minHeight: 675,
-    minAspectRatio: 1.2,
   },
 } as const;
 
@@ -212,16 +206,11 @@ async function getTeamPayload(formData: FormData) {
   const name = sanitizePlainText(String(formData.get("name") ?? ""), 80);
   const shortName = sanitizePlainText(String(formData.get("shortName") ?? ""), 80);
   const profile = sanitizePlainText(String(formData.get("profile") ?? ""), 1000);
-  const founded = sanitizePlainText(String(formData.get("founded") ?? ""), 40);
   const region = sanitizePlainText(String(formData.get("region") ?? ""), 40);
-  const representativeName = sanitizePlainText(String(formData.get("representativeName") ?? ""), 80);
-  const headCoachName = sanitizePlainText(String(formData.get("headCoachName") ?? ""), 80);
-  const websiteUrl = normalizeTeamHttpUrl(String(formData.get("websiteUrl") ?? ""), "公式サイトURL");
-  const instagramUrl = normalizeInstagramUrl(String(formData.get("instagramUrl") ?? ""));
   const logoPath = normalizeTeamAssetPath(String(formData.get("logoPath") ?? ""), "ロゴ画像URL");
-  const photoPath = normalizeTeamAssetPath(String(formData.get("photoPath") ?? ""), "チーム画像URL");
+  const homeUniformColor = normalizeUniformColor(formData.get("homeUniformColor"), "ホーム");
+  const awayUniformColor = normalizeUniformColor(formData.get("awayUniformColor"), "アウェイ");
   const uploadedLogoPath = await uploadTeamImage(formData.get("logoFile"), "logos");
-  const uploadedPhotoPath = await uploadTeamImage(formData.get("photoFile"), "photos");
   const sortOrder = Number.parseInt(String(formData.get("sortOrder") ?? "0"), 10);
   const status = String(formData.get("status") ?? "PUBLISHED") as PublishStatus;
 
@@ -230,25 +219,13 @@ async function getTeamPayload(formData: FormData) {
     slug: ensureSlug(name, "team"),
     shortName: shortName || null,
     profile: profile || null,
-    founded: founded || null,
     region: region || null,
-    representativeName: representativeName || null,
-    headCoachName: headCoachName || null,
-    websiteUrl,
-    instagramUrl,
     logoPath: uploadedLogoPath ?? logoPath,
-    photoPath: uploadedPhotoPath ?? photoPath,
+    homeUniformColor,
+    awayUniformColor,
     status: ["DRAFT", "PUBLISHED", "ARCHIVED"].includes(status) ? status : PublishStatus.PUBLISHED,
     sortOrder: Number.isFinite(sortOrder) ? sortOrder : 0,
   };
-}
-
-function normalizeTeamHttpUrl(value: string, label: string) {
-  try {
-    return normalizeOptionalHttpUrl(value, label);
-  } catch (error) {
-    throw new TeamInputError(error instanceof Error ? error.message : `${label}を確認してください。`);
-  }
 }
 
 function normalizeTeamAssetPath(value: string, label: string) {
@@ -259,57 +236,21 @@ function normalizeTeamAssetPath(value: string, label: string) {
   }
 }
 
-function normalizeInstagramUrl(value: string) {
-  const input = sanitizePlainText(value, 255);
+function normalizeUniformColor(value: FormDataEntryValue | null, label: string) {
+  const color = String(value ?? "").trim().toUpperCase();
 
-  if (!input || input === "ー" || input === "-") {
+  if (!color) {
     return null;
   }
 
-  if (input.startsWith("@")) {
-    return instagramHandleToUrl(input.slice(1));
+  if (!/^#[0-9A-F]{6}$/.test(color)) {
+    throw new TeamInputError(`${label}のユニフォーム色を選択してください。`);
   }
 
-  if (!/^https?:\/\//i.test(input)) {
-    return instagramHandleToUrl(input);
-  }
-
-  try {
-    const url = new URL(input);
-    const hostname = url.hostname.toLowerCase();
-
-    if (hostname !== "instagram.com" && hostname !== "www.instagram.com") {
-      throw new TeamInputError("Instagram URL は instagram.com のURLを入力してください。");
-    }
-
-    const handle = url.pathname.split("/").filter(Boolean)[0];
-
-    return instagramHandleToUrl(handle);
-  } catch (error) {
-    if (error instanceof TeamInputError) {
-      throw error;
-    }
-
-    throw new TeamInputError("Instagram URL を確認してください。");
-  }
+  return color;
 }
 
-function instagramHandleToUrl(handle: string | undefined) {
-  const normalizedHandle = sanitizePlainText(handle ?? "", 80).replace(/^@+/, "");
-  const reservedPaths = new Set(["accounts", "explore", "p", "reel", "stories", "tv"]);
-
-  if (!/^[a-zA-Z0-9._]{1,30}$/.test(normalizedHandle)) {
-    throw new TeamInputError("Instagramアカウント名は英数字、ピリオド、アンダースコアで入力してください。");
-  }
-
-  if (reservedPaths.has(normalizedHandle.toLowerCase())) {
-    throw new TeamInputError("Instagram URL はプロフィールページのURLを入力してください。");
-  }
-
-  return `https://www.instagram.com/${normalizedHandle}/`;
-}
-
-async function uploadTeamImage(fileValue: FormDataEntryValue | null, folder: "logos" | "photos") {
+async function uploadTeamImage(fileValue: FormDataEntryValue | null, folder: "logos") {
   if (!(fileValue instanceof File) || fileValue.size === 0) {
     return null;
   }

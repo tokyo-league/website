@@ -240,14 +240,22 @@ model Team {
   slug               String         @unique
   shortName          String?
   profile            String?
+  /// Legacy field kept for database compatibility. Public and admin UIs no longer use it.
   founded            String?
   region             String?
+  /// Legacy field kept for database compatibility. Public and admin UIs no longer use it.
   representativeName String?
+  /// Legacy field kept for database compatibility. Public and admin UIs no longer use it.
   headCoachName      String?
+  /// Legacy field kept for database compatibility. Public and admin UIs no longer use it.
   websiteUrl         String?
+  /// Legacy field kept for database compatibility. Public and admin UIs no longer use it.
   instagramUrl       String?
   logoAssetId        String?        @db.Uuid
   logoPath           String?
+  homeUniformColor   String?
+  awayUniformColor   String?
+  /// Legacy field kept for database compatibility. Public and admin UIs no longer use it.
   photoPath          String?
   status             PublishStatus
   sortOrder          Int            @default(0)

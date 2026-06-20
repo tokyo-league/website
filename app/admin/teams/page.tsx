@@ -36,8 +36,7 @@ export default async function AdminTeamsPage() {
           <div className="admin-table__row admin-table__row--head admin-table__row--teams">
             <span>チーム名</span>
             <span>地域</span>
-            <span>代表者</span>
-            <span>監督</span>
+            <span>ユニフォーム</span>
             <span>削除前確認</span>
             <span>操作</span>
           </div>
@@ -55,8 +54,11 @@ export default async function AdminTeamsPage() {
               <div key={team.id} className="admin-table__row admin-table__row--teams">
                 <strong>{team.name}</strong>
                 <span>{team.region ?? "-"}</span>
-                <span>{team.representativeName ?? "-"}</span>
-                <span>{team.headCoachName ?? "-"}</span>
+                <span className="admin-team-uniforms" aria-label={`ホーム ${team.homeUniformColor ?? "未設定"}、アウェイ ${team.awayUniformColor ?? "未設定"}`}>
+                  {team.homeUniformColor ? <i style={{ backgroundColor: team.homeUniformColor }} /> : null}
+                  {team.awayUniformColor ? <i style={{ backgroundColor: team.awayUniformColor }} /> : null}
+                  {!team.homeUniformColor && !team.awayUniformColor ? "未設定" : null}
+                </span>
                 <span className={referenceCount > 0 ? "admin-team-references" : "admin-team-references is-empty"}>
                   {referenceSummary}
                 </span>

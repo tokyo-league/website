@@ -12,6 +12,7 @@
     "assets:organize": "node ./scripts/organize-site-images.mjs",
     "import:history": "node ./scripts/run-with-env.mjs node ./scripts/import-history-from-site.mjs",
     "import:results": "node ./scripts/run-with-env.mjs node ./scripts/import-match-results-from-images.mjs",
+    "teams:colors": "node ./scripts/run-with-env.mjs node ./scripts/backfill-team-uniform-colors.mjs",
     "results:verify": "node ./scripts/run-with-env.mjs node ./scripts/verify-historical-standings.mjs",
     "docs:spec": "node ./docs/build-spec-pdf.mjs",
     "docs:admin": "node ./docs/admin-manual/build-admin-manual.mjs",

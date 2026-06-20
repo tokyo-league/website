@@ -94,6 +94,8 @@ test("参加チームページで主要導線とチーム一覧が表示でき�
   await expect(page.getByRole("main").getByRole("link", { name: "試合情報へ" })).toBeVisible();
   await expect(page.getByRole("main").getByRole("link", { name: "お問い合わせ" })).toBeVisible();
   await expect(page.getByText(/掲載チーム \d+/)).toBeVisible();
+  await expect(page.locator(".team-card__image")).toHaveCount(0);
+  await expect(page.locator(".team-card__identity").first()).toBeVisible();
 });
 
 test("お問い合わせフォームに必要項目とスパム対策が表示される", async ({ page }) => {

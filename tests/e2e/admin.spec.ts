@@ -115,7 +115,16 @@ test("チーム作成フローが完了できる", async ({ page }) => {
 
   await expect(page.getByRole("heading", { name: "チーム管理" })).toBeVisible();
   await page.getByLabel("チーム名").fill(teamName);
-  await page.getByLabel("Instagram URL").fill("@e2e_fc");
+  await expect(page.getByText("ユニフォームの色", { exact: true })).toBeVisible();
+  await expect(page.getByLabel("ホームの色")).toBeDisabled();
+  await expect(page.getByLabel("アウェイの色")).toBeDisabled();
+  await expect(page.getByText("未設定", { exact: true })).toHaveCount(2);
+  await expect(page.getByText("チーム画像", { exact: true })).toHaveCount(0);
+  await expect(page.getByLabel("結成")).toHaveCount(0);
+  await expect(page.getByLabel("代表者")).toHaveCount(0);
+  await expect(page.getByLabel("監督")).toHaveCount(0);
+  await expect(page.getByLabel("公式サイトURL")).toHaveCount(0);
+  await expect(page.getByLabel("Instagram URL")).toHaveCount(0);
   await page.getByRole("button", { name: "チームを保存" }).click();
 
   await expect(page.getByText(`${teamName} を追加しました。`)).toBeVisible();

@@ -4,6 +4,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { prisma } from "@/lib/prisma";
 import { siteAssets } from "@/lib/site-data";
+import { getTeamInitial, isDisplayableTeamLogo } from "@/lib/team-logo";
 
 export const dynamic = "force-dynamic";
 
@@ -17,13 +18,9 @@ export default async function TeamsPage() {
       id: true,
       name: true,
       region: true,
-      founded: true,
-      representativeName: true,
-      headCoachName: true,
-      websiteUrl: true,
-      instagramUrl: true,
       logoPath: true,
-      photoPath: true,
+      homeUniformColor: true,
+      awayUniformColor: true,
       profile: true,
     },
   });
@@ -37,7 +34,7 @@ export default async function TeamsPage() {
             <div>
               <p className="section-kicker">Teams</p>
               <h1>参加チーム</h1>
-              <p>東京リーグ参加チームの紹介一覧です。各チームの写真、ロゴ、基本情報を公開しています。</p>
+              <p>東京リーグに参加するチームをご紹介します。ロゴと基本情報から、各チームの個性をご覧いただけます。</p>
               <div className="page-intro__actions">
                 <Link href="/competitions" className="button">
                   試合情報へ
@@ -63,66 +60,35 @@ export default async function TeamsPage() {
               <span>掲載チーム {teams.length}</span>
             </div>
             <div className="team-grid">
-              {teams.map((team) => {
+              {teams.map((team, index) => {
                 const hasTeamLogo = isDisplayableTeamLogo(team.logoPath);
 
                 return (
                   <article key={team.id} className="team-card">
-                    <div className="team-card__image">
-                      <Image
-                        src={team.photoPath || siteAssets.teamsHero}
-                        alt={team.name}
-                        fill
-                        sizes="(max-width: 720px) 100vw, (max-width: 960px) 50vw, 33vw"
-                      />
+                    <div className="team-card__identity">
+                      <span className="team-card__number" aria-hidden="true">
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
                       {hasTeamLogo ? (
                         <div className="team-card__logo">
-                          <Image src={team.logoPath!} alt={`${team.name} ロゴ`} width={72} height={72} />
+                          <Image src={team.logoPath!} alt={`${team.name} ロゴ`} width={112} height={112} />
                         </div>
-                      ) : null}
+                      ) : (
+                        <div className="team-card__logo team-card__logo--fallback" aria-hidden="true">
+                          {getTeamInitial(team.name)}
+                        </div>
+                      )}
+                      <p>{team.region || "東京都内"}</p>
+                      <h2>{team.name}</h2>
                     </div>
                     <div className="team-card__body">
-                      <p className="section-kicker">{team.region || "東京"}</p>
-                      <h2>{team.name}</h2>
-                      {team.profile ? <p>{team.profile}</p> : null}
-                      <dl className="team-card__meta">
-                        <div>
-                          <dt>結成</dt>
-                          <dd>{team.founded || "未設定"}</dd>
+                      {team.profile ? <p className="team-card__profile">{team.profile}</p> : null}
+                      {team.homeUniformColor || team.awayUniformColor ? (
+                        <div className="team-card__uniforms" aria-label="ユニフォームの色">
+                          {team.homeUniformColor ? <UniformColor label="HOME" color={team.homeUniformColor} /> : null}
+                          {team.awayUniformColor ? <UniformColor label="AWAY" color={team.awayUniformColor} /> : null}
                         </div>
-                        <div>
-                          <dt>代表者</dt>
-                          <dd>{team.representativeName || "未設定"}</dd>
-                        </div>
-                        <div>
-                          <dt>監督</dt>
-                          <dd>{team.headCoachName || "未設定"}</dd>
-                        </div>
-                        <div>
-                          <dt>公式サイト</dt>
-                          <dd>
-                            {team.websiteUrl ? (
-                              <a href={team.websiteUrl} target="_blank" rel="noreferrer">
-                                公式サイトを見る
-                              </a>
-                            ) : (
-                              "未設定"
-                            )}
-                          </dd>
-                        </div>
-                        <div>
-                          <dt>Instagram</dt>
-                          <dd>
-                            {team.instagramUrl ? (
-                              <a href={team.instagramUrl} target="_blank" rel="noreferrer">
-                                Instagramを見る
-                              </a>
-                            ) : (
-                              "未設定"
-                            )}
-                          </dd>
-                        </div>
-                      </dl>
+                      ) : null}
                     </div>
                   </article>
                 );
@@ -136,20 +102,12 @@ export default async function TeamsPage() {
   );
 }
 
-function isDisplayableTeamLogo(logoPath: string | null) {
-  if (!logoPath || logoPath === siteAssets.logo) {
-    return false;
-  }
-
-  const normalizedPath = logoPath.toLowerCase();
-
-  if (normalizedPath.includes("/teams/photos/")) {
-    return false;
-  }
-
-  if (normalizedPath.includes("ロゴグレー")) {
-    return false;
-  }
-
-  return true;
+function UniformColor({ label, color }: { label: string; color: string }) {
+  return (
+    <div>
+      <span style={{ backgroundColor: color }} />
+      <small>{label}</small>
+      <code>{color}</code>
+    </div>
+  );
 }

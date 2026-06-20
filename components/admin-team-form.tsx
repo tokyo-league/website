@@ -17,12 +17,6 @@ const CLIENT_IMAGE_RULES = {
     minWidth: 240,
     minHeight: 240,
   },
-  photos: {
-    label: "チーム画像",
-    minWidth: 1200,
-    minHeight: 675,
-    minAspectRatio: 1.2,
-  },
 } as const;
 
 type TeamFormValues = {
@@ -30,14 +24,10 @@ type TeamFormValues = {
   name: string;
   shortName: string;
   profile: string;
-  founded: string;
   region: string;
-  representativeName: string;
-  headCoachName: string;
-  websiteUrl: string;
-  instagramUrl: string;
   logoPath: string;
-  photoPath: string;
+  homeUniformColor: string;
+  awayUniformColor: string;
   status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
   sortOrder: number;
 };
@@ -53,13 +43,11 @@ export function AdminTeamForm({
   const [state, formAction, pending] = useActionState(action, initialTeamActionState);
   const [toast, setToast] = useState<TeamActionState>(initialTeamActionState);
   const [uploadedLogoPreview, setUploadedLogoPreview] = useState<string | null>(null);
-  const [uploadedPhotoPreview, setUploadedPhotoPreview] = useState<string | null>(null);
   const [logoFileName, setLogoFileName] = useState("");
-  const [photoFileName, setPhotoFileName] = useState("");
   const [logoUploadError, setLogoUploadError] = useState("");
-  const [photoUploadError, setPhotoUploadError] = useState("");
+  const [homeUniformColor, setHomeUniformColor] = useState(initialValues.homeUniformColor);
+  const [awayUniformColor, setAwayUniformColor] = useState(initialValues.awayUniformColor);
   const logoInputId = useId();
-  const photoInputId = useId();
 
   useEffect(() => {
     if (state.status !== "idle") {
@@ -73,14 +61,10 @@ export function AdminTeamForm({
         URL.revokeObjectURL(uploadedLogoPreview);
       }
 
-      if (uploadedPhotoPreview) {
-        URL.revokeObjectURL(uploadedPhotoPreview);
-      }
     };
-  }, [uploadedLogoPreview, uploadedPhotoPreview]);
+  }, [uploadedLogoPreview]);
 
   const logoPreview = uploadedLogoPreview ?? initialValues.logoPath;
-  const photoPreview = uploadedPhotoPreview ?? initialValues.photoPath;
 
   return (
     <>
@@ -106,7 +90,6 @@ export function AdminTeamForm({
         <form action={formAction} className="admin-form-stack">
           {mode === "edit" && initialValues.id ? <input type="hidden" name="teamId" value={initialValues.id} /> : null}
           {initialValues.logoPath ? <input type="hidden" name="logoPath" value={initialValues.logoPath} /> : null}
-          {initialValues.photoPath ? <input type="hidden" name="photoPath" value={initialValues.photoPath} /> : null}
           <label className="admin-field">
             <span>チーム名</span>
             <input type="text" name="name" defaultValue={initialValues.name} required />
@@ -159,74 +142,17 @@ export function AdminTeamForm({
             />
           ) : null}
           <label className="admin-field">
-            <span>チーム画像</span>
-            <UploadField
-              inputId={photoInputId}
-              name="photoFile"
-              fileName={photoFileName}
-              label="チーム画像を選択"
-              hint={`JPG / PNG / WebP、${formatUploadLimit(IMAGE_UPLOAD_MAX_BYTES)}以下、1200x675px以上の横長画像。${mode === "edit" ? "アップロードすると現在のチーム画像を置き換えます。" : ""}`}
-              errorMessage={photoUploadError}
-              onFileChange={async (file) => {
-                const result = await validateImageFile(file, "photos");
-
-                if (uploadedPhotoPreview) {
-                  URL.revokeObjectURL(uploadedPhotoPreview);
-                }
-
-                if (result.status === "error") {
-                  setPhotoFileName("");
-                  setUploadedPhotoPreview(null);
-                  setPhotoUploadError(result.message);
-                  return;
-                }
-
-                setPhotoUploadError("");
-                setPhotoFileName(file?.name ?? "");
-                setUploadedPhotoPreview(file ? URL.createObjectURL(file) : null);
-              }}
-            />
-          </label>
-          {photoPreview ? (
-            <AssetPreview
-              src={photoPreview}
-              alt="選択中のチーム画像"
-              width={320}
-              height={180}
-              wide
-              caption={uploadedPhotoPreview ? "アップロード予定のチーム画像" : mode === "edit" ? "現在のチーム画像" : "選択中のチーム画像"}
-            />
-          ) : null}
-          <label className="admin-field">
-            <span>結成</span>
-            <input type="text" name="founded" defaultValue={initialValues.founded} />
-          </label>
-          <label className="admin-field">
             <span>地域</span>
             <input type="text" name="region" defaultValue={initialValues.region} />
           </label>
-          <label className="admin-field">
-            <span>代表者</span>
-            <input type="text" name="representativeName" defaultValue={initialValues.representativeName} />
-          </label>
-          <label className="admin-field">
-            <span>監督</span>
-            <input type="text" name="headCoachName" defaultValue={initialValues.headCoachName} />
-          </label>
-          <label className="admin-field">
-            <span>公式サイトURL</span>
-            <input type="url" name="websiteUrl" defaultValue={initialValues.websiteUrl} />
-          </label>
-          <label className="admin-field">
-            <span>Instagram URL</span>
-            <input
-              type="text"
-              name="instagramUrl"
-              placeholder="https://www.instagram.com/team_account/"
-              defaultValue={initialValues.instagramUrl}
-            />
-            <small className="admin-field__help">URL、@アカウント名、アカウント名のみの入力に対応します。</small>
-          </label>
+          <fieldset className="admin-uniform-colors">
+            <legend>ユニフォームの色</legend>
+            <p>カラーパレットからホームとアウェイの基調色を選択してください。</p>
+            <div className="admin-uniform-colors__grid">
+              <UniformColorField label="ホーム" name="homeUniformColor" value={homeUniformColor} onChange={setHomeUniformColor} />
+              <UniformColorField label="アウェイ" name="awayUniformColor" value={awayUniformColor} onChange={setAwayUniformColor} />
+            </div>
+          </fieldset>
           <label className="admin-field">
             <span>状態</span>
             <select name="status" defaultValue={initialValues.status}>
@@ -245,6 +171,40 @@ export function AdminTeamForm({
         </form>
       </article>
     </>
+  );
+}
+
+function UniformColorField({
+  label,
+  name,
+  value,
+  onChange,
+}: {
+  label: string;
+  name: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const isEnabled = Boolean(value);
+
+  return (
+    <div className="uniform-color-field">
+      <span>{label}</span>
+      <span className="uniform-color-field__control">
+        <input
+          type="color"
+          name={isEnabled ? name : undefined}
+          value={value || "#1F3A5F"}
+          disabled={!isEnabled}
+          aria-label={`${label}の色`}
+          onChange={(event) => onChange(event.target.value.toUpperCase())}
+        />
+        <code>{value ? value.toUpperCase() : "未設定"}</code>
+        <button type="button" onClick={() => onChange(isEnabled ? "" : "#1F3A5F")}>
+          {isEnabled ? "設定を解除" : "色を設定"}
+        </button>
+      </span>
+    </div>
   );
 }
 
@@ -315,7 +275,7 @@ function UploadField({
   );
 }
 
-async function validateImageFile(file: File | null, kind: "logos" | "photos") {
+async function validateImageFile(file: File | null, kind: "logos") {
   if (!file) {
     return { status: "idle" as const, message: "" };
   }
@@ -343,12 +303,6 @@ async function validateImageFile(file: File | null, kind: "logos" | "photos") {
       };
     }
 
-    if ("minAspectRatio" in rules && width / height < rules.minAspectRatio) {
-      return {
-        status: "error" as const,
-        message: `${rules.label}は横長画像を選択してください。`,
-      };
-    }
   } catch {
     return { status: "error" as const, message: "画像サイズを確認できませんでした。" };
   }

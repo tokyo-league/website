@@ -41,6 +41,6 @@
 - `npm run prisma:seed-admin` 実行時は `SEED_ADMIN_EMAIL` が必要
 - `E2E_TEST_MODE=1` はローカル/E2E用途のみ。本番では設定しない。productionではアプリ側でも無効化する
 - Neon を使う場合、`DATABASE_URL` は pooled 接続、`DIRECT_URL` は direct 接続を使う
-- チーム画像アップロードには Vercel Blob の `BLOB_READ_WRITE_TOKEN` が必要
+- チームロゴのアップロードには Vercel Blob の `BLOB_READ_WRITE_TOKEN` が必要
 - 更新系サーバアクションでは、入力の正規化、形式検証、長さ制限を必須にする
 - React の自動エスケープ前提で `dangerouslySetInnerHTML` は使わない

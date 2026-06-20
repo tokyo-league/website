@@ -216,11 +216,9 @@
 | short_name | text nullable | |
 | profile | text nullable | |
 | region | text nullable | |
-| representative_name | text nullable | |
-| head_coach_name | text nullable | |
-| website_url | text nullable | |
-| instagram_url | text nullable | |
 | logo_asset_id | uuid fk assets.id nullable | |
+| home_uniform_color | text nullable | `#RRGGBB` |
+| away_uniform_color | text nullable | `#RRGGBB` |
 | status | text | `draft`, `published` |
 | sort_order | integer | |
 | created_at | timestamptz | |
@@ -524,11 +522,8 @@
 - 略称
 - 紹介文
 - 地域
-- 代表者
-- 監督
-- Webサイト
-- Instagram
 - ロゴ
+- ユニフォーム色（ホーム／アウェイ）
 - 公開状態
 
 ### 資料管理

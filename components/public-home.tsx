@@ -5,6 +5,7 @@ import { NewsList } from "@/components/news-list";
 import { prisma } from "@/lib/prisma";
 import { getPublishedNews } from "@/lib/public-news";
 import { siteAssets, teams as fallbackTeams } from "@/lib/site-data";
+import { getTeamInitial, isDisplayableTeamLogo } from "@/lib/team-logo";
 
 export async function PublicHome() {
   const latestNews = await getPublishedNews(3);
@@ -73,12 +74,22 @@ export async function PublicHome() {
         <div className="home-team-grid">
           {featuredTeams.map((team) => (
             <article key={team.id} className="home-team-card">
-              <div className="home-team-card__image">
-                <Image src={team.photoPath || siteAssets.teamsHero} alt={team.name} fill sizes="(max-width: 720px) 100vw, 33vw" />
+              <div className="home-team-card__logo">
+                {isDisplayableTeamLogo(team.logoPath) ? (
+                  <Image src={team.logoPath!} alt={`${team.name} ロゴ`} width={112} height={112} />
+                ) : (
+                  <span aria-hidden="true">{getTeamInitial(team.name)}</span>
+                )}
               </div>
               <div className="home-team-card__copy">
                 <p>{team.region || "東京都内"}</p>
                 <p className="home-team-card__title">{team.name}</p>
+                {team.homeUniformColor || team.awayUniformColor ? (
+                  <div className="home-team-card__uniforms" aria-label="ユニフォームの色">
+                    {team.homeUniformColor ? <i style={{ backgroundColor: team.homeUniformColor }} /> : null}
+                    {team.awayUniformColor ? <i style={{ backgroundColor: team.awayUniformColor }} /> : null}
+                  </div>
+                ) : null}
               </div>
             </article>
           ))}
@@ -98,7 +109,9 @@ async function getRandomFeaturedTeams(limit: number) {
         id: true,
         name: true,
         region: true,
-        photoPath: true,
+        logoPath: true,
+        homeUniformColor: true,
+        awayUniformColor: true,
         sortOrder: true,
       },
       orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
@@ -114,7 +127,9 @@ async function getRandomFeaturedTeams(limit: number) {
       id: `fallback-${index + 1}`,
       name: team.name,
       region: team.area,
-      photoPath: team.image,
+      logoPath: team.logo,
+      homeUniformColor: null,
+      awayUniformColor: null,
       sortOrder: index,
     }));
   }

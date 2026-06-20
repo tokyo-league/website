@@ -9,6 +9,7 @@ export const siteNav = [
 
 export const siteAssets = {
   logo: "/site-assets/common/logo_head.svg",
+  homeHero: "/site-assets/mv/mv_top.jpg",
   heroResult: "/site-assets/results/Aリーグ-3.jpg",
   competitionHero: "/site-assets/teams/photos/池2全体.jpg",
   aboutHero: "/site-assets/mv/mv_prof.jpg",

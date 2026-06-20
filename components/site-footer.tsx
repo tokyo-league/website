@@ -1,4 +1,6 @@
 import Link from "next/link";
+import Image from "next/image";
+import { siteAssets } from "@/lib/site-data";
 
 const footerLinks = [
   { href: "/about", label: "東京リーグについて" },
@@ -10,8 +12,12 @@ export function SiteFooter() {
   return (
     <footer className="site-footer">
       <div className="container site-footer__inner">
-        <div>
-          <p className="section-kicker">TOKYO Junior Soccer League</p>
+        <div className="site-footer__brand">
+          <Image src={siteAssets.logo} alt="東京リーグ" width={72} height={72} />
+          <div>
+            <p className="section-kicker">TOKYO Junior Soccer League</p>
+            <strong>受け継ぐ誇りを、未来へ。</strong>
+          </div>
         </div>
         <div className="site-footer__links">
           {footerLinks.map((item) => (
@@ -20,6 +26,10 @@ export function SiteFooter() {
             </Link>
           ))}
         </div>
+      </div>
+      <div className="container site-footer__bottom">
+        <span>EST. 1982 / TOKYO</span>
+        <span>© TOKYO Junior Soccer League</span>
       </div>
     </footer>
   );

@@ -5,196 +5,77 @@ import { NewsModalList } from "@/components/news-modal-list";
 import { resolveAssetUrl } from "@/lib/asset-url";
 import { buildNewsExcerpt } from "@/lib/news-text";
 import { prisma } from "@/lib/prisma";
-import { divisionCards, newsItems as fallbackNewsItems, siteAssets, teams as fallbackTeams } from "@/lib/site-data";
+import { newsItems as fallbackNewsItems, siteAssets, teams as fallbackTeams } from "@/lib/site-data";
 
 export async function PublicHome() {
   const latestNews = await getLatestNews(3);
   const featuredTeams = await getRandomFeaturedTeams(3);
 
   return (
-    <main className="page-main">
-      <section className="home-hero">
-        <div className="container">
-          <div className="home-hero__panel">
-            <div className="home-hero__content">
-              <div className="home-hero__title-block">
-                <p className="section-kicker">TOKYO Junior Soccer League</p>
-                <h1>第103回 東京リーグ</h1>
-                <p className="home-hero__lead">
-                  東京少年サッカー連盟 東京リーグの試合情報、ニュース、参加チーム情報を掲載しています。
-                </p>
-              </div>
-              <div className="home-intro__links">
-                <Link href="/competitions" className="button">
-                  試合情報
-                </Link>
-                <Link href="/news" className="button button--ghost">
-                  ニュース
-                </Link>
-                <Link href="/teams" className="button button--ghost">
-                  参加チーム
-                </Link>
-              </div>
-              <article className="home-about-link-card">
-                <div>
-                  <p className="section-kicker">About</p>
-                  <h2>東京リーグについて</h2>
-                  <p>組織概要、規約、運営方針などの基本情報をまとめています。</p>
-                </div>
-                <Link href="/about" className="button button--ghost">
-                  説明を見る
-                </Link>
-              </article>
-            </div>
-            <div className="home-hero__media">
-              <Image
-                src={siteAssets.competitionMainVisual}
-                alt="東京リーグ メインビジュアル"
-                fill
-                sizes="(max-width: 960px) 100vw, 52vw"
-              />
-              <div className="home-hero__media-caption">
-                <span>Tokyo League</span>
-                <strong>Match & News</strong>
-              </div>
-            </div>
-          </div>
+    <main className="page-main heritage-home">
+      <section className="heritage-hero" aria-labelledby="home-hero-title">
+        <Image src={siteAssets.homeHero} alt="東京リーグでプレーする選手たち" fill priority sizes="100vw" />
+        <div className="heritage-hero__shade" />
+        <div className="heritage-hero__copy">
+          <p>EST. 1982 / TOKYO</p>
+          <h1 id="home-hero-title">受け継ぐ誇りを、<br />未来へ。</h1>
+          <span>Together, we shape the next generation.</span>
+        </div>
+        <div className="heritage-hero__side" aria-hidden="true"><b>01</b><span>SCROLL TO DISCOVER</span></div>
+      </section>
+
+      <section className="heritage-intro">
+        <div className="heritage-intro__label"><p className="section-kicker">OUR LEAGUE</p><span /></div>
+        <div>
+          <h2>サッカーを通じて、<br />強く、正しく、たくましく。</h2>
+          <p>東京リーグは、少年少女たちが真剣勝負の中で成長し、仲間とともに未来を切り拓くための舞台です。長い歴史を受け継ぎながら、次の一歩をつくります。</p>
+          <Link href="/about" className="heritage-text-link">東京リーグについて <span>→</span></Link>
         </div>
       </section>
 
-      <section className="section-block">
-        <div className="container home-primary-layout">
-          <article className="card home-news-card">
-            <div className="card__header">
-              <div>
-                <p className="section-kicker">News</p>
-                <h2>最新ニュース</h2>
-              </div>
-              <Link href="/news">一覧へ</Link>
-            </div>
-            <NewsModalList items={latestNews} />
-          </article>
-
-          <article className="card home-results-card">
-            <div className="card__header">
-              <div>
-                <p className="section-kicker">Competition</p>
-                <h2>試合結果</h2>
-              </div>
-              <Link href="/competitions">大会詳細へ</Link>
-            </div>
-            <div className="home-results-feature">
-              <div className="home-results-feature__image">
-                <Image
-                  src={siteAssets.heroResult}
-                  alt="東京リーグの試合結果"
-                  fill
-                  sizes="(max-width: 960px) 100vw, 42vw"
-                />
-              </div>
-              <div className="home-results-feature__body">
-                <p className="home-results-feature__eyebrow">開催中のリーグ結果</p>
-                <p className="home-results-feature__title">最新の試合結果や各チームの勝敗を確認できます。</p>
-                <div className="home-results-division-links" aria-label="リーグ別の試合結果">
-                  {divisionCards.map((division) => (
-                    <Link key={division.name} href={division.href} className="home-results-division-link">
-                      <strong>{division.name}を見る</strong>
-                      <span>更新 {division.updatedAt}</span>
-                    </Link>
-                  ))}
-                </div>
-                <div className="button-row home-results-feature__actions">
-                  <Link href="/competitions" className="button">
-                    試合結果を見る
-                  </Link>
-                  <Link href="/downloads" className="button button--ghost">
-                    要項を見る
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </article>
+      <section className="heritage-feature">
+        <div className="heritage-feature__copy">
+          <p className="section-kicker">LATEST COMPETITION</p>
+          <h2>第103回<br />東京リーグ</h2>
+          <p>2026 SEASON</p>
+          <Link href="/competitions" className="heritage-text-link">大会情報を見る <span>↗</span></Link>
+        </div>
+        <div className="heritage-feature__image">
+          <Image src={siteAssets.competitionMainVisual} alt="試合中の選手たち" fill sizes="(max-width: 900px) 100vw, 60vw" />
+          <span>PLAY WITH PRIDE</span>
+        </div>
+        <div className="heritage-feature__data">
+          <div><small>DIVISIONS</small><strong>7</strong></div>
+          <div><small>TEAMS</small><strong>88</strong></div>
+          <div><small>SEASON</small><strong>103</strong></div>
         </div>
       </section>
 
-      <section className="section-block">
-        <div className="container text-section-stack">
-          <article className="card home-teams-card">
-            <div className="card__header">
-              <div>
-                <p className="section-kicker">Teams</p>
-                <h2>参加チーム紹介</h2>
+      <section className="heritage-content heritage-news">
+        <div className="heritage-section-title">
+          <div><p className="section-kicker">JOURNAL</p><h2>最新情報</h2></div>
+          <Link href="/news">すべて見る <span>→</span></Link>
+        </div>
+        <NewsModalList items={latestNews} />
+      </section>
+
+      <section className="heritage-content heritage-teams">
+        <div className="heritage-section-title">
+          <div><p className="section-kicker">OUR TEAMS</p><h2>参加チーム</h2></div>
+          <Link href="/teams">すべて見る <span>→</span></Link>
+        </div>
+        <div className="home-team-grid">
+          {featuredTeams.map((team) => (
+            <article key={team.id} className="home-team-card">
+              <div className="home-team-card__image">
+                <Image src={team.photoPath || siteAssets.teamsHero} alt={team.name} fill sizes="(max-width: 720px) 100vw, 33vw" />
               </div>
-              <Link href="/teams" className="button home-section-link-button">
-                参加チーム一覧
-              </Link>
-            </div>
-            {featuredTeams.length > 0 ? (
-              <div className="home-team-grid">
-                {featuredTeams.map((team) => (
-                  <article key={team.id} className="home-team-card">
-                    <div className="home-team-card__image">
-                      <Image
-                        src={team.photoPath || siteAssets.teamsHero}
-                        alt={team.name}
-                        fill
-                        sizes="(max-width: 960px) 100vw, 33vw"
-                      />
-                    </div>
-                    <div className="home-team-card__copy">
-                      <p className="home-team-card__title">{team.name}</p>
-                      <p>{team.region || "東京都内"}</p>
-                    </div>
-                  </article>
-                ))}
+              <div className="home-team-card__copy">
+                <p>{team.region || "東京都内"}</p>
+                <p className="home-team-card__title">{team.name}</p>
               </div>
-            ) : (
-              <div className="home-team-grid">
-                <article className="home-team-card">
-                  <div className="home-team-card__image">
-                    <Image
-                      src={siteAssets.featuredTeamPhoto}
-                      alt="参加チーム紹介"
-                      fill
-                      sizes="(max-width: 960px) 100vw, 33vw"
-                    />
-                  </div>
-                  <div className="home-team-card__copy">
-                    <p className="home-team-card__title">参加チーム紹介</p>
-                    <p>東京都内</p>
-                  </div>
-                </article>
-                <article className="home-team-card">
-                  <div className="home-team-card__image">
-                    <Image
-                      src={siteAssets.teamsHero}
-                      alt="参加チーム紹介"
-                      fill
-                      sizes="(max-width: 960px) 100vw, 33vw"
-                    />
-                  </div>
-                  <div className="home-team-card__copy">
-                    <p className="home-team-card__title">参加チーム紹介</p>
-                    <p>東京都内</p>
-                  </div>
-                </article>
-                <article className="home-team-card">
-                  <div className="home-team-card__image">
-                    <Image
-                      src={siteAssets.heroResult}
-                      alt="参加チーム紹介"
-                      fill
-                      sizes="(max-width: 960px) 100vw, 33vw"
-                    />
-                  </div>
-                  <div className="home-team-card__copy">
-                    <p className="home-team-card__title">参加チーム紹介</p>
-                    <p>東京都内</p>
-                  </div>
-                </article>
-              </div>
-            )}
-          </article>
+            </article>
+          ))}
         </div>
       </section>
     </main>

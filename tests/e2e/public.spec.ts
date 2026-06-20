@@ -3,21 +3,37 @@ import { expect, test } from "@playwright/test";
 test("公開トップで主要導線とニュースモーダルが開く", async ({ page }) => {
   await page.goto("/");
 
-  await expect(page.getByRole("heading", { level: 1, name: "第103回 東京リーグ" })).toBeVisible();
-  await expect(page.getByRole("main").getByRole("link", { name: "試合情報", exact: true })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "最新ニュース" })).toBeVisible();
-  await expect(page.getByText("最新の試合結果や各チームの勝敗を確認できます。")).toBeVisible();
-  await expect(page.getByRole("link", { name: "Aリーグを見る 更新 03.22" })).toHaveAttribute(
+  await expect(page.getByRole("heading", { level: 1, name: /受け継ぐ誇りを/ })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: "第103回 東京リーグ" })).toBeVisible();
+  await expect(page.getByRole("main").getByRole("link", { name: /大会情報を見る/ })).toHaveAttribute(
     "href",
-    "/competitions/tokyo-league-103/a-league",
+    "/competitions",
   );
-  await expect(page.getByRole("link", { name: "参加チーム一覧" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "最新情報" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "参加チーム" })).toBeVisible();
 
   const detailButton = page.getByRole("button", { name: "詳細を見る" }).first();
   await detailButton.click();
 
   await expect(page.getByRole("dialog")).toBeVisible();
   await expect(page.getByRole("button", { name: "閉じる" })).toBeVisible();
+});
+
+test("スマホ表示でヒーローとハンバーガーメニューが利用できる", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+
+  const hero = page.locator(".heritage-hero");
+  await expect(hero).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: /受け継ぐ誇りを/ })).toBeVisible();
+
+  const menuButton = page.getByRole("button", { name: "メニューを開く" });
+  await expect(menuButton).toBeVisible();
+  await menuButton.click();
+  const navigation = page.getByRole("navigation", { name: "グローバルナビゲーション" });
+  await expect(navigation).toBeVisible();
+  await expect(navigation.getByRole("link", { name: "東京リーグについて", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "メニューを閉じる" })).toBeVisible();
 });
 
 test("公開ダウンロードページが表示できる", async ({ page }) => {

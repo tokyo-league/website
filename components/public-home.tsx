@@ -71,25 +71,19 @@ export async function PublicHome() {
           <div><p className="section-kicker">OUR TEAMS</p><h2>参加チーム</h2></div>
           <Link href="/teams">すべて見る <span>→</span></Link>
         </div>
-        <div className="home-team-grid">
+        <div className="home-team-logo-grid">
           {featuredTeams.map((team) => (
-            <article key={team.id} className="home-team-card">
-              <div className="home-team-card__logo">
+            <article key={team.id} className="home-team-logo-card">
+              <div className="home-team-logo-card__logo">
                 {isDisplayableTeamLogo(team.logoPath) ? (
                   <Image src={team.logoPath!} alt={`${team.name} ロゴ`} width={112} height={112} />
                 ) : (
                   <span aria-hidden="true">{getTeamInitial(team.name)}</span>
                 )}
               </div>
-              <div className="home-team-card__copy">
-                <p>{team.region || "東京都内"}</p>
-                <p className="home-team-card__title">{team.name}</p>
-                {team.homeUniformColor || team.awayUniformColor ? (
-                  <div className="home-team-card__uniforms" aria-label="ユニフォームの色">
-                    {team.homeUniformColor ? <i style={{ backgroundColor: team.homeUniformColor }} /> : null}
-                    {team.awayUniformColor ? <i style={{ backgroundColor: team.awayUniformColor }} /> : null}
-                  </div>
-                ) : null}
+              <div className="home-team-logo-card__copy">
+                <p className="home-team-logo-card__region">{team.region || "東京都内"}</p>
+                <p className="home-team-logo-card__name">{team.name}</p>
               </div>
             </article>
           ))}
@@ -110,8 +104,6 @@ async function getRandomFeaturedTeams(limit: number) {
         name: true,
         region: true,
         logoPath: true,
-        homeUniformColor: true,
-        awayUniformColor: true,
         sortOrder: true,
       },
       orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
@@ -128,8 +120,6 @@ async function getRandomFeaturedTeams(limit: number) {
       name: team.name,
       region: team.area,
       logoPath: team.logo,
-      homeUniformColor: null,
-      awayUniformColor: null,
       sortOrder: index,
     }));
   }

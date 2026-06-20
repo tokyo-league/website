@@ -58,6 +58,17 @@ test("スマホ表示でヒーローとハンバーガーメニューが利用�
   await expect(closeButton.locator("span").first()).toHaveCSS("background-color", "rgb(255, 255, 255)");
   await closeButton.click();
   await expect(navigation).toBeHidden();
+
+  const teamCards = page.locator(".home-team-logo-card");
+  await expect(teamCards).toHaveCount(3);
+  await expect(page.locator(".home-team-card__uniforms")).toHaveCount(0);
+
+  const firstTeamLogo = teamCards.first().locator(".home-team-logo-card__logo");
+  const firstTeamCopy = teamCards.first().locator(".home-team-logo-card__copy");
+  const [teamLogoBox, teamCopyBox] = await Promise.all([firstTeamLogo.boundingBox(), firstTeamCopy.boundingBox()]);
+  expect(teamLogoBox).not.toBeNull();
+  expect(teamCopyBox).not.toBeNull();
+  expect(teamLogoBox!.x + teamLogoBox!.width).toBeLessThanOrEqual(teamCopyBox!.x + 1);
 });
 
 test("公開ダウンロードページが表示できる", async ({ page }) => {

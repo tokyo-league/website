@@ -4,10 +4,6 @@ export const productionRequiredEnv = [
   "AUTH_GOOGLE_SECRET",
   "DATABASE_URL",
   "BLOB_READ_WRITE_TOKEN",
-  "RESEND_API_KEY",
-  "CONTACT_FROM_EMAIL",
-  "NEXT_PUBLIC_TURNSTILE_SITE_KEY",
-  "TURNSTILE_SECRET_KEY",
 ] as const;
 
 export function isProductionDeploymentEnv(env: NodeJS.ProcessEnv = process.env) {

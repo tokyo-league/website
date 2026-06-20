@@ -1,14 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { PublishStatus } from "@prisma/client";
-import { NewsModalList } from "@/components/news-modal-list";
-import { resolveAssetUrl } from "@/lib/asset-url";
-import { buildNewsExcerpt } from "@/lib/news-text";
+import { NewsList } from "@/components/news-list";
 import { prisma } from "@/lib/prisma";
-import { newsItems as fallbackNewsItems, siteAssets, teams as fallbackTeams } from "@/lib/site-data";
+import { getPublishedNews } from "@/lib/public-news";
+import { siteAssets, teams as fallbackTeams } from "@/lib/site-data";
 
 export async function PublicHome() {
-  const latestNews = await getLatestNews(3);
+  const latestNews = await getPublishedNews(3);
   const featuredTeams = await getRandomFeaturedTeams(3);
 
   return (
@@ -56,7 +55,7 @@ export async function PublicHome() {
           <div><p className="section-kicker">JOURNAL</p><h2>最新情報</h2></div>
           <Link href="/news">すべて見る <span>→</span></Link>
         </div>
-        <NewsModalList items={latestNews} />
+        <NewsList items={latestNews} />
       </section>
 
       <section className="heritage-content heritage-teams">
@@ -80,46 +79,6 @@ export async function PublicHome() {
       </section>
     </main>
   );
-}
-
-async function getLatestNews(limit: number) {
-  try {
-    const posts = await prisma.newsPost.findMany({
-      where: {
-        status: PublishStatus.PUBLISHED,
-      },
-      include: {
-        category: true,
-        eyecatchAsset: {
-          select: {
-            storageKey: true,
-          },
-        },
-      },
-      orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
-      take: limit,
-    });
-
-    return Promise.all(posts.map(async (post) => ({
-      id: post.id,
-      title: post.title,
-      excerpt: buildNewsExcerpt(post.body, 96),
-      body: post.body,
-      publishedAtLabel: formatDate(post.publishedAt),
-      categoryName: "お知らせ",
-      imageUrl: await resolveAssetUrl(post.eyecatchAsset?.storageKey),
-    })));
-  } catch {
-    return fallbackNewsItems.slice(0, limit).map((item, index) => ({
-      id: `fallback-news-${index + 1}`,
-      title: item.title,
-      excerpt: buildNewsExcerpt(item.excerpt, 96),
-      body: item.excerpt,
-      publishedAtLabel: item.date,
-      categoryName: item.category,
-      imageUrl: null,
-    }));
-  }
 }
 
 async function getRandomFeaturedTeams(limit: number) {
@@ -152,17 +111,4 @@ async function getRandomFeaturedTeams(limit: number) {
       sortOrder: index,
     }));
   }
-}
-
-function formatDate(value: Date | null) {
-  if (!value) {
-    return "-";
-  }
-
-  return value.toLocaleDateString("ja-JP", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    timeZone: "Asia/Tokyo",
-  });
 }

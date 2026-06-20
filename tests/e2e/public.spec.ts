@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test("公開トップで主要導線とニュースモーダルが開く", async ({ page }) => {
+test("公開トップからニュース詳細ページへ遷移できる", async ({ page }) => {
   await page.goto("/");
 
   await expect(page.getByRole("heading", { level: 1, name: /受け継ぐ誇りを/ })).toBeVisible();
@@ -12,11 +12,21 @@ test("公開トップで主要導線とニュースモーダルが開く", async
   await expect(page.getByRole("heading", { name: "最新情報" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "参加チーム" })).toBeVisible();
 
-  const detailButton = page.getByRole("button", { name: "詳細を見る" }).first();
-  await detailButton.click();
+  const firstNewsCard = page.locator(".heritage-news .news-list-item").first();
+  const newsTitle = await firstNewsCard.getByRole("heading").innerText();
+  const detailLink = firstNewsCard.getByRole("link", { name: "詳細を見る" });
+  await expect(detailLink).toBeVisible();
 
-  await expect(page.getByRole("dialog")).toBeVisible();
-  await expect(page.getByRole("button", { name: "閉じる" })).toBeVisible();
+  const [cardBox, linkBox] = await Promise.all([firstNewsCard.boundingBox(), detailLink.boundingBox()]);
+  expect(cardBox).not.toBeNull();
+  expect(linkBox).not.toBeNull();
+  expect(linkBox!.x + linkBox!.width).toBeLessThanOrEqual(cardBox!.x + cardBox!.width + 1);
+
+  await detailLink.click();
+  await expect(page).toHaveURL(/\/news\/[^/]+$/);
+  await expect(page.getByRole("heading", { level: 1, name: newsTitle })).toBeVisible();
+  await expect(page.locator(".news-detail-hero__media img")).toBeVisible();
+  await expect(page.getByRole("link", { name: /ニュース一覧/ }).first()).toBeVisible();
 });
 
 test("スマホ表示でヒーローとハンバーガーメニューが利用できる", async ({ page }) => {
@@ -51,6 +61,7 @@ test("ニュースページでニュースカードが表示できる", async ({
 
   await expect(page.getByRole("heading", { level: 1, name: "ニュース" })).toBeVisible();
   await expect(page.locator(".news-index .news-list-item").first()).toBeVisible();
+  await expect(page.locator(".news-index").getByRole("link", { name: "詳細を見る" }).first()).toBeVisible();
   await expect(page.getByRole("heading", { name: "関連資料" })).toHaveCount(0);
 });
 

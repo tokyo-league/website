@@ -168,6 +168,15 @@ body:has(.heritage-home) .site-header {
 .page-intro__inner > div:first-child { align-self: stretch; display: flex; flex-direction: column; justify-content: center; padding: clamp(34px, 6vw, 76px); }
 .page-intro h1 { margin: 16px 0 0; font-size: clamp(44px, 5.5vw, 76px); font-weight: 500; letter-spacing: -.06em; }
 .page-intro p { color: rgba(255,255,255,.65); }
+.page-intro__inner > div:first-child .button--ghost {
+  border-color: rgba(255, 255, 255, 0.55);
+  color: white;
+}
+.page-intro__inner > div:first-child .button--ghost:hover {
+  border-color: var(--gold-light);
+  background: var(--gold-light);
+  color: #111;
+}
 .page-intro__visual { align-self: stretch; min-height: 480px; border: 0; border-radius: 0; box-shadow: none; }
 .page-intro__visual img { filter: saturate(.72); }
 .page-intro__visual::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(18,19,16,.3), transparent 45%), linear-gradient(0deg, rgba(0,0,0,.42), transparent 55%); }

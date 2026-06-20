@@ -73,6 +73,10 @@ test("試合情報一覧からリーグ詳細まで辿れる", async ({ page }) 
 
   await expect(page.getByRole("heading", { name: "試合情報" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "開催中の大会" })).toBeVisible();
+  await expect(page.getByRole("main").getByRole("link", { name: "関連ニュース" })).toHaveCSS(
+    "color",
+    "rgb(255, 255, 255)",
+  );
 
   await page.getByRole("link", { name: "大会詳細へ" }).first().click();
 

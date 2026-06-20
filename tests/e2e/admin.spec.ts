@@ -24,6 +24,12 @@ test("結果管理で年度・大会・リーグ絞り込みと編集UIが表示
 
   await expect(page.getByRole("heading", { name: "結果管理" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "対象リーグ" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Excelで試合結果を入稿" })).toBeVisible();
+  await expect(page.getByRole("list", { name: "Excel入稿の手順" })).toContainText("対象を選択");
+  await expect(page.getByRole("list", { name: "Excel入稿の手順" })).toContainText("内容を確認");
+  await expect(page.locator(".admin-excel-import .upload-field__button", { hasText: "Excelを選択" })).toBeVisible();
+  await expect(page.getByLabel("第99回東京リーグなどの結果管理表")).toHaveAttribute("accept", /\.xlsx/);
+  await expect(page.getByRole("button", { name: "Excelの内容を読み取る" })).toBeDisabled();
   await expect(filterSelects.nth(0)).toHaveValue("2026");
   await expect(filterSelects.nth(1)).toHaveValue("第103回 東京リーグ");
   await expect(filterSelects.nth(2)).toHaveValue("e2e-division-a");

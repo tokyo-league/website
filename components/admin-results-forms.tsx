@@ -1,12 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useState, type FormEvent } from "react";
 import {
   addStandingRow,
   createMatch,
   deleteMatch,
   deleteStanding,
+  importMatchesFromExcel,
   regenerateStandingsFromMatches,
   replaceStandings,
   type ResultActionState,
@@ -15,6 +16,7 @@ import {
   useGeneratedStarTableAsResultImage,
 } from "@/app/admin/results/actions";
 import { ConfirmForm } from "@/components/confirm-form";
+import type { MatchExcelPreview } from "@/lib/match-excel-import-types";
 import { IMAGE_UPLOAD_MAX_BYTES, formatUploadLimit } from "@/lib/upload-limits";
 
 const initialState: ResultActionState = {
@@ -103,7 +105,7 @@ export function AdminResultsForms({
   }, [filteredDivisions, selectedDivisionId]);
 
   const selectedDivision = divisions.find((division) => division.id === selectedDivisionId) ?? divisions[0];
-  const currentSeasonYear = new Date().getFullYear();
+  const currentSeasonYear = Number(new Intl.DateTimeFormat("en", { year: "numeric", timeZone: "Asia/Tokyo" }).format(new Date()));
   const canEditScores = Boolean(
     selectedDivision && (selectedDivision.seasonIsCurrent || selectedDivision.seasonYear === currentSeasonYear),
   );
@@ -166,8 +168,9 @@ export function AdminResultsForms({
       <article className="admin-card">
         <div className="card__header">
           <div>
-            <p className="section-kicker">Target</p>
+            <p className="section-kicker">Step 1</p>
             <h3>対象リーグ</h3>
+            <p className="admin-section-lead">Excelを反映する年度・大会・リーグを先に選びます。</p>
           </div>
         </div>
         <div className="admin-filter-grid">
@@ -238,6 +241,13 @@ export function AdminResultsForms({
           </div>
         </div>
       </article>
+
+      <ExcelImportPanel
+        key={selectedDivision.id}
+        divisionId={selectedDivision.id}
+        divisionLabel={selectedDivision.label}
+        onToast={setToast}
+      />
 
       <div className="admin-columns">
         <article className="admin-card">
@@ -513,6 +523,159 @@ export function AdminResultsForms({
       </article>
     </>
   );
+}
+
+function ExcelImportPanel({
+  divisionId,
+  divisionLabel,
+  onToast,
+}: {
+  divisionId: string;
+  divisionLabel: string;
+  onToast: (state: ResultActionState) => void;
+}) {
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<MatchExcelPreview | null>(null);
+  const [previewError, setPreviewError] = useState("");
+  const [previewPending, setPreviewPending] = useState(false);
+  const [importState, importAction, importPending] = useActionState(importMatchesFromExcel, initialState);
+
+  useEffect(() => {
+    if (importState.status !== "idle") onToast(importState);
+  }, [importState, onToast]);
+
+  async function handlePreview(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!file) {
+      setPreviewError("Excelファイルを選択してください。");
+      return;
+    }
+
+    setPreviewPending(true);
+    setPreviewError("");
+    setPreview(null);
+
+    try {
+      const formData = new FormData();
+      formData.set("divisionId", divisionId);
+      formData.set("file", file);
+      const response = await fetch("/api/admin/results/import-excel/preview", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await response.json() as MatchExcelPreview & { message?: string };
+
+      if (!response.ok) throw new Error(data.message || "Excelを読み取れませんでした。");
+      setPreview(data);
+    } catch (error) {
+      setPreviewError(error instanceof Error ? error.message : "Excelを読み取れませんでした。");
+    } finally {
+      setPreviewPending(false);
+    }
+  }
+
+  const createCount = preview?.rows.filter((row) => row.operation === "create").length ?? 0;
+  const updateCount = preview?.rows.filter((row) => row.operation === "update").length ?? 0;
+  const canImport = Boolean(preview && preview.rows.length > 0 && preview.errors.length === 0);
+
+  return (
+    <article className="admin-card admin-excel-import">
+      <div className="card__header">
+        <div>
+          <p className="section-kicker">Steps 2–4</p>
+          <h3>Excelで試合結果を入稿</h3>
+          <p className="admin-section-lead">「管理表」シートを読み取り、確認してから試合結果へ反映します。</p>
+        </div>
+        <span className="admin-excel-import__badge">.xlsx</span>
+      </div>
+
+      <ol className="admin-import-steps" aria-label="Excel入稿の手順">
+        <li className="is-complete"><span>1</span><strong>対象を選択</strong><small>{divisionLabel}</small></li>
+        <li className={file ? "is-complete" : "is-current"}><span>2</span><strong>Excelを選択</strong><small>管理表をアップロード</small></li>
+        <li className={preview ? "is-complete" : file ? "is-current" : ""}><span>3</span><strong>内容を確認</strong><small>試合数・チーム名を確認</small></li>
+        <li className={importState.status === "success" ? "is-complete" : preview ? "is-current" : ""}><span>4</span><strong>試合結果に反映</strong><small>新規追加・既存更新</small></li>
+      </ol>
+
+      <form className="admin-form-stack" onSubmit={handlePreview}>
+        <div className="admin-field">
+          <span>第99回東京リーグなどの結果管理表</span>
+          <ExcelUploadField
+            fileName={file?.name ?? ""}
+            onFileChange={(nextFile) => {
+              setFile(nextFile);
+              setPreview(null);
+              setPreviewError("");
+            }}
+          />
+          <small className="admin-field__help">「管理表」シートが入った .xlsx（5MB以下）を選択してください。</small>
+        </div>
+        {previewError ? <p className="admin-inline-message admin-inline-message--error" role="alert">{previewError}</p> : null}
+        <button type="submit" className="button" disabled={!file || previewPending || importPending}>
+          {previewPending ? "読み取り中..." : "Excelの内容を読み取る"}
+        </button>
+      </form>
+
+      {preview ? (
+        <div className="admin-import-preview">
+          <div className="admin-import-summary" aria-label="入稿内容の集計">
+            <div><span>読み取りシート</span><strong>{preview.sheetName}</strong></div>
+            <div><span>反映する試合</span><strong>{preview.rows.length}件</strong></div>
+            <div><span>新規追加</span><strong>{createCount}件</strong></div>
+            <div><span>既存更新</span><strong>{updateCount}件</strong></div>
+          </div>
+
+          {preview.warnings.map((warning) => (
+            <p key={warning} className="admin-inline-message admin-import-message">{warning}</p>
+          ))}
+          {preview.errors.length > 0 ? (
+            <div className="admin-import-errors" role="alert">
+              <strong>Excelを修正して、もう一度読み取ってください</strong>
+              <ul>{preview.errors.map((error) => <li key={error}>{error}</li>)}</ul>
+            </div>
+          ) : null}
+
+          {preview.rows.length > 0 ? (
+            <div className="admin-import-table-wrap">
+              <table className="admin-import-table">
+                <thead>
+                  <tr><th>Excel行</th><th>試合日</th><th>対戦・スコア</th><th>会場</th><th>反映</th></tr>
+                </thead>
+                <tbody>
+                  {preview.rows.map((row) => (
+                    <tr key={`${row.sourceRow}-${row.homeTeamId}-${row.awayTeamId}`}>
+                      <td>{row.sourceRow}</td>
+                      <td>{formatJapanDate(row.matchDate)}</td>
+                      <td><strong>{row.homeTeamName} {row.homeScore} - {row.awayScore} {row.awayTeamName}</strong></td>
+                      <td>{row.venueName || "未設定"}</td>
+                      <td><span className={`admin-import-operation admin-import-operation--${row.operation}`}>{row.operation === "update" ? "更新" : "新規"}</span></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : null}
+
+          <form action={importAction} className="admin-import-confirm">
+            <input type="hidden" name="divisionId" value={divisionId} />
+            <input type="hidden" name="rowsJson" value={JSON.stringify(preview.rows)} />
+            <div>
+              <strong>{divisionLabel} に反映します</strong>
+              <p>同じ対戦カードは更新し、新しい対戦は追加します。Excelにない既存試合は残ります。</p>
+            </div>
+            <button type="submit" className="button" disabled={!canImport || importPending}>
+              {importPending ? "反映中..." : `${preview.rows.length}試合を反映する`}
+            </button>
+          </form>
+        </div>
+      ) : null}
+    </article>
+  );
+}
+
+function formatJapanDate(value: string) {
+  const [year, month, day] = value.split("-");
+  return `${year}/${month}/${day}`;
 }
 
 function StandingRowAddForm({
@@ -890,6 +1053,46 @@ function UploadField({
       </label>
       <small className="admin-field__help">{hint}</small>
       {errorMessage ? <small className="admin-field__error">{errorMessage}</small> : null}
+    </div>
+  );
+}
+
+function ExcelUploadField({
+  fileName,
+  onFileChange,
+}: {
+  fileName: string;
+  onFileChange: (file: File | null) => void;
+}) {
+  const [isDragging, setIsDragging] = useState(false);
+
+  return (
+    <div className="upload-field">
+      <input
+        id="matchResultsExcel"
+        type="file"
+        aria-label="第99回東京リーグなどの結果管理表"
+        accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        className="upload-field__input"
+        onChange={(event) => onFileChange(event.target.files?.[0] ?? null)}
+      />
+      <label
+        htmlFor="matchResultsExcel"
+        className={`upload-field__label${isDragging ? " is-dragging" : ""}`}
+        onDragOver={(event) => {
+          event.preventDefault();
+          setIsDragging(true);
+        }}
+        onDragLeave={() => setIsDragging(false)}
+        onDrop={(event) => {
+          event.preventDefault();
+          setIsDragging(false);
+          onFileChange(event.dataTransfer.files?.[0] ?? null);
+        }}
+      >
+        <span className="upload-field__button">Excelを選択</span>
+        <span className="upload-field__meta">{fileName || "ここにドラッグ&ドロップ、またはクリックして選択"}</span>
+      </label>
     </div>
   );
 }

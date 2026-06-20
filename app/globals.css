@@ -2647,6 +2647,210 @@ button {
   margin-top: 18px;
 }
 
+.admin-section-lead {
+  margin: 8px 0 0;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.admin-excel-import {
+  border-color: rgba(31, 78, 163, 0.2);
+  background:
+    linear-gradient(145deg, rgba(244, 248, 255, 0.86), rgba(255, 255, 255, 0.98) 42%),
+    var(--surface);
+}
+
+.admin-excel-import__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid rgba(31, 78, 163, 0.18);
+  border-radius: 999px;
+  background: #edf4ff;
+  color: #1f4ea3;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.admin-import-steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin-import-steps li {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  gap: 2px 10px;
+  align-items: center;
+  padding: 13px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.84);
+}
+
+.admin-import-steps li > span {
+  grid-row: 1 / span 2;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #e7e9ee;
+  color: #5d6470;
+  font-weight: 800;
+}
+
+.admin-import-steps strong {
+  font-size: 13px;
+}
+
+.admin-import-steps small {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-import-steps li.is-current {
+  border-color: rgba(31, 78, 163, 0.36);
+  box-shadow: 0 8px 18px rgba(31, 78, 163, 0.08);
+}
+
+.admin-import-steps li.is-current > span {
+  background: #1f4ea3;
+  color: #fff;
+}
+
+.admin-import-steps li.is-complete > span {
+  background: #20794a;
+  color: #fff;
+}
+
+.admin-import-preview {
+  display: grid;
+  gap: 16px;
+  margin-top: 22px;
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
+}
+
+.admin-import-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.admin-import-summary div {
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fff;
+}
+
+.admin-import-summary span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.admin-import-summary strong {
+  font-size: 18px;
+}
+
+.admin-import-message {
+  margin: 0;
+  color: #725a18;
+}
+
+.admin-import-errors {
+  padding: 16px 18px;
+  border: 1px solid rgba(179, 58, 39, 0.22);
+  border-radius: 16px;
+  background: #fff5f3;
+  color: #8c2f20;
+}
+
+.admin-import-errors ul {
+  margin: 10px 0 0;
+  padding-left: 20px;
+  line-height: 1.7;
+}
+
+.admin-import-table-wrap {
+  max-height: 420px;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fff;
+}
+
+.admin-import-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.admin-import-table th,
+.admin-import-table td {
+  padding: 11px 12px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.admin-import-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #f1f5fb;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.admin-import-operation {
+  display: inline-flex;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.admin-import-operation--create {
+  background: #edf4ff;
+  color: #1f4ea3;
+}
+
+.admin-import-operation--update {
+  background: #fff4db;
+  color: #725a18;
+}
+
+.admin-import-confirm {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 16px;
+  border: 1px solid rgba(31, 78, 163, 0.2);
+  border-radius: 18px;
+  background: #f5f8fd;
+}
+
+.admin-import-confirm p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
 .admin-field {
   display: grid;
   gap: 8px;
@@ -3133,6 +3337,29 @@ button {
 .admin-toast--error {
   border-color: rgba(166, 51, 36, 0.28);
   background: #fff5f3;
+}
+
+@media (max-width: 800px) {
+  .admin-import-steps,
+  .admin-import-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-import-confirm {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .admin-import-confirm .button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 520px) {
+  .admin-import-steps,
+  .admin-import-summary {
+    grid-template-columns: 1fr;
+  }
 }
 
 .login-shell {

@@ -180,6 +180,156 @@ export async function createMatch(
   };
 }
 
+export async function importMatchesFromExcel(
+  _prevState: ResultActionState,
+  formData: FormData,
+): Promise<ResultActionState> {
+  try {
+    const scope = await getAdminScope();
+    const divisionId = sanitizePlainText(String(formData.get("divisionId") ?? ""), 64);
+    const rowsJson = String(formData.get("rowsJson") ?? "");
+
+    if (!isValidUuid(divisionId) || !rowsJson || rowsJson.length > 200_000) {
+      return { status: "error", message: "Excel入稿データを確認してください。" };
+    }
+
+    if (!canEditDivision(scope, divisionId)) {
+      return { status: "error", message: "このリーグを編集する権限がありません。" };
+    }
+
+    const parsed = JSON.parse(rowsJson) as unknown;
+
+    if (!Array.isArray(parsed) || parsed.length === 0 || parsed.length > 200) {
+      return { status: "error", message: "入稿できる試合データは1〜200件です。" };
+    }
+
+    const rows = parsed.map((raw) => {
+      const row = typeof raw === "object" && raw !== null ? raw as Record<string, unknown> : {};
+      return {
+        sourceRow: parseInteger(String(row.sourceRow ?? "")) ?? 0,
+        matchDate: sanitizePlainText(String(row.matchDate ?? ""), 10),
+        homeTeamId: sanitizePlainText(String(row.homeTeamId ?? ""), 64),
+        awayTeamId: sanitizePlainText(String(row.awayTeamId ?? ""), 64),
+        homeScore: parseInteger(String(row.homeScore ?? "")),
+        awayScore: parseInteger(String(row.awayScore ?? "")),
+        venueName: sanitizePlainText(String(row.venueName ?? ""), 80),
+      };
+    });
+
+    const invalidRow = rows.find(
+      (row) =>
+        !isValidUuid(row.homeTeamId) ||
+        !isValidUuid(row.awayTeamId) ||
+        row.homeTeamId === row.awayTeamId ||
+        !isValidImportDate(row.matchDate) ||
+        row.homeScore === null ||
+        row.awayScore === null ||
+        row.homeScore < 0 ||
+        row.awayScore < 0 ||
+        row.homeScore > 99 ||
+        row.awayScore > 99,
+    );
+
+    if (invalidRow) {
+      return { status: "error", message: `${invalidRow.sourceRow || "不明"}行目の試合データを確認してください。` };
+    }
+
+    const division = await prisma.division.findUnique({
+      where: { id: divisionId },
+      select: {
+        teams: { select: { teamId: true } },
+        matches: {
+          select: { id: true, homeTeamId: true, awayTeamId: true },
+          orderBy: { createdAt: "asc" },
+        },
+      },
+    });
+
+    if (!division) {
+      return { status: "error", message: "対象リーグが見つかりませんでした。" };
+    }
+
+    const teamIds = new Set(division.teams.map((assignment) => assignment.teamId));
+
+    if (rows.some((row) => !teamIds.has(row.homeTeamId) || !teamIds.has(row.awayTeamId))) {
+      return { status: "error", message: "所属チームと一致しない試合が含まれています。もう一度Excelを確認してください。" };
+    }
+
+    const pairKeys = rows.map((row) => buildMatchPairKey(row.homeTeamId, row.awayTeamId));
+
+    if (new Set(pairKeys).size !== pairKeys.length) {
+      return { status: "error", message: "同じ対戦カードが重複しています。" };
+    }
+
+    const existingByPair = new Map(
+      division.matches.map((match) => [buildMatchPairKey(match.homeTeamId, match.awayTeamId), match]),
+    );
+    let createdCount = 0;
+    let updatedCount = 0;
+
+    await prisma.$transaction(async (tx) => {
+      for (const [index, row] of rows.entries()) {
+        const venue = row.venueName
+          ? await tx.venue.upsert({
+              where: { name: row.venueName },
+              update: {},
+              create: { name: row.venueName },
+              select: { id: true },
+            })
+          : null;
+        const existing = existingByPair.get(buildMatchPairKey(row.homeTeamId, row.awayTeamId));
+        const data = {
+          matchDate: new Date(`${row.matchDate}T00:00:00.000Z`),
+          venueId: venue?.id ?? null,
+          homeTeamId: row.homeTeamId,
+          awayTeamId: row.awayTeamId,
+          homeScore: row.homeScore,
+          awayScore: row.awayScore,
+          status: MatchStatus.PLAYED,
+          sortOrder: index + 1,
+          updatedById: scope.admin.id,
+        };
+
+        if (existing) {
+          await tx.match.update({ where: { id: existing.id }, data });
+          updatedCount += 1;
+        } else {
+          await tx.match.create({
+            data: {
+              divisionId,
+              ...data,
+              createdById: scope.admin.id,
+            },
+          });
+          createdCount += 1;
+        }
+      }
+
+      await tx.division.update({
+        where: { id: divisionId },
+        data: {
+          status: PublishStatus.PUBLISHED,
+          lastUpdatedAt: new Date(),
+        },
+      });
+    });
+
+    revalidatePath("/admin/results");
+    revalidatePath("/competitions");
+
+    return {
+      status: "success",
+      message: `${rows.length}試合を反映しました（新規${createdCount}件・更新${updatedCount}件）。`,
+    };
+  } catch (error) {
+    console.error("importMatchesFromExcel failed", error);
+    return {
+      status: "error",
+      message: "Excel入稿の反映に失敗しました。内容を確認してもう一度お試しください。",
+    };
+  }
+}
+
 export async function updateMatch(
   _prevState: ResultActionState,
   formData: FormData,
@@ -744,6 +894,17 @@ function canEditDivision(
   divisionId: string,
 ) {
   return scope.admin.role === "OWNER" || scope.accessibleDivisions.some((division) => division.id === divisionId);
+}
+
+function buildMatchPairKey(teamAId: string, teamBId: string) {
+  return [teamAId, teamBId].sort().join(":");
+}
+
+function isValidImportDate(value: string) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const [year, month, day] = value.split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day;
 }
 
 async function uploadResultImage(fileValue: FormDataEntryValue | null) {

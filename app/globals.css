@@ -107,6 +107,7 @@ body:has(.heritage-home) .site-header {
 .heritage-hero { position: relative; height: max(680px, 94svh); min-height: 680px; overflow: hidden; color: white; }
 .heritage-hero > img { object-fit: cover; object-position: center 43%; filter: saturate(.7) contrast(1.04); }
 .heritage-hero__shade { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(0,0,0,.78), rgba(0,0,0,.1) 70%), linear-gradient(0deg, rgba(0,0,0,.42), transparent 48%); }
+.heritage-hero__brand { display: none; }
 .heritage-hero__copy { position: absolute; z-index: 1; left: clamp(28px, 7vw, 110px); bottom: 12%; }
 .heritage-hero__copy > p { margin: 0; color: var(--gold-light); font: 800 13px var(--condensed); letter-spacing: .3em; }
 .heritage-hero__copy h1 { margin: 22px 0 26px; font-size: clamp(54px, 8.2vw, 124px); font-weight: 500; line-height: .98; letter-spacing: -.075em; }
@@ -255,10 +256,11 @@ body:has(.heritage-home) .site-header {
   .site-header,
   .site-header__inner { height: 76px; min-height: 76px; }
   .site-header__inner { width: 100%; padding: 0 20px; }
-  .site-header__logo { height: 60px; padding: 4px 10px 4px 5px; }
+  .site-header__logo { flex: 0 0 60px; width: 60px; max-width: 60px; height: 60px; padding: 4px; border-radius: 50%; overflow: hidden; }
   .site-header__logo img { width: 50px; height: 50px; }
-  .site-header__menu-button { z-index: 31; display: flex; margin-left: auto; border-color: currentColor; border-radius: 0; background: transparent; box-shadow: none; }
+  .site-header__menu-button { z-index: 32; display: flex; flex: 0 0 46px; margin-left: auto; border-color: rgba(18,19,16,.42); border-radius: 0; background: transparent; color: var(--dark); box-shadow: none; }
   .site-header__menu-button span { background: currentColor; }
+  body:has(.heritage-home) .site-header__menu-button { border-color: rgba(255,255,255,.72); background: rgba(18,19,16,.24); color: white; }
   .site-header__nav {
     position: fixed;
     inset: 0;
@@ -279,11 +281,26 @@ body:has(.heritage-home) .site-header {
     transition: opacity .22s ease, visibility .22s ease, transform .22s ease;
   }
   .site-header__nav.is-open { opacity: 1; visibility: visible; transform: translateY(0); }
-  .site-header__nav > a:not(.site-header__result-link) { padding: 18px 4px; border-bottom: 1px solid rgba(255,255,255,.16); font-size: 18px; }
+  .site-header__nav > a:not(.site-header__result-link) {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 58px;
+    padding: 0 4px;
+    border: 0;
+    border-bottom: 1px solid rgba(255,255,255,.18);
+    border-radius: 0;
+    background: transparent;
+    color: white;
+    font-size: 17px;
+  }
   .site-header__nav > a::after { display: none; }
   .site-header__result-link { align-self: auto; min-height: 64px; margin: 24px 0 0; justify-content: space-between; padding: 0 22px; }
   body.has-open-menu { overflow: hidden; }
   body.has-open-menu .site-header { color: white; }
+  body.has-open-menu .site-header__logo { opacity: 0; visibility: hidden; }
+  body.has-open-menu .site-header__menu-button { position: fixed; top: 20px; right: 20px; border-color: rgba(255,255,255,.56); background: #1c1d19; color: white; }
+  body.has-open-menu .site-header__menu-button span { background: white; }
   .heritage-feature { grid-template-columns: 1fr; }
   .heritage-feature__copy { min-height: 480px; }
   .heritage-feature__image { min-height: 500px; }
@@ -303,12 +320,18 @@ body:has(.heritage-home) .site-header {
 @media (max-width: 700px) {
   .container { width: min(100% - 32px, 1180px); }
   .site-header__logo-copy { display: none; }
-  .site-header__logo { width: 58px; padding: 4px; }
-  .heritage-hero { height: max(620px, 86svh); min-height: 620px; }
-  .heritage-hero > img { object-position: 58% center; }
-  .heritage-hero__shade { background: linear-gradient(90deg, rgba(0,0,0,.7), rgba(0,0,0,.13)), linear-gradient(0deg, rgba(0,0,0,.55), transparent 55%); }
-  .heritage-hero__copy { right: 24px; left: 24px; bottom: 10%; }
-  .heritage-hero__copy h1 { margin-block: 18px 22px; font-size: clamp(48px, 15vw, 72px); line-height: 1.04; }
+  .site-header__logo { flex-basis: 58px; width: 58px; max-width: 58px; height: 58px; padding: 4px; }
+  .heritage-hero { height: max(720px, 100svh); min-height: 720px; }
+  .heritage-hero > img { object-position: 36% center; }
+  .heritage-hero__shade { background: linear-gradient(90deg, rgba(0,0,0,.48), rgba(0,0,0,.06)), linear-gradient(0deg, rgba(0,0,0,.78), rgba(0,0,0,.05) 72%); }
+  .heritage-hero__brand { position: absolute; z-index: 1; top: 116px; right: 0; display: grid; gap: 22px; width: calc(100% - 48px); padding: 18px 24px 18px 22px; border-left: 3px solid var(--gold-light); background: rgba(18,19,16,.82); backdrop-filter: blur(7px); }
+  .heritage-hero__brand p { margin: 0; font: 700 17px/1.2 var(--condensed); letter-spacing: .05em; }
+  .heritage-hero__brand p span { color: var(--gold-light); font-size: 22px; font-weight: 900; }
+  .heritage-hero__brand > div { display: grid; gap: 4px; }
+  .heritage-hero__brand strong { font-size: 24px; line-height: 1.15; }
+  .heritage-hero__brand > div > span { color: rgba(255,255,255,.68); font-size: 11px; font-weight: 700; letter-spacing: .08em; }
+  .heritage-hero__copy { right: 24px; left: 24px; bottom: 7%; }
+  .heritage-hero__copy h1 { max-width: 340px; margin-block: 16px 20px; font-size: clamp(48px, 14vw, 62px); line-height: 1.04; }
   .heritage-hero__copy > span { display: block; max-width: 250px; font-size: 9px; line-height: 1.7; }
   .heritage-hero__side { display: none; }
   .heritage-intro { grid-template-columns: 1fr; gap: 42px; padding: 78px 24px; }

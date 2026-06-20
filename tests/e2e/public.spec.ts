@@ -36,14 +36,28 @@ test("スマホ表示でヒーローとハンバーガーメニューが利用�
   const hero = page.locator(".heritage-hero");
   await expect(hero).toBeVisible();
   await expect(page.getByRole("heading", { level: 1, name: /受け継ぐ誇りを/ })).toBeVisible();
+  await expect(hero.getByText("TOKYO Junior Soccer League", { exact: true })).toBeVisible();
+  await expect(hero.getByText("東京リーグ", { exact: true })).toBeVisible();
+  await expect(hero.getByText("東京少年サッカー連盟", { exact: true })).toBeVisible();
+
+  const logoBox = await page.getByRole("link", { name: "東京リーグ トップページ" }).boundingBox();
+  expect(logoBox).not.toBeNull();
+  expect(Math.abs(logoBox!.width - logoBox!.height)).toBeLessThanOrEqual(1);
 
   const menuButton = page.getByRole("button", { name: "メニューを開く" });
   await expect(menuButton).toBeVisible();
   await menuButton.click();
   const navigation = page.getByRole("navigation", { name: "グローバルナビゲーション" });
   await expect(navigation).toBeVisible();
-  await expect(navigation.getByRole("link", { name: "東京リーグについて", exact: true })).toBeVisible();
-  await expect(page.getByRole("button", { name: "メニューを閉じる" })).toBeVisible();
+  const aboutLink = navigation.getByRole("link", { name: "東京リーグについて", exact: true });
+  await expect(aboutLink).toBeVisible();
+  await expect(aboutLink).toHaveCSS("color", "rgb(255, 255, 255)");
+  await expect(aboutLink).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+  const closeButton = page.getByRole("button", { name: "メニューを閉じる" });
+  await expect(closeButton).toBeVisible();
+  await expect(closeButton.locator("span").first()).toHaveCSS("background-color", "rgb(255, 255, 255)");
+  await closeButton.click();
+  await expect(navigation).toBeHidden();
 });
 
 test("公開ダウンロードページが表示できる", async ({ page }) => {

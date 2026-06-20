@@ -15,6 +15,13 @@ export async function PublicHome() {
       <section className="heritage-hero" aria-labelledby="home-hero-title">
         <Image src={siteAssets.homeHero} alt="東京リーグでプレーする選手たち" fill priority sizes="100vw" />
         <div className="heritage-hero__shade" />
+        <div className="heritage-hero__brand">
+          <p><span>TOKYO</span> Junior Soccer League</p>
+          <div>
+            <strong>東京リーグ</strong>
+            <span>東京少年サッカー連盟</span>
+          </div>
+        </div>
         <div className="heritage-hero__copy">
           <p>EST. 1982 / TOKYO</p>
           <h1 id="home-hero-title">受け継ぐ誇りを、<br />未来へ。</h1>

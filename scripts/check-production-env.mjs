@@ -8,6 +8,10 @@ const requiredEnv = [
   "DATABASE_URL",
   "DIRECT_URL",
   "BLOB_READ_WRITE_TOKEN",
+  "RESEND_API_KEY",
+  "CONTACT_FROM_EMAIL",
+  "NEXT_PUBLIC_TURNSTILE_SITE_KEY",
+  "TURNSTILE_SECRET_KEY",
 ];
 
 const options = parseArgs(process.argv.slice(2));
@@ -56,6 +60,14 @@ if (env.DIRECT_URL && !isPostgresUrl(env.DIRECT_URL)) {
 
 if (env.BLOB_READ_WRITE_TOKEN && !env.BLOB_READ_WRITE_TOKEN.startsWith("vercel_blob_rw_")) {
   errors.push("BLOB_READ_WRITE_TOKEN は Vercel Blob の read/write token を設定してください。");
+}
+
+if (env.RESEND_API_KEY && !env.RESEND_API_KEY.startsWith("re_")) {
+  errors.push("RESEND_API_KEY は Resend API key の形式を確認してください。");
+}
+
+if (env.CONTACT_FROM_EMAIL && !env.CONTACT_FROM_EMAIL.includes("@")) {
+  errors.push("CONTACT_FROM_EMAIL は送信元メールアドレスを設定してください。");
 }
 
 if (env.DATABASE_URL && env.DIRECT_URL && env.DATABASE_URL === env.DIRECT_URL) {

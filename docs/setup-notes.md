@@ -11,7 +11,7 @@
 ## ローカルセットアップ
 
 1. `.env.example` を `.env.local` か `.env.dev` に反映
-2. `DATABASE_URL`, `DIRECT_URL`, `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `BLOB_READ_WRITE_TOKEN` を設定
+2. `DATABASE_URL`, `DIRECT_URL`, `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `BLOB_READ_WRITE_TOKEN`, `RESEND_API_KEY`, `CONTACT_FROM_EMAIL`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` を設定
 3. `npm install`
 4. `npm run prisma:generate`
 5. `npm run prisma:validate`

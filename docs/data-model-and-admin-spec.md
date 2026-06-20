@@ -40,10 +40,10 @@
 | column | type | notes |
 | --- | --- | --- |
 | id | uuid pk | |
-| email | text unique | ログインID |
+| email | text unique | ログインIDまたは問い合わせ通知先 |
 | name | text | 表示名 |
-| role | text | `owner`, `editor` |
-| is_active | boolean | 無効化した管理者はログイン不可 |
+| role | text | `owner`, `editor`, `contact` |
+| is_active | boolean | 無効化した管理者はログイン不可。`contact` は問い合わせ通知対象外 |
 | created_at | timestamptz | |
 | updated_at | timestamptz | |
 
@@ -624,8 +624,9 @@
 
 - 管理画面は Google OIDC + NextAuth による認証を必須とする
 - Google側で検証済みのメールアドレスで、かつ `User` テーブルに事前登録され、有効なメールアドレスのみログイン可能とする
-- 管理者ロールは `OWNER` / `EDITOR` の2段階とする
+- 担当者ロールは `OWNER` / `EDITOR` / `CONTACT` の3種類とする
 - `OWNER` は全管理機能を利用可能とし、`EDITOR` は割り当て済みリーグの結果更新に限定する
+- `CONTACT` は問い合わせメールの受信専用とし、管理画面へのログイン権限を持たない
 - サーバーアクションは画面表示だけに依存せず、実行時にも `requireOwner` / `getAdminScope` で権限確認する
 - 管理者ロール変更は自己降格とOwner不在を禁止し、権限喪失による運用停止を防ぐ
 - 管理者無効化は自己無効化と有効Owner不在を禁止し、退任者のアクセス遮断と運用継続を両立する
@@ -725,7 +726,7 @@
 - 公開予約
 - 試合結果CSV一括投入
 - 順位表自動計算
-- お問い合わせフォーム
+- 問い合わせ送信履歴の管理画面保存（フォームからのメール送信は実装済み）
 
 ## 推奨実装順
 

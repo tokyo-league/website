@@ -27,7 +27,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         where: { email: user.email },
       });
 
-      if (!admin || !admin.isActive) {
+      if (!admin || !admin.isActive || admin.role === "CONTACT") {
         return false;
       }
 

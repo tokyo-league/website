@@ -77,6 +77,10 @@ export default async function AdminAssignmentsPage() {
             <span>割当済みリーグのみ編集対象に表示</span>
           </li>
           <li>
+            <strong>問い合わせ先</strong>
+            <span>公開フォームから送信された問い合わせをメールで受信（管理画面へのログイン権限なし）</span>
+          </li>
+          <li>
             <strong>担当リーグ権限</strong>
             <span>試合結果、順位表、リーグ管理をまとめて編集可能</span>
           </li>

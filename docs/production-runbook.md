@@ -22,10 +22,14 @@
 | `AUTH_GOOGLE_ID` | Production / Preview / Development | Google OAuth Client ID | 本番ドメイン用OAuthクライアント |
 | `AUTH_GOOGLE_SECRET` | Production / Preview / Development | Google OAuth Client Secret | リポジトリへコミットしない |
 | `BLOB_READ_WRITE_TOKEN` | Production / Preview / Development | Vercel Blobアップロード | 管理画面の画像・資料アップロードに必要 |
+| `RESEND_API_KEY` | Production / Preview / Development | 問い合わせメール送信 | Resendの送信専用APIキー |
+| `CONTACT_FROM_EMAIL` | Production / Preview / Development | 問い合わせメール送信元 | Resendで認証済みの送信元アドレス |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | Production / Preview / Development | 問い合わせスパム対策 | Cloudflare Turnstileの公開キー |
+| `TURNSTILE_SECRET_KEY` | Production / Preview / Development | 問い合わせスパム対策 | Cloudflare Turnstileの秘密キー |
 | `SEED_ADMIN_EMAIL` | Local / one-off command | 初期Owner登録 | 本番常駐は不要。実行時だけ使う |
 | `SEED_ADMIN_NAME` | Local / one-off command | 初期Owner表示名 | 未設定時は `Tokyo League Admin` |
 
-Production環境では `DATABASE_URL`, `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `BLOB_READ_WRITE_TOKEN` の欠落をアプリ起動時に検出します。`DIRECT_URL` はPrisma schema反映などのDB運用コマンドで必要なため、納品前チェックで確認します。Preview / Development ではローカル検証や画面確認を優先し、未設定時はログイン画面に設定メモを表示します。
+Production環境では `DATABASE_URL`, `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `BLOB_READ_WRITE_TOKEN`, `RESEND_API_KEY`, `CONTACT_FROM_EMAIL`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` の欠落をアプリ起動時に検出します。`DIRECT_URL` はPrisma schema反映などのDB運用コマンドで必要なため、納品前チェックで確認します。Preview / Development ではローカル検証や画面確認を優先し、未設定時はログイン画面に設定メモを表示します。
 
 納品前にはVercel Production環境変数をpullし、値を表示せずに必須項目と主要な形式だけを検査します。
 
@@ -135,7 +139,7 @@ npm run production:readiness -- --production-url https://<production-domain> --p
 - `/news` で公開ニュースが表示される
 - `/teams` で公開チームが表示される
 - `/downloads` で公開資料が表示される
-- `/contact` で問い合わせ先が表示される
+- `/contact` で問い合わせフォームとTurnstile認証が表示される
 
 管理者ツール:
 

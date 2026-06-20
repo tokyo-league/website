@@ -14,7 +14,7 @@ export function getAdminJwtLookupEmail(token: JWT, user?: User) {
 }
 
 export function applyAdminRecordToJwt(token: JWT, admin: AdminJwtRecord | null | undefined) {
-  if (!admin?.isActive) {
+  if (!admin?.isActive || admin.role === "CONTACT") {
     return null;
   }
 

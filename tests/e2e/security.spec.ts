@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { applyAdminRecordToJwt, getAdminJwtLookupEmail } from "../../lib/admin-session";
 import { normalizeCspReport } from "../../lib/csp-report";
+import { parseContactSubmission } from "../../lib/contact";
 import { assertDownloadFileAllowed } from "../../lib/download-file-validation";
 import { assertProductionEnvReady, getInvalidProductionEnv, getMissingProductionEnv } from "../../lib/env-validation";
 import { isVerifiedGoogleProfile } from "../../lib/google-profile";
@@ -18,6 +19,28 @@ const requiredHeaders = [
   ["permissions-policy", "camera=(), microphone=(), geolocation=(), payment=(), usb=()"],
   ["strict-transport-security", "max-age=63072000; includeSubDomains; preload"],
 ] as const;
+
+test("お問い合わせ入力をサーバー側でも検証・正規化する", () => {
+  const valid = new FormData();
+  valid.set("type", "membership");
+  valid.set("message", "  加盟条件について\n教えてください。  ");
+  valid.set("name", "  東京 太郎  ");
+  valid.set("email", "TARO@EXAMPLE.COM");
+  valid.set("confirmed", "on");
+
+  expect(parseContactSubmission(valid)).toEqual({
+    ok: true,
+    value: {
+      type: "membership",
+      message: "加盟条件について\n教えてください。",
+      name: "東京 太郎",
+      email: "taro@example.com",
+    },
+  });
+
+  valid.set("website", "https://spam.example");
+  expect(parseContactSubmission(valid)).toMatchObject({ ok: false });
+});
 
 test("公開ページにセキュリティヘッダーが付与される", async ({ page }) => {
   const response = await page.goto("/");
@@ -161,6 +184,10 @@ test("Production環境では必須環境変数の欠落を検出する", () => {
     AUTH_GOOGLE_ID: "tokyo-league.apps.googleusercontent.com",
     DATABASE_URL: "postgres://example",
     BLOB_READ_WRITE_TOKEN: "vercel_blob_rw_token",
+    RESEND_API_KEY: "re_example",
+    CONTACT_FROM_EMAIL: "contact@send.tokyo-league.jp",
+    NEXT_PUBLIC_TURNSTILE_SITE_KEY: "site-key",
+    TURNSTILE_SECRET_KEY: "secret-key",
   };
 
   expect(getMissingProductionEnv(productionEnv)).toEqual(["AUTH_GOOGLE_SECRET"]);
@@ -184,6 +211,10 @@ test("Production環境では危険な環境変数値を検出する", () => {
     DATABASE_URL: "mysql://example",
     DIRECT_URL: "https://example.com",
     BLOB_READ_WRITE_TOKEN: "blob-token",
+    RESEND_API_KEY: "re_example",
+    CONTACT_FROM_EMAIL: "contact@send.tokyo-league.jp",
+    NEXT_PUBLIC_TURNSTILE_SITE_KEY: "site-key",
+    TURNSTILE_SECRET_KEY: "secret-key",
     E2E_TEST_MODE: "1",
     AUTH_URL: "http://localhost:3000",
     NEXTAUTH_URL: "not-a-url",
@@ -251,6 +282,14 @@ test("管理者JWTはDB上の有効状態で再検証される", () => {
     }),
   ).toBeNull();
   expect(applyAdminRecordToJwt(token, null)).toBeNull();
+  expect(
+    applyAdminRecordToJwt(token, {
+      id: "contact-user-id",
+      email: "contact@example.com",
+      role: "CONTACT",
+      isActive: true,
+    }),
+  ).toBeNull();
 });
 
 test("Googleログインは検証済みメールだけを許可する", () => {

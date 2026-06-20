@@ -76,6 +76,10 @@ export async function getAdminScope(): Promise<AdminScope> {
     redirect(LOGIN_PATH);
   }
 
+  if (admin.role === "CONTACT") {
+    redirect(LOGIN_PATH);
+  }
+
   if (admin.role === "OWNER") {
     const divisions = await prisma.division.findMany({
       include: {

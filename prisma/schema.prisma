@@ -11,6 +11,7 @@ datasource db {
 enum AdminRole {
   OWNER
   EDITOR
+  CONTACT
 }
 
 enum DivisionPermission {

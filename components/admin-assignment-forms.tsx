@@ -21,7 +21,7 @@ type UserOption = {
   id: string;
   name: string;
   email: string;
-  role: "OWNER" | "EDITOR";
+  role: "OWNER" | "EDITOR" | "CONTACT";
   isActive: boolean;
 };
 
@@ -96,7 +96,7 @@ export function AdminAssignmentForms({
           </div>
           <form action={createUserAction} className="admin-form-stack">
             <label className="admin-field">
-              <span>Googleメールアドレス</span>
+              <span>メールアドレス</span>
               <input type="email" name="email" placeholder="user@example.com" required />
             </label>
             <label className="admin-field">
@@ -108,6 +108,7 @@ export function AdminAssignmentForms({
               <select name="role" defaultValue="EDITOR">
                 <option value="EDITOR">Editor</option>
                 <option value="OWNER">Owner</option>
+                <option value="CONTACT">問い合わせ先（受信専用）</option>
               </select>
             </label>
             <button type="submit" className="button" disabled={createUserPending}>
@@ -285,7 +286,7 @@ function AdminUserEditor({
   }, [deleteState, onDone]);
 
   const deletable = user.role !== "OWNER" && !isCurrentUser;
-  const roleLabel = user.role === "OWNER" ? "Owner" : "Editor";
+  const roleLabel = user.role === "OWNER" ? "Owner" : user.role === "CONTACT" ? "問い合わせ先" : "Editor";
 
   return (
     <div className="admin-item-card">
@@ -316,6 +317,7 @@ function AdminUserEditor({
             <select name="role" defaultValue={user.role}>
               <option value="EDITOR">Editor</option>
               <option value="OWNER">Owner</option>
+              <option value="CONTACT">問い合わせ先（受信専用）</option>
             </select>
           </label>
         </div>
@@ -332,7 +334,9 @@ function AdminUserEditor({
           action={activeAction}
           message={
             user.isActive
-              ? "この担当者を無効化します。無効化すると管理画面へログインできなくなります。よろしいですか？"
+              ? user.role === "CONTACT"
+                ? "この問い合わせ先を無効化します。無効化すると問い合わせメールが届かなくなります。よろしいですか？"
+                : "この担当者を無効化します。無効化すると管理画面へログインできなくなります。よろしいですか？"
               : "この担当者を有効化します。よろしいですか？"
           }
         >

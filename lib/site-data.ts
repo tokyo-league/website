@@ -151,6 +151,5 @@ export const downloadItems = [
 ];
 
 export const contactInfo = {
-  email: "info@tokyo-league.jp",
-  body: "新規参加、資料に関する問い合わせ、運営への連絡窓口をここに集約します。初期段階ではフォームではなくメール案内を基本とします。",
+  body: "東京リーグへのお問い合わせは、下記フォームからお送りください。",
 };

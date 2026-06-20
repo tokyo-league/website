@@ -21,7 +21,7 @@ export async function createAdminUser(
   const name = sanitizePlainText(String(formData.get("name") ?? ""), 80);
   const role = String(formData.get("role") ?? "EDITOR") as AdminRole;
 
-  if (!email || !name || !isValidEmail(email) || !["OWNER", "EDITOR"].includes(role)) {
+  if (!email || !name || !isValidEmail(email) || !["OWNER", "EDITOR", "CONTACT"].includes(role)) {
     return {
       status: "error",
       message: "メールアドレス、表示名、ロールを確認してください。",
@@ -54,7 +54,7 @@ export async function createAdminUser(
       },
     });
 
-    if (role === "OWNER") {
+    if (role !== "EDITOR") {
       await tx.divisionEditorAssignment.deleteMany({
         where: { userId: user.id },
       });
@@ -68,7 +68,7 @@ export async function createAdminUser(
 
   return {
     status: "success",
-    message: `${name} を ${role === "OWNER" ? "Owner" : "Editor"} として保存しました。`,
+    message: `${name} を ${getRoleLabel(role)} として保存しました。`,
   };
 }
 
@@ -82,7 +82,7 @@ export async function updateAdminUser(
   const name = sanitizePlainText(String(formData.get("name") ?? ""), 80);
   const role = String(formData.get("role") ?? "EDITOR") as AdminRole;
 
-  if (!userId || !isValidUuid(userId) || !name || !["OWNER", "EDITOR"].includes(role)) {
+  if (!userId || !isValidUuid(userId) || !name || !["OWNER", "EDITOR", "CONTACT"].includes(role)) {
     return {
       status: "error",
       message: "担当者、表示名、ロールを確認してください。",
@@ -115,7 +115,7 @@ export async function updateAdminUser(
       },
     });
 
-    if (role === "OWNER") {
+    if (role !== "EDITOR") {
       await tx.divisionEditorAssignment.deleteMany({
         where: { userId },
       });
@@ -129,7 +129,7 @@ export async function updateAdminUser(
 
   return {
     status: "success",
-    message: `${name} を ${role === "OWNER" ? "Owner" : "Editor"} として更新しました。`,
+    message: `${name} を ${getRoleLabel(role)} として更新しました。`,
   };
 }
 
@@ -400,7 +400,7 @@ async function validateAdminRoleChange(
     };
   }
 
-  if (currentRole === "OWNER" && nextRole === "EDITOR") {
+  if (currentRole === "OWNER" && nextRole !== "OWNER") {
     const otherOwnerCount = await prisma.user.count({
       where: {
         role: "OWNER",
@@ -412,10 +412,16 @@ async function validateAdminRoleChange(
     if (otherOwnerCount === 0) {
       return {
         status: "error",
-        message: "最後のOwnerはEditorへ変更できません。",
+        message: "最後のOwnerは別のロールへ変更できません。",
       };
     }
   }
 
   return null;
+}
+
+function getRoleLabel(role: AdminRole) {
+  if (role === "OWNER") return "Owner";
+  if (role === "CONTACT") return "問い合わせ先";
+  return "Editor";
 }

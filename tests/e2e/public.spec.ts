@@ -96,6 +96,20 @@ test("参加チームページで主要導線とチーム一覧が表示でき�
   await expect(page.getByText(/掲載チーム \d+/)).toBeVisible();
 });
 
+test("お問い合わせフォームに必要項目とスパム対策が表示される", async ({ page }) => {
+  await page.goto("/contact");
+
+  await expect(page.getByRole("heading", { level: 1, name: "お問い合わせ" })).toBeVisible();
+  await expect(page.getByText("運用負荷とスパム対策を考慮し、初期はメール案内を基本にする想定です。")).toHaveCount(0);
+  await expect(page.getByLabel("お問い合わせの種類")).toBeVisible();
+  await expect(page.getByLabel("お問い合わせ内容")).toBeVisible();
+  await expect(page.getByLabel("お名前")).toBeVisible();
+  await expect(page.getByLabel("連絡先メールアドレス")).toBeVisible();
+  await expect(page.getByLabel("上記の内容で送信してよろしければチェックしてください。")).toBeVisible();
+  await expect(page.locator(".cf-turnstile")).toBeVisible();
+  await expect(page.getByRole("button", { name: "お問い合わせを送信" })).toBeVisible();
+});
+
 test("試合情報一覧からリーグ詳細まで辿れる", async ({ page }) => {
   await page.goto("/competitions");
 

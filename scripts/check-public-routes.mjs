@@ -46,7 +46,7 @@ const routeChecks = [
   {
     label: "お問い合わせ",
     path: "/contact",
-    requiredText: ["お問い合わせ", "お問い合わせ先"],
+    requiredText: ["お問い合わせ", "お問い合わせフォーム"],
   },
 ];
 

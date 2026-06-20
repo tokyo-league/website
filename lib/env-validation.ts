@@ -4,6 +4,10 @@ export const productionRequiredEnv = [
   "AUTH_GOOGLE_SECRET",
   "DATABASE_URL",
   "BLOB_READ_WRITE_TOKEN",
+  "RESEND_API_KEY",
+  "CONTACT_FROM_EMAIL",
+  "NEXT_PUBLIC_TURNSTILE_SITE_KEY",
+  "TURNSTILE_SECRET_KEY",
 ] as const;
 
 export function isProductionDeploymentEnv(env: NodeJS.ProcessEnv = process.env) {
@@ -43,6 +47,14 @@ export function getInvalidProductionEnv(env: NodeJS.ProcessEnv = process.env) {
 
   if (env.BLOB_READ_WRITE_TOKEN && !env.BLOB_READ_WRITE_TOKEN.startsWith("vercel_blob_rw_")) {
     invalid.push("BLOB_READ_WRITE_TOKEN");
+  }
+
+  if (env.RESEND_API_KEY && !env.RESEND_API_KEY.startsWith("re_")) {
+    invalid.push("RESEND_API_KEY");
+  }
+
+  if (env.CONTACT_FROM_EMAIL && !env.CONTACT_FROM_EMAIL.includes("@")) {
+    invalid.push("CONTACT_FROM_EMAIL");
   }
 
   for (const key of ["AUTH_URL", "NEXTAUTH_URL"]) {

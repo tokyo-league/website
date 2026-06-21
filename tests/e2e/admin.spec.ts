@@ -24,6 +24,11 @@ test("結果管理で年度・大会・リーグ絞り込みと編集UIが表示
 
   await expect(page.getByRole("heading", { name: "結果管理" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "対象リーグ" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "入稿方法を選ぶ" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Excelファイルがある場合" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Excelファイルがない場合" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Excel入稿へ進む" })).toHaveAttribute("href", "#excel-import");
+  await expect(page.getByRole("link", { name: "手入力へ進む" })).toHaveAttribute("href", "#manual-match-entry");
   await expect(page.getByRole("heading", { name: "Excelで試合結果を入稿" })).toBeVisible();
   await expect(page.getByRole("list", { name: "Excel入稿の手順" })).toContainText("対象を選択");
   await expect(page.getByRole("list", { name: "Excel入稿の手順" })).toContainText("内容を確認");

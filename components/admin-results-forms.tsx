@@ -207,6 +207,8 @@ export function AdminResultsForms({
         </div>
       </article>
 
+      <ImportFlowGuide canEditScores={canEditScores} />
+
       <article className="admin-card">
         <div className="card__header">
           <div>
@@ -250,7 +252,7 @@ export function AdminResultsForms({
       />
 
       <div className="admin-columns">
-        <article className="admin-card">
+        <article className="admin-card" id="result-image-entry">
           <div className="card__header">
             <div>
               <p className="section-kicker">Result Image</p>
@@ -357,7 +359,7 @@ export function AdminResultsForms({
         </article>
 
         {canEditScores ? (
-          <article className="admin-card">
+          <article className="admin-card" id="manual-match-entry">
             <div className="card__header">
               <div>
                 <p className="section-kicker">Match</p>
@@ -525,6 +527,69 @@ export function AdminResultsForms({
   );
 }
 
+function ImportFlowGuide({ canEditScores }: { canEditScores: boolean }) {
+  return (
+    <article className="admin-card admin-import-guide" aria-labelledby="import-guide-title">
+      <div className="card__header">
+        <div>
+          <p className="section-kicker">Start Here</p>
+          <h3 id="import-guide-title">入稿方法を選ぶ</h3>
+          <p className="admin-section-lead">手元にExcelの結果管理表があるかどうかで、進む手順が変わります。</p>
+        </div>
+      </div>
+
+      <div className="admin-import-routes">
+        <section className="admin-import-route admin-import-route--recommended">
+          <div className="admin-import-route__header">
+            <div>
+              <span className="admin-import-route__label">おすすめ・一括入稿</span>
+              <h4>Excelファイルがある場合</h4>
+            </div>
+            <span className="admin-import-route__icon" aria-hidden="true">XLSX</span>
+          </div>
+          <ol>
+            <li><span>1</span><p><strong>対象リーグを選ぶ</strong><small>年度・大会・リーグを確認</small></p></li>
+            <li><span>2</span><p><strong>結果管理表を選ぶ</strong><small>「管理表」シート入りの .xlsx</small></p></li>
+            <li><span>3</span><p><strong>読み取り内容を確認</strong><small>チーム名・得点・日付・会場を確認</small></p></li>
+            <li><span>4</span><p><strong>試合結果へ反映</strong><small>新規試合を追加、同じ対戦は更新</small></p></li>
+          </ol>
+          <a href="#excel-import" className="button">Excel入稿へ進む</a>
+        </section>
+
+        <section className="admin-import-route">
+          <div className="admin-import-route__header">
+            <div>
+              <span className="admin-import-route__label">手入力</span>
+              <h4>Excelファイルがない場合</h4>
+            </div>
+            <span className="admin-import-route__icon admin-import-route__icon--manual" aria-hidden="true">入力</span>
+          </div>
+          {canEditScores ? (
+            <>
+              <ol>
+                <li><span>1</span><p><strong>対象リーグを選ぶ</strong><small>年度・大会・リーグを確認</small></p></li>
+                <li><span>2</span><p><strong>試合結果を1件ずつ追加</strong><small>日付・対戦・得点・会場を入力</small></p></li>
+                <li><span>3</span><p><strong>登録済み試合を確認</strong><small>誤りがあれば更新または削除</small></p></li>
+                <li><span>4</span><p><strong>順位表を再計算</strong><small>全試合の入力後に実行</small></p></li>
+              </ol>
+              <a href="#manual-match-entry" className="button button--ghost">手入力へ進む</a>
+            </>
+          ) : (
+            <>
+              <ol>
+                <li><span>1</span><p><strong>対象リーグを選ぶ</strong><small>過去大会であることを確認</small></p></li>
+                <li><span>2</span><p><strong>結果画像を用意</strong><small>JPG・PNG・WebPに対応</small></p></li>
+                <li><span>3</span><p><strong>結果画像を登録</strong><small>過去大会は画像を正本として掲載</small></p></li>
+              </ol>
+              <a href="#result-image-entry" className="button button--ghost">結果画像の登録へ進む</a>
+            </>
+          )}
+        </section>
+      </div>
+    </article>
+  );
+}
+
 function ExcelImportPanel({
   divisionId,
   divisionLabel,
@@ -580,7 +645,7 @@ function ExcelImportPanel({
   const canImport = Boolean(preview && preview.rows.length > 0 && preview.errors.length === 0);
 
   return (
-    <article className="admin-card admin-excel-import">
+    <article className="admin-card admin-excel-import" id="excel-import">
       <div className="card__header">
         <div>
           <p className="section-kicker">Steps 2–4</p>

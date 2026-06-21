@@ -1982,7 +1982,7 @@ button {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1px;
-  background: rgba(31, 31, 27, 0.14);
+  background: rgba(255, 255, 255, 0.28);
 }
 
 .home-team-logo-card {
@@ -1993,8 +1993,8 @@ button {
   padding: 30px;
   border: 0;
   border-radius: 0;
-  background: #f7f4ec;
-  color: var(--text);
+  background: #11120f;
+  color: white;
 }
 
 .home-team-logo-card__logo {
@@ -2029,13 +2029,13 @@ button {
 
 .home-team-logo-card__region {
   margin: 0 0 8px;
-  color: var(--muted);
+  color: rgba(255, 255, 255, 0.62);
   font-size: 13px;
 }
 
 .home-team-logo-card__name {
   margin: 0;
-  color: var(--text);
+  color: white;
   font-size: 20px;
   font-weight: 800;
   line-height: 1.4;

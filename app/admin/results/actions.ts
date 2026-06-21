@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { put } from "@vercel/blob";
 import { MatchStatus, PublishStatus } from "@prisma/client";
 import { getAdminScope } from "@/lib/admin-access";
+import { VERIFIED_FROM_RESULT_IMAGE_NOTE } from "@/lib/historical-results";
 import { assertImageFileAllowed } from "@/lib/image-file-validation";
 import { prisma } from "@/lib/prisma";
 import { isValidUuid, parseInteger, sanitizePlainText } from "@/lib/security";
@@ -698,15 +699,17 @@ export async function replaceStandings(
           goalsAgainst: row.goalsAgainst,
           goalDifference: row.goalsFor - row.goalsAgainst,
           points: row.points,
+          note: VERIFIED_FROM_RESULT_IMAGE_NOTE,
         })),
       });
     });
 
     revalidatePath("/admin/results");
+    revalidatePath("/competitions", "layout");
 
     return {
       status: "success",
-      message: `${rows.length}チーム分の順位表を保存しました。`,
+      message: `${rows.length}チーム分の順位表を保存し、試合結果ページへ反映しました。`,
     };
   } catch (error) {
     console.error("replaceStandings failed", error);

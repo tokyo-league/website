@@ -943,6 +943,7 @@ function BulkStandingEditor({
     <form action={action} className="admin-form-stack">
       <input type="hidden" name="divisionId" value={divisionId} />
       <input type="hidden" name="rowsJson" value={JSON.stringify(rows)} />
+      <p className="admin-inline-message">「順位表をまとめて保存」を押すと、結果画像の有無にかかわらず試合結果ページへ反映されます。</p>
       <div className="admin-standings-table">
         <div className="admin-standings-table__head">
           <span>チーム</span>

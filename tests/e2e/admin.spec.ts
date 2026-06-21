@@ -44,6 +44,7 @@ test("結果管理で年度・大会・リーグ絞り込みと編集UIが表示
   await expect(page.getByRole("button", { name: "行を追加" })).toBeVisible();
   await expect(page.getByRole("button", { name: "登録値に戻す" })).toBeVisible();
   await expect(page.getByRole("button", { name: "入力をクリア" })).toBeVisible();
+  await expect(page.getByText(/結果画像の有無にかかわらず試合結果ページへ反映/)).toBeVisible();
   await expect(page.getByRole("heading", { name: "登録済み順位表の確認" })).toBeVisible();
   await expect(page.locator(".admin-standings-summary form").getByRole("button", { name: "削除" }).first()).toBeVisible();
 });

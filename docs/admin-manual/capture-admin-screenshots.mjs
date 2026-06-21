@@ -17,6 +17,8 @@ const pages = [
   },
   { slug: "assignments-users", path: "/admin/assignments", label: "担当者編集", scrollY: 900 },
   { slug: "results-top", path: "/admin/results", label: "結果管理 上部", heading: "対象リーグ" },
+  { slug: "results-import-guide", path: "/admin/results", label: "結果管理 入稿方法", heading: "入稿方法を選ぶ" },
+  { slug: "results-excel", path: "/admin/results", label: "結果管理 Excel入稿", heading: "Excelで試合結果を入稿" },
   { slug: "results-middle", path: "/admin/results", label: "結果管理 入力欄", heading: "結果画像" },
   { slug: "results-standings", path: "/admin/results", label: "結果管理 順位表", heading: "順位表を作成・更新" },
   {

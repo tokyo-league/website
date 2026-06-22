@@ -1,7 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
+import { unstable_noStore as noStore } from "next/cache";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { getBoardMembers } from "@/lib/board-members";
 import { siteAssets } from "@/lib/site-data";
 
 const overviewItems = [
@@ -19,23 +21,6 @@ const mainActivities = [
   "少年審判員の育成と審判講習会の実施を行う",
 ];
 
-const boardMembers = [
-  { role: "顧問", name: "宮崎 昇作", duty: "" },
-  { role: "会長", name: "三木 健一郎", duty: "後援会会長" },
-  { role: "特任理事", name: "山藤 武久", duty: "" },
-  { role: "副会長", name: "湯澤 茂", duty: "海外交流" },
-  { role: "副会長", name: "田島 政文", duty: "U7,8,9,10フェス" },
-  { role: "理事長", name: "真田 実", duty: "事務局" },
-  { role: "理事", name: "浅田 春美", duty: "総務" },
-  { role: "理事", name: "丸山 雄介", duty: "U7,8,9,10フェス" },
-  { role: "理事", name: "上田 道弘", duty: "山藤杯" },
-  { role: "理事", name: "岩間 孝俊", duty: "広報" },
-  { role: "理事", name: "福田 茂", duty: "会計" },
-  { role: "理事", name: "大田 謙一", duty: "会計" },
-  { role: "理事", name: "五十嵐 正", duty: "西川杯" },
-  { role: "会計監査", name: "桜井 保明", duty: "" },
-];
-
 const effortGoals = [
   "サッカーの競技力を高め、リーグ運営では子どもたちが活動できる試合会場を継続して提供できるよう努める。",
   "すべての子どもたちが試合に参加できるよう、長期的な視点で活動し、日々の練習や試合を通じて人としての基礎を育む。",
@@ -43,7 +28,10 @@ const effortGoals = [
   "東京リーグに関わるすべての活動が、サッカー競技に限らず社会的にも有益なものとなるよう努める。",
 ];
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  noStore();
+  const boardMembers = await getBoardMembers();
+
   return (
     <>
       <SiteHeader />
@@ -105,7 +93,7 @@ export default function AboutPage() {
                     <span>担当</span>
                   </div>
                   {boardMembers.map((member) => (
-                    <div key={`${member.role}-${member.name}`} className="about-board__row">
+                    <div key={member.id} className="about-board__row">
                       <span className="about-board__role">{member.role}</span>
                       <strong className="about-board__name">{member.name}</strong>
                       <span className={`about-board__duty${member.duty ? "" : " is-empty"}`}>

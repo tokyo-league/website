@@ -80,6 +80,20 @@ test("資料管理ページが表示できる", async ({ page }) => {
   await expect(page.getByText("公開URL", { exact: true })).toBeVisible();
 });
 
+test("理事会管理で追加・編集・削除UIが表示できる", async ({ page }) => {
+  await page.goto("/admin/board");
+
+  await expect(page.getByRole("heading", { name: "理事会管理" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "理事会メンバーを追加" })).toBeVisible();
+  await expect(page.getByLabel("役職").first()).toBeVisible();
+  await expect(page.getByLabel("氏名").first()).toBeVisible();
+  await expect(page.getByLabel("担当").first()).toBeVisible();
+  await expect(page.getByRole("button", { name: "メンバーを追加" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "登録済みメンバー" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "変更を保存" }).first()).toBeVisible();
+  await expect(page.getByRole("button", { name: "削除" }).first()).toBeVisible();
+});
+
 test("チーム一覧で削除前の参照状況が確認できる", async ({ page }) => {
   await page.goto("/admin/teams");
 

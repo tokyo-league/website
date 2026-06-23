@@ -8,7 +8,7 @@ import { assertImageFileAllowed } from "@/lib/image-file-validation";
 import { prisma } from "@/lib/prisma";
 import { ensureSlug, isValidUuid, sanitizeMultilineText, sanitizePlainText } from "@/lib/security";
 import { isE2ETestMode } from "@/lib/test-mode";
-import { IMAGE_UPLOAD_MAX_BYTES } from "@/lib/upload-limits";
+import { IMAGE_UPLOAD_MAX_BYTES, NEWS_BODY_IMAGE_MAX_COUNT } from "@/lib/upload-limits";
 
 export type NewsActionState = {
   status: "idle" | "success" | "error";
@@ -50,7 +50,12 @@ export async function createNewsPost(
     }
 
     const slug = await createUniqueNewsSlug(payload.title);
-    const eyecatchAssetId = await uploadEyecatchAsset(formData.get("eyecatchFile"), scope.admin.id);
+    const eyecatchAssetId = await uploadNewsImageAsset(
+      formData.get("eyecatchFile"),
+      scope.admin.id,
+      "アイキャッチ画像",
+    );
+    const bodyImageAssetIds = await uploadBodyImageAssets(formData, scope.admin.id);
 
     await prisma.newsPost.create({
       data: {
@@ -64,6 +69,9 @@ export async function createNewsPost(
         publishedAt: payload.publishedAt,
         createdById: scope.admin.id,
         updatedById: scope.admin.id,
+        bodyImages: {
+          create: bodyImageAssetIds.map((assetId, sortOrder) => ({ assetId, sortOrder })),
+        },
       },
     });
 
@@ -96,7 +104,12 @@ export async function updateNewsPost(
 
     const existing = await prisma.newsPost.findUnique({
       where: { id: newsId },
-      select: { id: true, title: true, eyecatchAssetId: true },
+      select: {
+        id: true,
+        title: true,
+        eyecatchAssetId: true,
+        bodyImages: { orderBy: { sortOrder: "asc" }, select: { assetId: true } },
+      },
     });
 
     if (!existing) {
@@ -110,20 +123,45 @@ export async function updateNewsPost(
     }
 
     const eyecatchAssetId =
-      (await uploadEyecatchAsset(formData.get("eyecatchFile"), scope.admin.id)) ?? existing.eyecatchAssetId;
+      (await uploadNewsImageAsset(
+        formData.get("eyecatchFile"),
+        scope.admin.id,
+        "アイキャッチ画像",
+      )) ?? existing.eyecatchAssetId;
+    const removeBodyImageIds = new Set(
+      formData
+        .getAll("removeBodyImageIds")
+        .map((value) => sanitizePlainText(String(value), 64))
+        .filter(isValidUuid),
+    );
+    const retainedBodyImageAssetIds = existing.bodyImages
+      .map((image) => image.assetId)
+      .filter((assetId) => !removeBodyImageIds.has(assetId));
+    const newBodyImageAssetIds = await uploadBodyImageAssets(
+      formData,
+      scope.admin.id,
+      retainedBodyImageAssetIds.length,
+    );
+    const bodyImageAssetIds = [...retainedBodyImageAssetIds, ...newBodyImageAssetIds];
 
-    await prisma.newsPost.update({
-      where: { id: newsId },
-      data: {
-        title: payload.title,
-        excerpt: null,
-        body: payload.body,
-        categoryId: null,
-        eyecatchAssetId,
-        status: payload.status,
-        publishedAt: payload.publishedAt,
-        updatedById: scope.admin.id,
-      },
+    await prisma.$transaction(async (tx) => {
+      await tx.newsPostImage.deleteMany({ where: { newsPostId: newsId } });
+      await tx.newsPost.update({
+        where: { id: newsId },
+        data: {
+          title: payload.title,
+          excerpt: null,
+          body: payload.body,
+          categoryId: null,
+          eyecatchAssetId,
+          status: payload.status,
+          publishedAt: payload.publishedAt,
+          updatedById: scope.admin.id,
+          bodyImages: {
+            create: bodyImageAssetIds.map((assetId, sortOrder) => ({ assetId, sortOrder })),
+          },
+        },
+      });
     });
 
     revalidateNewsPaths();
@@ -220,7 +258,25 @@ async function createUniqueNewsSlug(title: string) {
   return slug;
 }
 
-async function uploadEyecatchAsset(fileValue: FormDataEntryValue | null, userId: string) {
+async function uploadBodyImageAssets(formData: FormData, userId: string, existingCount = 0) {
+  const files = formData
+    .getAll("bodyImageFiles")
+    .filter((value): value is File => value instanceof File && value.size > 0);
+
+  if (existingCount + files.length > NEWS_BODY_IMAGE_MAX_COUNT) {
+    throw new Error(`本文画像は最大${NEWS_BODY_IMAGE_MAX_COUNT}枚までです。`);
+  }
+
+  return Promise.all(files.map((file) => uploadNewsImageAsset(file, userId, "本文画像"))).then((ids) =>
+    ids.filter((id): id is string => Boolean(id)),
+  );
+}
+
+async function uploadNewsImageAsset(
+  fileValue: FormDataEntryValue | null,
+  userId: string,
+  label: "アイキャッチ画像" | "本文画像",
+) {
   if (!(fileValue instanceof File) || fileValue.size === 0) {
     return null;
   }
@@ -232,7 +288,7 @@ async function uploadEyecatchAsset(fileValue: FormDataEntryValue | null, userId:
     size: fileValue.size,
     buffer: fileBuffer,
     rules: {
-      label: "アイキャッチ画像",
+      label,
       maxSizeBytes: IMAGE_UPLOAD_MAX_BYTES,
     },
   });
@@ -263,6 +319,7 @@ function revalidateNewsPaths() {
   revalidatePath("/admin/news");
   revalidatePath("/news");
   revalidatePath("/");
+  revalidatePath("/news/[newsSlug]", "page");
 }
 
 function parseDateTimeAsJst(value: string) {

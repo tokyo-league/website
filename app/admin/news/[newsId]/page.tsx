@@ -27,6 +27,13 @@ export default async function AdminNewsEditPage({
             storageKey: true,
           },
         },
+        bodyImages: {
+          orderBy: { sortOrder: "asc" },
+          select: {
+            assetId: true,
+            asset: { select: { storageKey: true, originalFilename: true } },
+          },
+        },
       },
     });
 
@@ -35,6 +42,13 @@ export default async function AdminNewsEditPage({
   }
 
   const currentEyecatchUrl = await resolveAssetUrl(post.eyecatchAsset?.storageKey);
+  const currentBodyImages = await Promise.all(
+    post.bodyImages.map(async (image) => ({
+      assetId: image.assetId,
+      url: await resolveAssetUrl(image.asset.storageKey),
+      filename: image.asset.originalFilename,
+    })),
+  );
 
   return (
     <AdminLayoutShell currentPath="/admin/news" title="ニュース管理" kicker="News" scope={scope}>
@@ -47,6 +61,9 @@ export default async function AdminNewsEditPage({
           status: post.status,
           publishedAt: formatDateTimeLocal(post.publishedAt),
           currentEyecatchUrl,
+          currentBodyImages: currentBodyImages.filter(
+            (image): image is { assetId: string; url: string; filename: string } => Boolean(image.url),
+          ),
         }}
       />
     </AdminLayoutShell>

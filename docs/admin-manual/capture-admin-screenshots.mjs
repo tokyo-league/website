@@ -28,7 +28,7 @@ const pages = [
     heading: "登録済み順位表の確認",
   },
   { slug: "news-list", path: "/admin/news", label: "ニュース一覧" },
-  { slug: "news-form", path: "/admin/news/new", label: "ニュース作成" },
+  { slug: "news-form", path: "/admin/news/new", label: "ニュース作成", zoom: 0.5 },
   { slug: "teams-list", path: "/admin/teams", label: "チーム一覧" },
   { slug: "teams-form", path: "/admin/teams/new", label: "チーム作成" },
   { slug: "downloads", path: "/admin/downloads", label: "資料管理" },
@@ -48,6 +48,12 @@ for (const item of pages) {
   await page.goto(url, { waitUntil: "domcontentloaded" });
   await page.locator("main").waitFor({ state: "visible", timeout: 20_000 });
   await page.waitForTimeout(600);
+  if (item.zoom) {
+    await page.evaluate((zoom) => {
+      document.body.style.zoom = String(zoom);
+    }, item.zoom);
+    await page.waitForTimeout(250);
+  }
   if (item.clickSelector) {
     await Promise.all([
       page.waitForURL(/\/admin\/competitions\/[^/]+$/),

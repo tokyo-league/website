@@ -10,7 +10,7 @@ test("公開トップからニュース詳細ページへ遷移できる", async
     "/competitions",
   );
   await expect(page.getByRole("heading", { name: "最新情報" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "参加チーム" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "参加チーム", exact: true })).toBeVisible();
 
   const firstNewsCard = page.locator(".heritage-news .news-list-item").first();
   const newsTitle = await firstNewsCard.getByRole("heading").innerText();

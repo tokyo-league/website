@@ -128,6 +128,20 @@ model NewsPost {
   relatedCompetition   Competition?   @relation(fields: [relatedCompetitionId], references: [id])
   createdBy            User           @relation("NewsCreatedBy", fields: [createdById], references: [id])
   updatedBy            User           @relation("NewsUpdatedBy", fields: [updatedById], references: [id])
+  bodyImages           NewsPostImage[]
+}
+
+model NewsPostImage {
+  id         String   @id @default(uuid()) @db.Uuid
+  newsPostId String   @db.Uuid
+  assetId    String   @unique @db.Uuid
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  newsPost   NewsPost @relation(fields: [newsPostId], references: [id], onDelete: Cascade)
+  asset      Asset    @relation(fields: [assetId], references: [id])
+
+  @@unique([newsPostId, sortOrder])
+  @@index([newsPostId])
 }
 
 model Asset {
@@ -143,6 +157,7 @@ model Asset {
   updatedAt        DateTime      @updatedAt
   createdBy        User?         @relation(fields: [createdById], references: [id])
   newsEyecatches   NewsPost[]
+  newsBodyImages   NewsPostImage[]
   competitionFiles CompetitionFile[]
   teamLogos        Team[]
   downloads        Download[]

@@ -97,6 +97,18 @@
 | created_at | timestamptz | |
 | updated_at | timestamptz | |
 
+### news_post_images
+
+ニュース本文の前に表示する複数画像。`sort_order` の昇順で表示する。
+
+| column | type | notes |
+| --- | --- | --- |
+| id | uuid pk | |
+| news_post_id | uuid fk news_posts.id | 記事削除時に連動削除 |
+| asset_id | uuid fk assets.id unique | 本文画像 |
+| sort_order | integer | 0始まりの表示順 |
+| created_at | timestamptz | |
+
 ### assets
 
 画像やPDFの共通管理

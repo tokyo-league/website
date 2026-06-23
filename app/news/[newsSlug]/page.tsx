@@ -66,6 +66,21 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
               <span />
             </div>
             <div className="news-detail-body__content">
+              {news.bodyImageUrls.length > 0 ? (
+                <div className="news-detail-body__images" aria-label="記事画像">
+                  {news.bodyImageUrls.map((imageUrl, index) => (
+                    <figure key={imageUrl} className="news-detail-body__image">
+                      <Image
+                        src={imageUrl}
+                        alt={`${news.title}の記事画像 ${index + 1}`}
+                        width={1200}
+                        height={800}
+                        sizes="(max-width: 700px) 100vw, 760px"
+                      />
+                    </figure>
+                  ))}
+                </div>
+              ) : null}
               {paragraphs.map((paragraph, index) => (
                 <p key={`${index}-${paragraph.slice(0, 24)}`}>{renderTextWithLinks(paragraph)}</p>
               ))}

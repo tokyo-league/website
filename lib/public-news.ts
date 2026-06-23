@@ -14,6 +14,7 @@ export type PublicNewsItem = {
   publishedAtLabel: string;
   categoryName: string;
   imageUrl: string | null;
+  bodyImageUrls: string[];
 };
 
 export async function getPublishedNews(limit?: number): Promise<PublicNewsItem[]> {
@@ -23,22 +24,33 @@ export async function getPublishedNews(limit?: number): Promise<PublicNewsItem[]
       include: {
         category: true,
         eyecatchAsset: { select: { storageKey: true } },
+        bodyImages: {
+          orderBy: { sortOrder: "asc" },
+          select: { asset: { select: { storageKey: true } } },
+        },
       },
       orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
       take: limit,
     });
 
     return Promise.all(
-      posts.map(async (post) => ({
-        id: post.id,
-        slug: post.slug,
-        title: post.title,
-        excerpt: buildNewsExcerpt(post.excerpt || post.body, 120),
-        body: post.body,
-        publishedAtLabel: formatNewsDate(post.publishedAt),
-        categoryName: post.category?.name || "お知らせ",
-        imageUrl: await resolveAssetUrl(post.eyecatchAsset?.storageKey),
-      })),
+      posts.map(async (post) => {
+        const bodyImageUrls = await Promise.all(
+          post.bodyImages.map((image) => resolveAssetUrl(image.asset.storageKey)),
+        );
+
+        return {
+          id: post.id,
+          slug: post.slug,
+          title: post.title,
+          excerpt: buildNewsExcerpt(post.excerpt || post.body, 120),
+          body: post.body,
+          publishedAtLabel: formatNewsDate(post.publishedAt),
+          categoryName: post.category?.name || "お知らせ",
+          imageUrl: await resolveAssetUrl(post.eyecatchAsset?.storageKey),
+          bodyImageUrls: bodyImageUrls.filter((url): url is string => Boolean(url)),
+        };
+      }),
     );
   } catch {
     return buildFallbackNews().slice(0, limit);
@@ -52,10 +64,18 @@ export const getPublishedNewsBySlug = cache(async (slug: string): Promise<Public
       include: {
         category: true,
         eyecatchAsset: { select: { storageKey: true } },
+        bodyImages: {
+          orderBy: { sortOrder: "asc" },
+          select: { asset: { select: { storageKey: true } } },
+        },
       },
     });
 
     if (post) {
+      const bodyImageUrls = await Promise.all(
+        post.bodyImages.map((image) => resolveAssetUrl(image.asset.storageKey)),
+      );
+
       return {
         id: post.id,
         slug: post.slug,
@@ -65,6 +85,7 @@ export const getPublishedNewsBySlug = cache(async (slug: string): Promise<Public
         publishedAtLabel: formatNewsDate(post.publishedAt),
         categoryName: post.category?.name || "お知らせ",
         imageUrl: await resolveAssetUrl(post.eyecatchAsset?.storageKey),
+        bodyImageUrls: bodyImageUrls.filter((url): url is string => Boolean(url)),
       };
     }
   } catch {
@@ -84,6 +105,7 @@ function buildFallbackNews(): PublicNewsItem[] {
     publishedAtLabel: item.date,
     categoryName: item.category,
     imageUrl: null,
+    bodyImageUrls: [],
   }));
 }
 

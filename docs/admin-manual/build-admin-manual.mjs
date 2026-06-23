@@ -390,29 +390,32 @@ const sections = [
   {
     title: "14. お知らせ管理: 入力項目",
     image: "news-form.png",
+    fit: "contain",
     markers: [
-      ["①", 47, 32],
-      ["②", 47, 42],
-      ["③", 47, 61],
-      ["④", 40, 75],
-      ["⑤", 20, 85],
+      ["①", 50, 24],
+      ["②", 50, 38],
+      ["③", 50, 61],
+      ["④", 50, 76],
+      ["⑤", 50, 94],
     ],
     callouts: [
       "① タイトルを入力します。",
       "② 本文を入力します。",
       "③ 任意でアイキャッチ画像を選択します。",
-      "④ 公開状態と公開日時を指定します。",
+      "④ 本文画像を複数選択し、公開状態と公開日時を指定します。",
       "⑤ 保存ボタンです。",
     ],
     steps: [
       "タイトルと本文を入力します。どちらも必須です。",
       "必要に応じてアイキャッチ画像を選びます。編集時に新しい画像を選ぶと差し替わります。",
+      "本文画像は複数選択でき、選択順で公開記事の本文直前に表示されます。編集時は登録済み画像を個別に削除できます。",
       "公開状態を「下書き」「公開」「非公開」から選びます。",
       "公開する場合は公開日時を指定します。空欄で公開保存すると保存時点の日時が入ります。",
       "「ニュースを保存」または「更新を保存」を押し、成功メッセージを確認します。",
     ],
     notes: [
       "アイキャッチ画像はJPG / PNG / WebPのみ、10MB以下です。アップロード時にMIME typeと画像内容を確認します。",
+      "本文画像は最大10枚です。JPG / PNG / WebPのみ、1枚あたり10MB以下です。",
       "公開日時入力は管理画面の日時として日本時間で扱います。",
       "URLスラッグは新規作成時にタイトルから自動生成されます。",
     ],
@@ -536,7 +539,7 @@ const globalChecklist = [
   ["大会", "年度・大会・リーグの追加・編集・削除、全大会一覧、所属チーム追加・解除、表示順自動設定"],
   ["試合", "対象リーグ選択、Excel一括入稿・内容確認、手入力、結果画像追加・差替、星取表画像生成、試合更新・削除"],
   ["順位表", "まとめて保存、試合結果から再計算、行追加、表形式での登録内容確認、個別行削除、入力クリア"],
-  ["お知らせ", "新規作成、編集、削除、下書き・公開・非公開、アイキャッチ"],
+  ["お知らせ", "新規作成、編集、削除、下書き・公開・非公開、アイキャッチ、本文画像"],
   ["チーム", "新規追加、編集、削除、画像条件、参照中削除不可"],
   ["資料", "新規追加、編集、ファイル差替、削除、カテゴリ・公開状態"],
   ["更新履歴", "Owner専用、直近50件、対象・内容・担当者・日本時間の確認"],
@@ -563,7 +566,7 @@ function listItems(items) {
 function sectionHtml(section) {
   const imgSrc = pathToFileURL(path.join(assetsDir, section.image)).href;
   return `
-    <section class="page section-page${section.compact ? " compact-section" : ""}">
+    <section class="page section-page${section.compact ? " compact-section" : ""}${section.fit === "contain" ? " section-page--contain-shot" : ""}">
       <header class="section-header">
         <p>Tokyo League Admin Manual</p>
         <h2>${escapeHtml(section.title)}</h2>
@@ -692,6 +695,10 @@ const html = `<!doctype html>
       object-fit: cover;
       object-position: top left;
       display: block;
+    }
+    .section-page--contain-shot .shot img {
+      object-fit: contain;
+      object-position: center center;
     }
     .marker {
       position: absolute;

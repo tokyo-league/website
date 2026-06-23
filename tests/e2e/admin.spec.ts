@@ -128,7 +128,9 @@ test("ニュース作成フローが完了できる", async ({ page }) => {
 
   await expect(page.getByRole("heading", { name: "ニュース管理" })).toBeVisible();
   await page.getByLabel("タイトル").fill(title);
-  await page.getByLabel("本文").fill("E2Eニュース本文です。");
+  await page.getByLabel("本文", { exact: true }).fill("E2Eニュース本文です。");
+  await expect(page.getByText("本文画像（複数選択可）", { exact: true })).toBeVisible();
+  await expect(page.locator('input[name="bodyImageFiles"]')).toHaveAttribute("multiple", "");
   await page.getByRole("button", { name: "ニュースを保存" }).click();
 
   await expect(page.getByText(`ニュース「${title}」を作成しました。`)).toBeVisible();
@@ -172,6 +174,8 @@ test("アップロード欄に容量上限を表示し、超過時は具体的�
   await expect(page.getByText("JPG / PNG / WebP、10MB以下。", { exact: true })).toBeVisible();
   await page.locator('input[name="eyecatchFile"]').setInputFiles(oversizedImage);
   await expect(page.getByText("アイキャッチ画像は 10MB 以下にしてください。")).toBeVisible();
+  await page.locator('input[name="bodyImageFiles"]').setInputFiles(oversizedImage);
+  await expect(page.getByText("本文画像は1枚あたり 10MB 以下にしてください。")).toBeVisible();
 
   await page.goto("/admin/teams/new");
   await expect(page.getByText(/JPG \/ PNG \/ WebP、10MB以下、240x240px以上/)).toBeVisible();

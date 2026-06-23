@@ -15,6 +15,7 @@ export default async function AdminNewsNewPage() {
           status: "DRAFT",
           publishedAt: "",
           currentEyecatchUrl: null,
+          currentBodyImages: [],
         }}
       />
     </AdminLayoutShell>

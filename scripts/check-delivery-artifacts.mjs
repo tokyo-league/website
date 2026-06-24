@@ -14,6 +14,11 @@ checkFile({
   minBytes: 1_000_000,
 });
 checkFile({
+  label: "結果管理HowTo PDF",
+  filePath: "docs/admin-manual/output/tokyo-league-result-management-howto.pdf",
+  minBytes: 700_000,
+});
+checkFile({
   label: "本番デプロイRunbook",
   filePath: "docs/production-runbook.md",
   minBytes: 4_000,
@@ -32,7 +37,7 @@ checkFile({
 checkQaPages({
   label: "管理者説明書QA画像",
   dirPath: "docs/admin-manual/output/qa-pages",
-  expectedCount: 23,
+  expectedCount: 24,
 });
 
 checkTextDoesNotContain({
@@ -44,6 +49,21 @@ checkTextDoesNotContain({
   label: "管理者マニュアルの古い順位表行追加文",
   filePath: "docs/admin-manual/output/tokyo-league-admin-manual.html",
   forbiddenText: "任意行追加は追加実装候補",
+});
+checkTextContains({
+  label: "管理者マニュアルの理事会管理記載",
+  filePath: "docs/admin-manual/output/tokyo-league-admin-manual.html",
+  requiredText: "理事会管理: メンバー追加・更新・削除",
+});
+checkTextContains({
+  label: "結果管理HowToの分岐説明",
+  filePath: "docs/admin-manual/output/tokyo-league-result-management-howto.html",
+  requiredText: "Excelがあるとき、ないとき、結果画像で残すとき",
+});
+checkTextContains({
+  label: "結果管理HowToの最後の確認",
+  filePath: "docs/admin-manual/output/tokyo-league-result-management-howto.html",
+  requiredText: "最後のチェックリスト",
 });
 
 checkTextContains({

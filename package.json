@@ -16,6 +16,7 @@
     "results:verify": "node ./scripts/run-with-env.mjs node ./scripts/verify-historical-standings.mjs",
     "docs:spec": "node ./docs/build-spec-pdf.mjs",
     "docs:admin": "node ./docs/admin-manual/build-admin-manual.mjs",
+    "docs:results-howto": "node ./docs/admin-manual/build-results-howto.mjs",
     "docs:admin:screenshots": "node ./docs/admin-manual/capture-admin-screenshots.mjs",
     "docs:admin:qa": "node ./docs/admin-manual/render-manual-qa.mjs",
     "docs:admin:qa:check": "node ./docs/admin-manual/check-manual-qa.mjs",

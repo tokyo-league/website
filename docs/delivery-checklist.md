@@ -1,6 +1,6 @@
 # 東京リーグ リニューアル納品チェックリスト
 
-最終更新: 2026-06-10 JST
+最終更新: 2026-06-25 JST
 
 ## 納品物
 
@@ -10,7 +10,8 @@
 | 管理者ツール | `app/admin/`, `components/admin-*`, `lib/admin-access.ts` | `npm run test:e2e` | E2Eモードで検証済み |
 | 仕様書PDF | `docs/output/tokyo-league-renewal-spec.pdf` | `npm run docs:spec` | 生成済み |
 | 管理者ツール説明書PDF | `docs/admin-manual/output/tokyo-league-admin-manual.pdf` | `npm run docs:admin` | 生成済み |
-| 管理者説明書QA画像 | `docs/admin-manual/output/qa-pages/` | `npm run docs:admin:qa`, `npm run docs:admin:qa:check` | 23ページ生成・品質確認済み |
+| 結果管理HowTo PDF | `docs/admin-manual/output/tokyo-league-result-management-howto.pdf` | `npm run docs:results-howto` | 生成済み |
+| 管理者説明書QA画像 | `docs/admin-manual/output/qa-pages/` | `npm run docs:admin:qa`, `npm run docs:admin:qa:check` | 24ページ生成・品質確認済み |
 | 本番デプロイRunbook | `docs/production-runbook.md` | 手順確認 | 作成済み |
 | 納品ハンドオフ | `docs/delivery-handoff.md` | 手順確認 | 作成済み |
 | 納品物自動チェック | PDF、QA画像、Runbook、古い文言混入 | `npm run docs:delivery:check` | 実装済み |
@@ -60,6 +61,7 @@
 - `npm run build`: 成功。公開トップとニュース一覧は動的レンダリング化し、ビルド時のDB接続エラーログなし
 - `npm run docs:spec`: 成功
 - `npm run docs:admin`: 成功
+- `npm run docs:results-howto`: 成功
 - `npm run docs:admin:qa`: 成功
 - `npm run docs:admin:qa:check`: 成功
 - `npm run docs:delivery:check`: 成功

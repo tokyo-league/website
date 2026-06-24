@@ -32,6 +32,7 @@ const pages = [
   { slug: "teams-list", path: "/admin/teams", label: "チーム一覧" },
   { slug: "teams-form", path: "/admin/teams/new", label: "チーム作成" },
   { slug: "downloads", path: "/admin/downloads", label: "資料管理" },
+  { slug: "board", path: "/admin/board", label: "理事会管理" },
   { slug: "assignments", path: "/admin/assignments", label: "担当割当" },
   { slug: "audit", path: "/admin/audit", label: "更新履歴" },
 ];

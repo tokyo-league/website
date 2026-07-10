@@ -58,7 +58,7 @@ checkTextContains({
 checkTextContains({
   label: "結果管理HowToの分岐説明",
   filePath: "docs/admin-manual/output/tokyo-league-result-management-howto.html",
-  requiredText: "Excelがある場合、Excelがない場合、過去大会を結果画像で管理する場合",
+  requiredText: "各カードは、左側の説明を確認してから、右側の手順を左から右へ順番に進めます",
 });
 checkTextContains({
   label: "結果管理HowToの最後の確認",

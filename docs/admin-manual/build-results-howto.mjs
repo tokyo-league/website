@@ -149,9 +149,21 @@ const pages = [
 ];
 
 const routes = [
-  ["Excelがある", "Excel入稿", "内容読み取り", "内容確認", "試合へ反映", "順位表確認"],
-  ["Excelがない", "手入力", "試合を追加", "登録済み試合確認", "順位表保存", "登録済み順位表確認"],
-  ["過去大会", "結果画像", "画像を登録", "補足説明を入力", "保存", "公開ページ確認"],
+  {
+    label: "Excelファイルあり",
+    summary: "結果管理表を読み取り、確認後に複数試合をまとめて反映します。",
+    steps: ["対象リーグ選択", "Excel入稿", "内容読み取り", "内容確認", "試合へ反映", "順位表確認"],
+  },
+  {
+    label: "Excelファイルなし",
+    summary: "試合日、対戦チーム、得点、会場を1試合ずつ入力します。",
+    steps: ["対象リーグ選択", "手入力", "試合を追加", "登録済み試合確認", "順位表保存", "登録済み順位表確認"],
+  },
+  {
+    label: "過去大会・結果画像管理",
+    summary: "試合スコアを編集せず、結果画像を正本として登録・確認します。",
+    steps: ["対象リーグ選択", "結果画像", "画像を登録", "補足説明を入力", "保存", "公開ページ確認"],
+  },
 ];
 
 function escapeHtml(value) {
@@ -202,7 +214,7 @@ const html = `<!doctype html>
   <meta charset="utf-8">
   <title>東京リーグ 結果管理 HowTo</title>
   <style>
-    @page { size: A4 landscape; margin: 12mm; }
+    @page { size: A4 landscape; margin: 0; }
     * { box-sizing: border-box; }
     body {
       margin: 0;
@@ -212,10 +224,14 @@ const html = `<!doctype html>
       background: #eff5f8;
     }
     .page {
-      page-break-after: always;
-      min-height: 186mm;
+      width: 297mm;
+      height: 210mm;
+      break-after: page;
       background: #fff;
       overflow: hidden;
+    }
+    .page:last-child {
+      break-after: auto;
     }
     .cover {
       display: grid;
@@ -255,7 +271,7 @@ const html = `<!doctype html>
       font-size: 10.5pt;
     }
     .map-page {
-      padding: 13mm 14mm;
+      padding: 12mm 14mm;
     }
     .map-page h2, .lesson-copy h2, .check-page h2 {
       margin: 0;
@@ -263,59 +279,71 @@ const html = `<!doctype html>
       line-height: 1.25;
     }
     .map-lead {
-      margin: 6mm 0 8mm;
-      max-width: 190mm;
-      font-size: 13pt;
+      margin: 5mm 0 6mm;
+      max-width: 220mm;
+      font-size: 12.2pt;
       color: #3d4a5c;
     }
     .route-grid {
       display: grid;
-      gap: 9px;
+      gap: 6mm;
     }
-    .route {
+    .route-card {
       display: grid;
-      grid-template-columns: 28mm repeat(5, 1fr);
-      gap: 6px;
-      align-items: stretch;
+      grid-template-columns: 50mm 1fr;
+      gap: 6mm;
+      align-items: center;
+      padding: 5mm;
+      border: 1px solid #d9e3ec;
+      border-radius: 18px;
+      background: #f7fafc;
     }
-    .route span {
+    .route-card__header {
+      display: grid;
+      gap: 2mm;
+    }
+    .route-card__header h3 {
+      margin: 0;
+      color: #0d3b66;
+      font-size: 13.5pt;
+    }
+    .route-card__header p {
+      margin: 0;
+      color: #4b596b;
+      font-size: 9.3pt;
+      line-height: 1.45;
+    }
+    .route-card__steps {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 4px;
+      align-items: center;
+    }
+    .route-step {
       display: grid;
       place-items: center;
-      min-height: 19mm;
-      padding: 7px;
+      min-height: 17mm;
+      padding: 5px;
       text-align: center;
       border-radius: 14px;
-      background: #f3f7fa;
-      border: 1px solid #d9e3ec;
+      background: #fff;
+      border: 1px solid #ccd9e5;
       font-weight: 700;
-      font-size: 10.5pt;
+      font-size: 8.8pt;
+      position: relative;
     }
-    .route span:first-child {
+    .route-step:first-child {
       background: #0d3b66;
       color: #fff;
       border-color: #0d3b66;
     }
-    .route span:not(:last-child)::after {
+    .route-step:not(:last-child)::after {
       content: "→";
       position: absolute;
-    }
-    .mini-rule {
-      margin-top: 10mm;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8mm;
-    }
-    .mini-rule article {
-      padding: 8mm;
-      border-radius: 20px;
-      background: #fff8ec;
-      border: 1px solid #f0d5a6;
-      font-size: 11pt;
-    }
-    .mini-rule h3 {
-      margin: 0 0 6px;
-      color: #9a5b04;
-      font-size: 14pt;
+      right: -7px;
+      color: #0d3b66;
+      font-weight: 900;
+      z-index: 1;
     }
     .lesson-page {
       padding: 10mm 11mm;
@@ -443,23 +471,21 @@ const html = `<!doctype html>
 
   <section class="page map-page">
     <h2>結果管理の全体手順</h2>
-    <p class="map-lead">結果管理は、手元の資料の種類によって操作手順が分かれます。Excelがある場合、Excelがない場合、過去大会を結果画像で管理する場合の3つに分けて確認します。</p>
+    <p class="map-lead">結果管理は、手元の資料の種類によって3つの進め方に分かれます。下の各カードは、左側の説明を確認してから、右側の手順を左から右へ順番に進めます。</p>
     <div class="route-grid">
-      ${routes.map((route) => `<div class="route">${route.map((step) => `<span>${escapeHtml(step)}</span>`).join("")}</div>`).join("")}
-    </div>
-    <div class="mini-rule">
-      <article>
-        <h3>Excelがある</h3>
-        <p>結果管理表を読み取り、画面上で内容を確認してから複数試合をまとめて反映します。</p>
-      </article>
-      <article>
-        <h3>Excelがない</h3>
-        <p>試合日、対戦チーム、得点、会場を1試合ずつ入力し、登録後に順位表を確認します。</p>
-      </article>
-      <article>
-        <h3>過去大会</h3>
-        <p>試合スコアを編集せず、結果画像を正本として登録・確認する運用があります。</p>
-      </article>
+      ${routes
+        .map(
+          (route) => `<article class="route-card">
+            <div class="route-card__header">
+              <h3>${escapeHtml(route.label)}</h3>
+              <p>${escapeHtml(route.summary)}</p>
+            </div>
+            <div class="route-card__steps">
+              ${route.steps.map((step) => `<span class="route-step">${escapeHtml(step)}</span>`).join("")}
+            </div>
+          </article>`,
+        )
+        .join("")}
     </div>
   </section>
 
@@ -503,7 +529,7 @@ await page.pdf({
   format: "A4",
   landscape: true,
   printBackground: true,
-  margin: { top: "12mm", right: "12mm", bottom: "12mm", left: "12mm" },
+  margin: { top: "0", right: "0", bottom: "0", left: "0" },
 });
 await browser.close();
 

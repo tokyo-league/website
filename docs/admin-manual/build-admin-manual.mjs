@@ -134,6 +134,37 @@ const sections = [
     ],
   },
   {
+    title: "お問い合わせ管理: 受信先の追加・停止",
+    image: "contact-assignment.png",
+    markers: [
+      ["①", 36, 50],
+      ["②", 36, 68],
+      ["③", 36, 85],
+      ["④", 36, 96],
+    ],
+    callouts: [
+      "① 問い合わせを受け取るメールアドレスを入力します。",
+      "② 受信先として画面に表示する名称を入力します。",
+      "③ ロールは「問い合わせ先（受信専用）」を選択します。",
+      "④ 「担当者を保存」で問い合わせ受信先として登録します。",
+    ],
+    steps: [
+      "左メニューの「担当割当」を開きます。",
+      "「担当者を追加」で、問い合わせを受け取るメールアドレスと表示名を入力します。",
+      "ロールで「問い合わせ先（受信専用）」を選択し、「担当者を保存」を押します。",
+      "登録済み担当者に追加されたことを確認します。",
+      "受信を止める場合は、登録済み担当者の該当カードで「無効化」を押します。",
+      "受信先を変更する場合は、新しい問い合わせ先を追加したうえで、古い問い合わせ先を無効化または削除します。",
+    ],
+    notes: [
+      "問い合わせ先（受信専用）は公開サイトの問い合わせフォームから送信されたメールを受信するためのロールです。",
+      "問い合わせ先（受信専用）は管理画面へログインできません。Owner / Editor権限とは分けて管理します。",
+      "問い合わせフォームは、有効な問い合わせ先（受信専用）のメールアドレス全員へ配信します。",
+      "問い合わせメール送信には `RESEND_API_KEY`、`CONTACT_FROM_EMAIL`、Turnstile関連環境変数が必要です。",
+      "問い合わせフォーム本文や固定ページ本文の編集UIは現行管理画面にはありません。受信先のみ担当割当画面で管理します。",
+    ],
+  },
+  {
     title: "5. 大会管理: 大会追加・年度管理",
     image: "competitions.png",
     markers: [
@@ -421,6 +452,38 @@ const sections = [
     ],
   },
   {
+    title: "お知らせ管理: 画像入稿",
+    image: "news-form.png",
+    fit: "contain",
+    markers: [
+      ["①", 50, 55],
+      ["②", 50, 72],
+      ["③", 50, 81],
+      ["④", 50, 94],
+    ],
+    callouts: [
+      "① アイキャッチ画像を選択します。ニュース一覧や記事の見た目を整えるための代表画像です。",
+      "② 本文画像を選択します。複数枚をまとめて選択できます。",
+      "③ 公開状態と公開日時を確認します。",
+      "④ 保存すると、本文・画像・公開設定がまとめて反映されます。",
+    ],
+    steps: [
+      "ニュース作成または編集画面を開きます。",
+      "代表画像を設定する場合は、「アイキャッチ画像」の「画像を選択」から画像を選びます。",
+      "記事本文の画像を追加する場合は、「本文画像を選択」から1枚または複数枚の画像を選びます。",
+      "編集時に登録済み本文画像を外す場合は、対象画像の「保存時に削除」にチェックを入れます。",
+      "公開状態と公開日時を確認し、「ニュースを保存」または「更新を保存」を押します。",
+      "保存後はニュース一覧または公開記事で、画像が想定どおり表示されていることを確認します。",
+    ],
+    notes: [
+      "アイキャッチ画像と本文画像はいずれもJPG / PNG / WebPのみ、1枚あたり10MB以下です。",
+      "本文画像は最大10枚まで登録できます。編集時は既存画像と新規追加画像の合計で判定します。",
+      "本文画像は選択順で記事本文の直前に表示されます。表示順を変えたい場合は、選択順を調整して再登録します。",
+      "アップロード時はMIME type、拡張子、画像内容を検証します。条件に合わない画像は保存できません。",
+      "画像だけを差し替える場合も、ニュース本文や公開状態を確認してから保存してください。",
+    ],
+  },
+  {
     title: "15. チーム管理: 一覧・新規・更新・削除",
     image: "teams-list.png",
     markers: [
@@ -567,11 +630,11 @@ const sections = [
 
 const globalChecklist = [
   ["ログイン", "Google認証、有効な管理者メール登録、ログアウト、未登録・無効化済みメール不可"],
-  ["権限", "Owner / Editor / 問い合わせ先（受信専用）、担当者編集・無効化、担当リーグ割当、割当解除、担当者削除制限"],
+  ["権限・問い合わせ", "Owner / Editor / 問い合わせ先（受信専用）、担当者編集・無効化、担当リーグ割当、割当解除、担当者削除制限、問い合わせ受信先管理"],
   ["大会", "年度・大会・リーグの追加・編集・削除、全大会一覧、所属チーム追加・解除、表示順自動設定"],
   ["試合", "対象リーグ選択、Excel一括入稿・内容確認、手入力、結果画像追加・差替、星取表画像生成、試合更新・削除"],
   ["順位表", "まとめて保存、試合結果から再計算、行追加、表形式での登録内容確認、個別行削除、入力クリア"],
-  ["お知らせ", "新規作成、編集、削除、下書き・公開・非公開、アイキャッチ、本文画像"],
+  ["お知らせ", "新規作成、編集、削除、下書き・公開・非公開、アイキャッチ画像、本文画像、登録済み本文画像の削除"],
   ["チーム", "新規追加、編集、削除、画像条件、参照中削除不可"],
   ["資料", "新規追加、編集、ファイル差替、削除、カテゴリ・公開状態"],
   ["理事会", "メンバー追加、編集、削除、公開サイト「東京リーグについて」への反映"],
@@ -596,16 +659,25 @@ function listItems(items) {
   return items.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
 }
 
-function sectionHtml(section) {
+function stripSectionNumber(title) {
+  return String(title).replace(/^\d+\.\s*/, "");
+}
+
+function sectionTitle(section, index) {
+  return `${index + 1}. ${stripSectionNumber(section.title)}`;
+}
+
+function sectionHtml(section, index) {
+  const displayTitle = sectionTitle(section, index);
   const imgSrc = pathToFileURL(path.join(assetsDir, section.image)).href;
   return `
     <section class="page section-page${section.compact ? " compact-section" : ""}${section.fit === "contain" ? " section-page--contain-shot" : ""}">
       <header class="section-header">
         <p>Tokyo League Admin Manual</p>
-        <h2>${escapeHtml(section.title)}</h2>
+        <h2>${escapeHtml(displayTitle)}</h2>
       </header>
       <figure class="shot">
-        <img src="${imgSrc}" alt="${escapeHtml(section.title)}">
+        <img src="${imgSrc}" alt="${escapeHtml(displayTitle)}">
         ${markerHtml(section.markers)}
       </figure>
       <div class="callout-grid">
@@ -631,7 +703,7 @@ const html = `<!doctype html>
   <meta charset="utf-8">
   <title>東京リーグ 管理画面 操作マニュアル</title>
   <style>
-    @page { size: A4 landscape; margin: 12mm; }
+    @page { size: A4 landscape; margin: 0; }
     * { box-sizing: border-box; }
     body {
       margin: 0;
@@ -641,11 +713,14 @@ const html = `<!doctype html>
       background: #f5f7fa;
     }
     .page {
-      page-break-after: always;
-      min-height: 186mm;
+      width: 297mm;
+      height: 210mm;
+      break-after: page;
       padding: 0;
       background: #fff;
+      overflow: hidden;
     }
+    .page:last-child { break-after: auto; }
     .cover {
       display: grid;
       align-content: center;
@@ -697,7 +772,7 @@ const html = `<!doctype html>
       width: 24%;
     }
     .section-page {
-      padding: 0;
+      padding: 12mm;
     }
     .section-header {
       display: flex;
@@ -819,7 +894,7 @@ const html = `<!doctype html>
   <section class="page cover">
     <p>納品用</p>
     <h1>東京リーグ<br>管理画面 操作マニュアル</h1>
-    <p>ログイン、権限、担当割当、試合結果、お知らせ、チーム、資料、理事会、大会管理の運用手順をまとめた管理者向け手順書です。</p>
+    <p>ログイン、権限、担当割当、問い合わせ受信先、試合結果、お知らせ、チーム、資料、理事会、大会管理の運用手順をまとめた管理者向け手順書です。</p>
     <div class="meta">
       <span>作成日: ${escapeHtml(today)} JST</span>
       <span>対象: Tokyo League 管理画面</span>
@@ -830,7 +905,7 @@ const html = `<!doctype html>
   <section class="page toc">
     <h2>目次</h2>
     <div class="toc-grid">
-      ${sections.map((section) => `<div class="toc-item">${escapeHtml(section.title)}</div>`).join("")}
+      ${sections.map((section, index) => `<div class="toc-item">${escapeHtml(sectionTitle(section, index))}</div>`).join("")}
     </div>
   </section>
 
@@ -868,6 +943,8 @@ const html = `<!doctype html>
         <tr><th>順位表行</th><td>登録済み順位表はまとめて保存で上書きできます。未所属の公開チームを順位表へ追加すると、リーグ所属にも同期されます。個別行削除と入力クリアも対応済みです。</td></tr>
         <tr><th>担当権限の細分化</th><td>内部データには結果編集、順位編集、リーグ管理の種別がありますが、現行UIでは「担当リーグ編集」としてまとめて付与します。細分化UIを追加実装候補とします。</td></tr>
         <tr><th>担当者の無効化</th><td>担当者の表示名・ロール変更、無効化、削除に対応済みです。Owner / Editorの無効化はログインを停止し、問い合わせ先の無効化はメール配信を停止します。</td></tr>
+        <tr><th>問い合わせ受信先</th><td>公開サイトの問い合わせフォームは、有効な「問い合わせ先（受信専用）」ロールのメールアドレスへ配信します。問い合わせ先は担当割当画面で追加・無効化できます。問い合わせ先は管理画面へログインできません。</td></tr>
+        <tr><th>お知らせ画像</th><td>アイキャッチ画像と本文画像の入稿に対応済みです。本文画像は最大10枚まで登録でき、編集時は登録済み画像を保存時に削除できます。</td></tr>
         <tr><th>チーム削除</th><td>リーグ所属、試合、順位表に紐づくチームは削除できません。一覧の削除前確認で参照数を確認できます。代替チームへの移管は追加実装候補です。</td></tr>
         <tr><th>大会関連ファイル</th><td>要項、組み合わせ、結果PDFなどを大会に紐づける <code>CompetitionFile</code> モデルはありますが管理UIはありません。資料管理との使い分けを含めて追加実装候補とします。</td></tr>
         <tr><th>理事会</th><td>理事会メンバーの追加、編集、削除に対応済みです。保存後は公開サイトの「東京リーグについて」ページにも反映されます。</td></tr>
@@ -892,7 +969,7 @@ await page.pdf({
   format: "A4",
   landscape: true,
   printBackground: true,
-  margin: { top: "12mm", right: "12mm", bottom: "12mm", left: "12mm" },
+  margin: { top: "0", right: "0", bottom: "0", left: "0" },
 });
 await browser.close();
 

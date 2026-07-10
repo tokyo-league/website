@@ -11,7 +11,7 @@
 | 仕様書PDF | `docs/output/tokyo-league-renewal-spec.pdf` | `npm run docs:spec` | 生成済み |
 | 管理者ツール説明書PDF | `docs/admin-manual/output/tokyo-league-admin-manual.pdf` | `npm run docs:admin` | 生成済み |
 | 結果管理HowTo PDF | `docs/admin-manual/output/tokyo-league-result-management-howto.pdf` | `npm run docs:results-howto` | 生成済み |
-| 管理者説明書QA画像 | `docs/admin-manual/output/qa-pages/` | `npm run docs:admin:qa`, `npm run docs:admin:qa:check` | 24ページ生成・品質確認済み |
+| 管理者説明書QA画像 | `docs/admin-manual/output/qa-pages/` | `npm run docs:admin:qa`, `npm run docs:admin:qa:check` | 26ページ生成・品質確認済み |
 | 本番デプロイRunbook | `docs/production-runbook.md` | 手順確認 | 作成済み |
 | 納品ハンドオフ | `docs/delivery-handoff.md` | 手順確認 | 作成済み |
 | 納品物自動チェック | PDF、QA画像、Runbook、古い文言混入 | `npm run docs:delivery:check` | 実装済み |

@@ -8,6 +8,12 @@ const outputDir = path.resolve("docs/admin-manual/assets");
 const pages = [
   { slug: "login", path: "/login", label: "ログイン画面" },
   { slug: "dashboard", path: "/admin", label: "ダッシュボード" },
+  {
+    slug: "contact-assignment",
+    path: "/admin/assignments",
+    label: "問い合わせ先設定",
+    selectValue: { selector: 'select[name="role"]', value: "CONTACT" },
+  },
   { slug: "competitions", path: "/admin/competitions", label: "大会管理" },
   {
     slug: "competition-edit",
@@ -62,6 +68,10 @@ for (const item of pages) {
     ]);
     await page.locator("main").waitFor({ state: "visible", timeout: 20_000 });
     await page.waitForTimeout(600);
+  }
+  if (item.selectValue) {
+    await page.locator(item.selectValue.selector).first().selectOption(item.selectValue.value);
+    await page.waitForTimeout(250);
   }
   if (item.heading) {
     await page.locator("h3", { hasText: item.heading }).first().evaluate((heading) => {

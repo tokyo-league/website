@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { siteAssets } from "@/lib/site-data";
+import { getHomeMessages } from "@/lib/home-messages";
 
 const footerLinks = [
   { href: "/about", label: "東京リーグについて" },
@@ -8,7 +9,9 @@ const footerLinks = [
   { href: "/contact", label: "お問い合わせ" },
 ];
 
-export function SiteFooter() {
+export async function SiteFooter() {
+  const { mainMessage } = await getHomeMessages();
+
   return (
     <footer className="site-footer">
       <div className="container site-footer__inner">
@@ -16,7 +19,7 @@ export function SiteFooter() {
           <Image src={siteAssets.logo} alt="東京リーグ" width={72} height={72} />
           <div>
             <p className="section-kicker">TOKYO Junior Soccer League</p>
-            <strong>受け継ぐ誇りを、未来へ。</strong>
+            <strong>{mainMessage}</strong>
           </div>
         </div>
         <div className="site-footer__links">

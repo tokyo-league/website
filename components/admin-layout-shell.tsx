@@ -28,6 +28,7 @@ export async function AdminLayoutShell({
           { href: "/admin/news", label: "ニュース" },
           { href: "/admin/teams", label: "チーム" },
           { href: "/admin/downloads", label: "資料" },
+          { href: "/admin/home-messages", label: "トップページ" },
           { href: "/admin/board", label: "理事会" },
         ]
       : []),

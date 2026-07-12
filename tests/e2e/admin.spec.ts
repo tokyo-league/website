@@ -80,6 +80,22 @@ test("資料管理ページが表示できる", async ({ page }) => {
   await expect(page.getByText("公開URL", { exact: true })).toBeVisible();
 });
 
+test("トップページの文言を編集できる", async ({ page }) => {
+  await page.goto("/admin/home-messages");
+
+  await expect(page.getByRole("heading", { name: "トップページ管理" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "トップページの文言を編集" })).toBeVisible();
+  await expect(page.getByLabel("メインメッセージ（トップ・フッター共通）")).toHaveValue("受け継ぐ誇りを、未来へ。");
+  await expect(page.getByLabel("メインメッセージ（紹介見出し）")).toHaveValue("サッカーを通じて、強く、正しく、たくましく。");
+  await expect(page.getByLabel("サブメッセージ")).toHaveValue(/東京リーグは、少年少女たちが真剣勝負/);
+  await expect(page.getByRole("button", { name: "変更を保存" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /追加|削除/ })).toHaveCount(0);
+
+  await page.getByLabel("メインメッセージ（トップ・フッター共通）").fill("E2E用メインメッセージ");
+  await page.getByRole("button", { name: "変更を保存" }).click();
+  await expect(page.getByRole("status")).toContainText("トップページのメッセージを更新しました。");
+});
+
 test("理事会管理で追加・編集・削除UIが表示できる", async ({ page }) => {
   await page.goto("/admin/board");
 

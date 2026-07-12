@@ -4,12 +4,16 @@ import { PublishStatus } from "@prisma/client";
 import { NewsList } from "@/components/news-list";
 import { prisma } from "@/lib/prisma";
 import { getPublishedNews } from "@/lib/public-news";
+import { getHomeMessages } from "@/lib/home-messages";
 import { siteAssets, teams as fallbackTeams } from "@/lib/site-data";
 import { getTeamInitial, isDisplayableTeamLogo } from "@/lib/team-logo";
 
 export async function PublicHome() {
-  const latestNews = await getPublishedNews(3);
-  const featuredTeams = await getRandomFeaturedTeams(3);
+  const [latestNews, featuredTeams, messages] = await Promise.all([
+    getPublishedNews(3),
+    getRandomFeaturedTeams(3),
+    getHomeMessages(),
+  ]);
 
   return (
     <main className="page-main heritage-home">
@@ -25,7 +29,7 @@ export async function PublicHome() {
         </div>
         <div className="heritage-hero__copy">
           <p>EST. 1982 / TOKYO</p>
-          <h1 id="home-hero-title">受け継ぐ誇りを、<br />未来へ。</h1>
+          <h1 id="home-hero-title">{messages.mainMessage}</h1>
           <span>Together, we shape the next generation.</span>
         </div>
         <div className="heritage-hero__side" aria-hidden="true"><b>01</b><span>SCROLL TO DISCOVER</span></div>
@@ -34,8 +38,8 @@ export async function PublicHome() {
       <section className="heritage-intro">
         <div className="heritage-intro__label"><p className="section-kicker">OUR LEAGUE</p><span /></div>
         <div>
-          <h2>サッカーを通じて、<br />強く、正しく、たくましく。</h2>
-          <p>東京リーグは、少年少女たちが真剣勝負の中で成長し、仲間とともに未来を切り拓くための舞台です。長い歴史を受け継ぎながら、次の一歩をつくります。</p>
+          <h2>{messages.leadMessage}</h2>
+          <p>{messages.subMessage}</p>
           <Link href="/about" className="heritage-text-link">東京リーグについて <span>→</span></Link>
         </div>
       </section>

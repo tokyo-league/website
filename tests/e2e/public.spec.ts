@@ -4,6 +4,7 @@ test("公開トップからニュース詳細ページへ遷移できる", async
   await page.goto("/");
 
   await expect(page.getByRole("heading", { level: 1, name: /受け継ぐ誇りを/ })).toBeVisible();
+  await expect(page.locator(".site-footer").getByText("受け継ぐ誇りを、未来へ。", { exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { level: 2, name: "第103回 東京リーグ" })).toBeVisible();
   await expect(page.getByRole("main").getByRole("link", { name: /大会情報を見る/ })).toHaveAttribute(
     "href",

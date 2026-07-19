@@ -3003,6 +3003,15 @@ button {
   font-size: 12px;
 }
 
+.admin-contact-recipient-setting {
+  display: grid;
+  gap: 5px;
+}
+
+.admin-contact-recipient-setting .admin-field__help {
+  margin: 0;
+}
+
 .admin-field__error {
   color: #b33a27;
   font-size: 12px;

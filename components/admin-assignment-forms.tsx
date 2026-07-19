@@ -112,10 +112,13 @@ export function AdminAssignmentForms({
                 <option value="CONTACT">問い合わせ専用（管理画面にはログインできません）</option>
               </select>
             </label>
-            <label className="admin-check">
-              <input type="checkbox" name="receivesContact" value="true" />
-              <span>問い合わせ先としてメールを受信する</span>
-            </label>
+            <div className="admin-contact-recipient-setting">
+              <label className="admin-check">
+                <input type="checkbox" name="receivesContact" value="true" />
+                <span>問い合わせ先としてメールを受信する</span>
+              </label>
+              <p className="admin-field__help">Owner／Editorを選択している担当者を、問い合わせ先としても登録する場合に有効にしてください。</p>
+            </div>
             <button type="submit" className="button" disabled={createUserPending}>
               {createUserPending ? "保存中..." : "担当者を保存"}
             </button>
@@ -327,10 +330,13 @@ function AdminUserEditor({
             </select>
           </label>
         </div>
-        <label className="admin-check">
-          <input type="checkbox" name="receivesContact" value="true" defaultChecked={user.receivesContact} />
-          <span>問い合わせ先としてメールを受信する</span>
-        </label>
+        <div className="admin-contact-recipient-setting">
+          <label className="admin-check">
+            <input type="checkbox" name="receivesContact" value="true" defaultChecked={user.receivesContact} />
+            <span>問い合わせ先としてメールを受信する</span>
+          </label>
+          <p className="admin-field__help">Owner／Editorを選択している担当者を、問い合わせ先としても登録する場合に有効にしてください。</p>
+        </div>
         <div className="admin-item-card__actions">
           <button type="submit" className="button" disabled={updatePending}>
             {updatePending ? "更新中..." : "担当者を更新"}

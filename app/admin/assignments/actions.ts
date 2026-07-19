@@ -20,11 +20,19 @@ export async function createAdminUser(
   const email = normalizeEmail(String(formData.get("email") ?? ""));
   const name = sanitizePlainText(String(formData.get("name") ?? ""), 80);
   const role = String(formData.get("role") ?? "EDITOR") as AdminRole;
+  const receivesContact = String(formData.get("receivesContact") ?? "") === "true";
 
   if (!email || !name || !isValidEmail(email) || !["OWNER", "EDITOR", "CONTACT"].includes(role)) {
     return {
       status: "error",
       message: "メールアドレス、表示名、ロールを確認してください。",
+    };
+  }
+
+  if (role === "CONTACT" && !receivesContact) {
+    return {
+      status: "error",
+      message: "ログインなしの担当者は、問い合わせ先として設定してください。",
     };
   }
 
@@ -44,12 +52,14 @@ export async function createAdminUser(
       update: {
         name,
         role,
+        receivesContact,
         isActive: true,
       },
       create: {
         email,
         name,
         role,
+        receivesContact,
         isActive: true,
       },
     });
@@ -68,7 +78,7 @@ export async function createAdminUser(
 
   return {
     status: "success",
-    message: `${name} を ${getRoleLabel(role)} として保存しました。`,
+    message: `${name} を ${getRoleLabel(role, receivesContact)} として保存しました。`,
   };
 }
 
@@ -81,11 +91,19 @@ export async function updateAdminUser(
   const userId = sanitizePlainText(String(formData.get("userId") ?? ""), 64);
   const name = sanitizePlainText(String(formData.get("name") ?? ""), 80);
   const role = String(formData.get("role") ?? "EDITOR") as AdminRole;
+  const receivesContact = String(formData.get("receivesContact") ?? "") === "true";
 
   if (!userId || !isValidUuid(userId) || !name || !["OWNER", "EDITOR", "CONTACT"].includes(role)) {
     return {
       status: "error",
       message: "担当者、表示名、ロールを確認してください。",
+    };
+  }
+
+  if (role === "CONTACT" && !receivesContact) {
+    return {
+      status: "error",
+      message: "ログインなしの担当者は、問い合わせ先として設定してください。",
     };
   }
 
@@ -112,6 +130,7 @@ export async function updateAdminUser(
       data: {
         name,
         role,
+        receivesContact,
       },
     });
 
@@ -129,7 +148,7 @@ export async function updateAdminUser(
 
   return {
     status: "success",
-    message: `${name} を ${getRoleLabel(role)} として更新しました。`,
+    message: `${name} を ${getRoleLabel(role, receivesContact)} として更新しました。`,
   };
 }
 
@@ -420,8 +439,7 @@ async function validateAdminRoleChange(
   return null;
 }
 
-function getRoleLabel(role: AdminRole) {
-  if (role === "OWNER") return "Owner";
-  if (role === "CONTACT") return "問い合わせ先";
-  return "Editor";
+function getRoleLabel(role: AdminRole, receivesContact: boolean) {
+  const accessLabel = role === "OWNER" ? "Owner" : role === "CONTACT" ? "ログインなし" : "Editor";
+  return receivesContact ? `${accessLabel} + 問い合わせ先` : accessLabel;
 }

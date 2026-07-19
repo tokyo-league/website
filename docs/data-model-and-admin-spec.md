@@ -42,8 +42,9 @@
 | id | uuid pk | |
 | email | text unique | ログインIDまたは問い合わせ通知先 |
 | name | text | 表示名 |
-| role | text | `owner`, `editor`, `contact` |
-| is_active | boolean | 無効化した管理者はログイン不可。`contact` は問い合わせ通知対象外 |
+| role | text | `owner`, `editor`, `contact`（`contact` は管理画面にログインしない問い合わせ専用の既存区分） |
+| receivesContact | boolean | 公開フォームの問い合わせメールを受信するか。Owner／Editorと重複可能 |
+| is_active | boolean | 無効化した管理者はログイン不可かつ問い合わせ通知対象外 |
 | created_at | timestamptz | |
 | updated_at | timestamptz | |
 

@@ -63,6 +63,7 @@ model User {
   email          String     @unique
   name           String
   role           AdminRole
+  receivesContact Boolean   @default(false)
   isActive       Boolean    @default(true)
   image          String?
   createdAt      DateTime   @default(now())

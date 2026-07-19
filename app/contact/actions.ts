@@ -43,7 +43,10 @@ export async function submitContact(
 
   try {
     const contacts = await prisma.user.findMany({
-      where: { role: "CONTACT", isActive: true },
+      where: {
+        isActive: true,
+        OR: [{ receivesContact: true }, { role: "CONTACT" }],
+      },
       select: { email: true },
       orderBy: { createdAt: "asc" },
     });

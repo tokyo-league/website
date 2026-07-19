@@ -42,6 +42,7 @@ export default async function AdminAssignmentsPage() {
           name: user.name,
           email: user.email,
           role: user.role,
+          receivesContact: user.receivesContact || user.role === "CONTACT",
           isActive: user.isActive,
         }))}
         divisions={divisions.map((division) => ({
@@ -78,7 +79,7 @@ export default async function AdminAssignmentsPage() {
           </li>
           <li>
             <strong>問い合わせ先</strong>
-            <span>公開フォームから送信された問い合わせをメールで受信（管理画面へのログイン権限なし）</span>
+            <span>公開フォームから送信された問い合わせをメールで受信。Owner／Editorと重複して設定できます。</span>
           </li>
           <li>
             <strong>担当リーグ権限</strong>

@@ -22,6 +22,7 @@ type UserOption = {
   name: string;
   email: string;
   role: "OWNER" | "EDITOR" | "CONTACT";
+  receivesContact: boolean;
   isActive: boolean;
 };
 
@@ -104,12 +105,16 @@ export function AdminAssignmentForms({
               <input type="text" name="name" placeholder="担当者名" required />
             </label>
             <label className="admin-field">
-              <span>ロール</span>
+              <span>管理画面権限</span>
               <select name="role" defaultValue="EDITOR">
                 <option value="EDITOR">Editor</option>
                 <option value="OWNER">Owner</option>
-                <option value="CONTACT">問い合わせ先（受信専用）</option>
+                <option value="CONTACT">ログインなし</option>
               </select>
+            </label>
+            <label className="admin-check">
+              <input type="checkbox" name="receivesContact" value="true" />
+              <span>問い合わせ先としてメールを受信する</span>
             </label>
             <button type="submit" className="button" disabled={createUserPending}>
               {createUserPending ? "保存中..." : "担当者を保存"}
@@ -286,14 +291,15 @@ function AdminUserEditor({
   }, [deleteState, onDone]);
 
   const deletable = user.role !== "OWNER" && !isCurrentUser;
-  const roleLabel = user.role === "OWNER" ? "Owner" : user.role === "CONTACT" ? "問い合わせ先" : "Editor";
+  const roleLabel = user.role === "OWNER" ? "Owner" : user.role === "CONTACT" ? "ログインなし" : "Editor";
+  const roleSummary = [roleLabel, ...(user.receivesContact ? ["問い合わせ先"] : [])].join(" + ");
 
   return (
     <div className="admin-item-card">
       <div className="admin-item-card__summary">
         <strong>{user.name}</strong>
         <p>
-          {user.email} / {roleLabel} / {user.isActive ? "有効" : "無効"} / 担当リーグ {assignmentCount}件
+          {user.email} / {roleSummary} / {user.isActive ? "有効" : "無効"} / 担当リーグ {assignmentCount}件
         </p>
       </div>
 
@@ -313,14 +319,18 @@ function AdminUserEditor({
             <input type="email" value={user.email} readOnly />
           </label>
           <label className="admin-field">
-            <span>ロール</span>
+            <span>管理画面権限</span>
             <select name="role" defaultValue={user.role}>
               <option value="EDITOR">Editor</option>
               <option value="OWNER">Owner</option>
-              <option value="CONTACT">問い合わせ先（受信専用）</option>
+              <option value="CONTACT">ログインなし</option>
             </select>
           </label>
         </div>
+        <label className="admin-check">
+          <input type="checkbox" name="receivesContact" value="true" defaultChecked={user.receivesContact} />
+          <span>問い合わせ先としてメールを受信する</span>
+        </label>
         <div className="admin-item-card__actions">
           <button type="submit" className="button" disabled={updatePending}>
             {updatePending ? "更新中..." : "担当者を更新"}
@@ -334,7 +344,7 @@ function AdminUserEditor({
           action={activeAction}
           message={
             user.isActive
-              ? user.role === "CONTACT"
+              ? user.receivesContact
                 ? "この問い合わせ先を無効化します。無効化すると問い合わせメールが届かなくなります。よろしいですか？"
                 : "この担当者を無効化します。無効化すると管理画面へログインできなくなります。よろしいですか？"
               : "この担当者を有効化します。よろしいですか？"

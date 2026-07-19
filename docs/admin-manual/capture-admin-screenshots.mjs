@@ -12,6 +12,7 @@ const pages = [
     slug: "contact-assignment",
     path: "/admin/assignments",
     label: "問い合わせ先設定",
+    zoom: 0.75,
     selectValue: { selector: 'select[name="role"]', value: "CONTACT" },
   },
   { slug: "competitions", path: "/admin/competitions", label: "大会管理" },
@@ -40,7 +41,7 @@ const pages = [
   { slug: "downloads", path: "/admin/downloads", label: "資料管理" },
   { slug: "home-messages", path: "/admin/home-messages", label: "トップページ管理", zoom: 0.75 },
   { slug: "board", path: "/admin/board", label: "理事会管理" },
-  { slug: "assignments", path: "/admin/assignments", label: "担当割当" },
+  { slug: "assignments", path: "/admin/assignments", label: "担当割当", zoom: 0.75 },
   { slug: "audit", path: "/admin/audit", label: "更新履歴" },
 ];
 

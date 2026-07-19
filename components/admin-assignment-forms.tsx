@@ -109,7 +109,7 @@ export function AdminAssignmentForms({
               <select name="role" defaultValue="EDITOR">
                 <option value="EDITOR">Editor</option>
                 <option value="OWNER">Owner</option>
-                <option value="CONTACT">ログインなし</option>
+                <option value="CONTACT">問い合わせ専用（管理画面にはログインできません）</option>
               </select>
             </label>
             <label className="admin-check">
@@ -291,7 +291,7 @@ function AdminUserEditor({
   }, [deleteState, onDone]);
 
   const deletable = user.role !== "OWNER" && !isCurrentUser;
-  const roleLabel = user.role === "OWNER" ? "Owner" : user.role === "CONTACT" ? "ログインなし" : "Editor";
+  const roleLabel = user.role === "OWNER" ? "Owner" : user.role === "CONTACT" ? "問い合わせ専用（ログイン不可）" : "Editor";
   const roleSummary = [roleLabel, ...(user.receivesContact ? ["問い合わせ先"] : [])].join(" + ");
 
   return (
@@ -323,7 +323,7 @@ function AdminUserEditor({
             <select name="role" defaultValue={user.role}>
               <option value="EDITOR">Editor</option>
               <option value="OWNER">Owner</option>
-              <option value="CONTACT">ログインなし</option>
+              <option value="CONTACT">問い合わせ専用（管理画面にはログインできません）</option>
             </select>
           </label>
         </div>

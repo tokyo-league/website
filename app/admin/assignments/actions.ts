@@ -32,7 +32,7 @@ export async function createAdminUser(
   if (role === "CONTACT" && !receivesContact) {
     return {
       status: "error",
-      message: "ログインなしの担当者は、問い合わせ先として設定してください。",
+      message: "問い合わせ専用の担当者は、問い合わせ先として設定してください。",
     };
   }
 
@@ -103,7 +103,7 @@ export async function updateAdminUser(
   if (role === "CONTACT" && !receivesContact) {
     return {
       status: "error",
-      message: "ログインなしの担当者は、問い合わせ先として設定してください。",
+      message: "問い合わせ専用の担当者は、問い合わせ先として設定してください。",
     };
   }
 
@@ -440,6 +440,6 @@ async function validateAdminRoleChange(
 }
 
 function getRoleLabel(role: AdminRole, receivesContact: boolean) {
-  const accessLabel = role === "OWNER" ? "Owner" : role === "CONTACT" ? "ログインなし" : "Editor";
+  const accessLabel = role === "OWNER" ? "Owner" : role === "CONTACT" ? "問い合わせ専用（ログイン不可）" : "Editor";
   return receivesContact ? `${accessLabel} + 問い合わせ先` : accessLabel;
 }

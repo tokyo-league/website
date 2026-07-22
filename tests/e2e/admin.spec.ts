@@ -96,6 +96,17 @@ test("トップページの文言を編集できる", async ({ page }) => {
   await expect(page.getByRole("status")).toContainText("トップページのメッセージを更新しました。");
 });
 
+test("東京リーグについての内容を編集できる", async ({ page }) => {
+  await page.goto("/admin/about");
+
+  await expect(page.getByRole("heading", { name: "東京リーグについて管理" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "公開ページの内容を編集" })).toBeVisible();
+  await expect(page.getByLabel("総会/納会")).toHaveValue("年6回開催、必要に応じて臨時開催");
+  await expect(page.getByLabel("主な事業")).toHaveValue(/参加チームにより年2回のリーグ戦/);
+  await expect(page.getByLabel("東京少年サッカー連盟の根本原則")).toHaveValue(/加盟するチーム関係者/);
+  await expect(page.getByLabel("努力目標")).toHaveValue(/サッカーの競技力を高め/);
+});
+
 test("理事会管理で追加・編集・削除UIが表示できる", async ({ page }) => {
   await page.goto("/admin/board");
 

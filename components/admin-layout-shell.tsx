@@ -29,6 +29,7 @@ export async function AdminLayoutShell({
           { href: "/admin/teams", label: "チーム" },
           { href: "/admin/downloads", label: "資料" },
           { href: "/admin/home-messages", label: "トップページ" },
+          { href: "/admin/about", label: "東京リーグについて" },
           { href: "/admin/board", label: "理事会" },
         ]
       : []),

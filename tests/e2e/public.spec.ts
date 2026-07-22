@@ -94,9 +94,10 @@ test("ニュースページでニュースカードが表示できる", async ({
 test("東京リーグ紹介ページで理事会情報が表示できる", async ({ page }) => {
   await page.goto("/about");
 
+  await expect(page.getByText("総会/納会", { exact: true })).toBeVisible();
+  await expect(page.getByText("理事会", { exact: true })).toHaveCount(1);
   await expect(page.getByRole("heading", { level: 2, name: "理事会" })).toBeVisible();
   await expect(page.getByText("宮崎 昇作", { exact: true })).toBeVisible();
-  await expect(page.getByText("後援会会長", { exact: true })).toBeVisible();
 });
 
 test("参加チームページで主要導線とチーム一覧が表示できる", async ({ page }) => {

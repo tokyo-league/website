@@ -1710,6 +1710,10 @@ button {
   margin: 0;
 }
 
+.text-section__body {
+  white-space: pre-line;
+}
+
 .about-overview__row dt {
   color: var(--muted);
   font-weight: 700;

@@ -3,34 +3,19 @@ import Link from "next/link";
 import { unstable_noStore as noStore } from "next/cache";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { getAboutContent } from "@/lib/about-content";
 import { getBoardMembers } from "@/lib/board-members";
 import { siteAssets } from "@/lib/site-data";
 
-const overviewItems = [
-  { label: "名称", value: "東京少年サッカー連盟" },
-  { label: "創立", value: "1979年 東京23区の少年サッカーチーム13チームで創立" },
-  { label: "参加チーム", value: "現在都内の少年チーム88チームが参加" },
-  { label: "理事会", value: "年6回開催、必要に応じて臨時開催" },
-];
-
-const mainActivities = [
-  "参加チームにより年2回のリーグ戦を展開",
-  "オープン大会を年1回開催し、加盟チームが一会場に集まる機会をつくる",
-  "国際交流大会を年1回実施する",
-  "参加チームの選手育成を進める",
-  "少年審判員の育成と審判講習会の実施を行う",
-];
-
-const effortGoals = [
-  "サッカーの競技力を高め、リーグ運営では子どもたちが活動できる試合会場を継続して提供できるよう努める。",
-  "すべての子どもたちが試合に参加できるよう、長期的な視点で活動し、日々の練習や試合を通じて人としての基礎を育む。",
-  "加盟チームは連盟の活動に積極的に参加し、企画や運営に協力する。",
-  "東京リーグに関わるすべての活動が、サッカー競技に限らず社会的にも有益なものとなるよう努める。",
-];
-
 export default async function AboutPage() {
   noStore();
-  const boardMembers = await getBoardMembers();
+  const [boardMembers, content] = await Promise.all([getBoardMembers(), getAboutContent()]);
+  const overviewItems = [
+    { label: "名称", value: content.overview.name },
+    { label: "創立", value: content.overview.founded },
+    { label: "参加チーム", value: content.overview.participatingTeams },
+    { label: "総会/納会", value: content.overview.generalMeetingReception },
+  ];
 
   return (
     <>
@@ -78,7 +63,7 @@ export default async function AboutPage() {
               <article className="text-section">
                 <h2>主な事業</h2>
                 <ul className="text-list">
-                  {mainActivities.map((item) => (
+                  {content.mainActivities.map((item) => (
                     <li key={item}>{item}</li>
                   ))}
                 </ul>
@@ -116,17 +101,13 @@ export default async function AboutPage() {
 
               <article className="text-section">
                 <h2>東京少年サッカー連盟の根本原則</h2>
-                <p>
-                  加盟するチーム関係者が互いに協働し、サッカーを通じて少年少女の健やかな成長を支え、
-                  その資質を高めていくことを基本に据えています。その積み重ねを通じて、連盟の活動が
-                  社会にも貢献することを目指します。
-                </p>
+                <p className="text-section__body">{content.fundamentalPrinciple}</p>
               </article>
 
               <article className="text-section">
                 <h2>努力目標</h2>
                 <ol className="text-list text-list--numbered">
-                  {effortGoals.map((item) => (
+                  {content.effortGoals.map((item) => (
                     <li key={item}>{item}</li>
                   ))}
                 </ol>

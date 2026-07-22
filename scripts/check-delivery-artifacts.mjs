@@ -37,7 +37,7 @@ checkFile({
 checkQaPages({
   label: "管理者説明書QA画像",
   dirPath: "docs/admin-manual/output/qa-pages",
-  expectedCount: 26,
+  expectedCount: 28,
 });
 
 checkTextDoesNotContain({
@@ -54,6 +54,11 @@ checkTextContains({
   label: "管理者マニュアルの理事会管理記載",
   filePath: "docs/admin-manual/output/tokyo-league-admin-manual.html",
   requiredText: "理事会管理: メンバー追加・更新・削除",
+});
+checkTextContains({
+  label: "管理者マニュアルの東京リーグについて管理記載",
+  filePath: "docs/admin-manual/output/tokyo-league-admin-manual.html",
+  requiredText: "東京リーグについて管理: 公開ページ本文の編集",
 });
 checkTextContains({
   label: "管理者マニュアルのお知らせ画像入稿記載",

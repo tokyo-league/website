@@ -40,6 +40,7 @@ const pages = [
   { slug: "teams-form", path: "/admin/teams/new", label: "チーム作成" },
   { slug: "downloads", path: "/admin/downloads", label: "資料管理" },
   { slug: "home-messages", path: "/admin/home-messages", label: "トップページ管理", zoom: 0.75 },
+  { slug: "about-content", path: "/admin/about", label: "東京リーグについて管理", zoom: 0.45 },
   { slug: "board", path: "/admin/board", label: "理事会管理" },
   { slug: "assignments", path: "/admin/assignments", label: "担当割当", zoom: 0.75 },
   { slug: "audit", path: "/admin/audit", label: "更新履歴" },

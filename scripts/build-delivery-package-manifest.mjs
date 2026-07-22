@@ -59,7 +59,7 @@ const deliverables = [
     label: "管理者説明書QA画像",
     kind: "qa-pages",
     filePath: "docs/admin-manual/output/qa-pages",
-    expectedCount: 20,
+    expectedCount: 28,
     note: "PDF visual QA pages",
   },
   {

@@ -125,15 +125,22 @@ test("お問い合わせフォームに必要項目とスパム対策が表示�
   await expect(page.getByRole("button", { name: "お問い合わせを送信" })).toBeVisible();
 });
 
-test("試合情報一覧からリーグ詳細まで辿れる", async ({ page }) => {
+test("試合情報を大会別にたどり、リーグ詳細まで辿れる", async ({ page }) => {
   await page.goto("/competitions");
 
   await expect(page.getByRole("heading", { name: "試合情報" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "開催中の大会" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "大会を選ぶ" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "東京リーグ" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "山藤杯" })).toBeVisible();
   await expect(page.getByRole("main").getByRole("link", { name: "関連ニュース" })).toHaveCSS(
     "color",
     "rgb(255, 255, 255)",
   );
+
+  await page.getByRole("link", { name: "試合結果を見る" }).first().click();
+
+  await expect(page).toHaveURL("/competitions/tokyo-league");
+  await expect(page.getByRole("heading", { name: "開催中の大会" })).toBeVisible();
 
   await page.getByRole("link", { name: "大会詳細へ" }).first().click();
 
@@ -150,6 +157,9 @@ test("試合情報一覧からリーグ詳細まで辿れる", async ({ page }) 
   await expect(teamDialog).toBeHidden();
 
   await page.goto("/competitions/tokyo-league-103/a-league");
+  await expect(page).toHaveURL("/competitions/tokyo-league/tokyo-league-103/a-league");
+
+  await page.goto("/competitions/tokyo-league/tokyo-league-103/a-league");
 
   await expect(page.getByRole("heading", { level: 1, name: "Aリーグ" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "試合結果画像" })).toBeVisible();
@@ -157,7 +167,7 @@ test("試合情報一覧からリーグ詳細まで辿れる", async ({ page }) 
   await expect(page.getByRole("heading", { name: "試合一覧" })).toHaveCount(0);
   await expect(page.locator(".standing-table")).toBeVisible();
 
-  await page.goto("/competitions/tokyo-league-103/b-league");
+  await page.goto("/competitions/tokyo-league/tokyo-league-103/b-league");
   await expect(page.getByText("公式結果は上の結果画像をご確認ください。")).toBeVisible();
   await expect(page.getByRole("heading", { name: "試合一覧" })).toHaveCount(0);
   await expect(page.getByText(/目視照合済み|OCR/)).toHaveCount(0);

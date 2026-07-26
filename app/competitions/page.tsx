@@ -1,39 +1,13 @@
+import Image from "next/image";
 import Link from "next/link";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { prisma } from "@/lib/prisma";
+import { competitionCategories } from "@/lib/competition-category";
 import { siteAssets } from "@/lib/site-data";
-import Image from "next/image";
-import { e2eMockCompetition, isE2ETestMode } from "@/lib/test-mode";
 
 export const dynamic = "force-dynamic";
 
-export default async function CompetitionsPage() {
-  const competitions = isE2ETestMode()
-    ? [e2eMockCompetition]
-    : await prisma.competition.findMany({
-        include: {
-          season: true,
-          divisions: {
-            where: {
-              status: "PUBLISHED",
-            },
-            orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
-          },
-        },
-        orderBy: [{ season: { year: "desc" } }, { edition: "desc" }, { createdAt: "desc" }],
-      });
-
-  const latestSeasonYear = competitions[0]?.season.year ?? null;
-  const currentCompetitions = competitions.filter((competition) => competition.season.year === latestSeasonYear);
-  const archiveGroups = new Map<number, Array<(typeof competitions)[number]>>();
-
-  for (const competition of competitions) {
-    const list = archiveGroups.get(competition.season.year) ?? [];
-    list.push(competition);
-    archiveGroups.set(competition.season.year, list);
-  }
-
+export default function CompetitionsPage() {
   return (
     <>
       <SiteHeader />
@@ -43,7 +17,7 @@ export default async function CompetitionsPage() {
             <div>
               <p className="section-kicker">Competition</p>
               <h1>試合情報</h1>
-              <p>開催中の大会と過去大会のアーカイブを、年度ごとに確認できる構成です。</p>
+              <p>大会ごとに、開催中の試合結果と過去大会のアーカイブを確認できます。</p>
               <div className="page-intro__actions">
                 <Link href="/downloads" className="button">
                   要項を見る
@@ -54,12 +28,7 @@ export default async function CompetitionsPage() {
               </div>
             </div>
             <div className="page-intro__visual page-intro__visual--feature">
-              <Image
-                src={siteAssets.competitionMainVisual}
-                alt="東京リーグの試合情報"
-                fill
-                sizes="100vw"
-              />
+              <Image src={siteAssets.competitionMainVisual} alt="東京リーグの試合情報" fill sizes="100vw" />
               <div className="page-intro__visual-caption">
                 <span>Tokyo League Match</span>
                 <strong>試合情報</strong>
@@ -72,64 +41,20 @@ export default async function CompetitionsPage() {
           <div className="container">
             <div className="section-heading">
               <div>
-                <p className="section-kicker">Current</p>
-                <h2>開催中の大会</h2>
+                <p className="section-kicker">Tournament</p>
+                <h2>大会を選ぶ</h2>
               </div>
             </div>
             <div className="competition-card-grid">
-              {currentCompetitions.map((competition) => (
-                <article key={competition.id} className="card competition-card">
-                  <p className="section-kicker">{competition.season.label}</p>
-                  <h2>{competition.name}</h2>
-                  <p>{competition.summary || defaultCompetitionSummary(competition.competitionType)}</p>
-                  <div className="mini-meta">
-                    <span>{competition.competitionType === "LEAGUE" ? `${competition.divisions.length}リーグ` : "結果掲載"}</span>
-                    <span>{competition.status === "PUBLISHED" ? "公開中" : "アーカイブ"}</span>
-                  </div>
+              {Object.values(competitionCategories).map((category) => (
+                <article key={category.slug} className="card competition-card">
+                  <p className="section-kicker">{category.kicker}</p>
+                  <h2>{category.name}</h2>
+                  <p>{category.description}</p>
                   <div className="page-intro__actions">
-                    <Link href={`/competitions/${competition.slug}`} className="button">
-                      大会詳細へ
+                    <Link href={`/competitions/${category.slug}`} className="button">
+                      試合結果を見る
                     </Link>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="section-block">
-          <div className="container">
-            <div className="section-heading">
-              <div>
-                <p className="section-kicker">Archive</p>
-                <h2>過去大会アーカイブ</h2>
-              </div>
-            </div>
-            <div className="archive-stack">
-              {[...archiveGroups.entries()].map(([year, items]) => (
-                <article key={year} className="card">
-                  <div className="card__header">
-                    <div>
-                      <p className="section-kicker">Season</p>
-                      <h2>{year}年度</h2>
-                    </div>
-                  </div>
-                  <div className="list-stack">
-                    {items.map((competition) => (
-                      <article key={competition.id} className="list-row list-row--large">
-                        <p className="list-row__meta">
-                          <span>{competition.competitionType === "LEAGUE" ? "東京リーグ" : "5年生FES 山藤杯"}</span>
-                          <span>{competition.divisions.length > 0 ? `${competition.divisions.length}リーグ` : "結果掲載"}</span>
-                        </p>
-                        <h3>{competition.name}</h3>
-                        <p>{competition.summary || defaultCompetitionSummary(competition.competitionType)}</p>
-                        <div className="page-intro__actions">
-                          <Link href={`/competitions/${competition.slug}`} className="button button--ghost">
-                            詳細を見る
-                          </Link>
-                        </div>
-                      </article>
-                    ))}
                   </div>
                 </article>
               ))}
@@ -140,16 +65,4 @@ export default async function CompetitionsPage() {
       <SiteFooter />
     </>
   );
-}
-
-function defaultCompetitionSummary(type: "LEAGUE" | "CUP" | "OTHER") {
-  if (type === "LEAGUE") {
-    return "リーグ別の結果画像、所属チーム、過去結果のアーカイブを確認できます。";
-  }
-
-  if (type === "CUP") {
-    return "年ごとの決勝大会結果を画像または PDF で掲載しています。";
-  }
-
-  return "大会情報を掲載しています。";
 }

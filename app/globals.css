@@ -3248,6 +3248,67 @@ button {
   font-size: 13px;
 }
 
+.admin-unplayed-match-adjustment {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin: 20px 0;
+  padding: 20px;
+  border: 2px solid #b42318;
+  background: #fff5f3;
+}
+
+.admin-unplayed-match-adjustment__eyebrow {
+  margin: 0 0 6px;
+  color: #b42318;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.admin-unplayed-match-adjustment h4,
+.admin-unplayed-match-adjustment p,
+.admin-unplayed-match-adjustment small {
+  margin: 0;
+}
+
+.admin-unplayed-match-adjustment h4 {
+  color: #7a271a;
+  font-size: 20px;
+}
+
+.admin-unplayed-match-adjustment > div > p:not(.admin-unplayed-match-adjustment__eyebrow) {
+  margin-top: 8px;
+  color: #5c261d;
+}
+
+.admin-unplayed-match-adjustment small {
+  display: block;
+  margin-top: 8px;
+  color: #7a271a;
+  font-weight: 700;
+}
+
+.admin-unplayed-match-adjustment__button {
+  border-color: #b42318;
+  background: #b42318;
+  color: #fff;
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .admin-unplayed-match-adjustment {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .admin-unplayed-match-adjustment__button {
+    width: 100%;
+  }
+}
+
 .admin-asset-preview {
   display: inline-grid;
   gap: 12px;

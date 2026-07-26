@@ -31,6 +31,7 @@ export async function getStarTableDivisionById(divisionId: string): Promise<Star
   return {
     competitionName: division.competition.name,
     divisionName: division.name,
+    applyUnplayedMatchPointsAdjustment: Boolean(division.unplayedMatchPointsAdjustedAt),
     teams: division.teams.map((assignment) => ({
       id: assignment.teamId,
       name: assignment.team.shortName || assignment.team.name,

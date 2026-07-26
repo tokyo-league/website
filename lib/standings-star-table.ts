@@ -20,6 +20,7 @@ export type StarTableDivision = {
   divisionName: string;
   teams: StarTableTeam[];
   matches: StarTableMatch[];
+  applyUnplayedMatchPointsAdjustment?: boolean;
 };
 
 type TeamStats = {
@@ -62,7 +63,7 @@ const SUMMARY_HEADERS = [
 export function renderStandingsStarTableSvg(division: StarTableDivision) {
   const teams = buildTeamOrder(division);
   const pairResults = buildPairResults(division.matches);
-  const stats = buildStats(teams, pairResults);
+  const stats = buildStats(teams, pairResults, Boolean(division.applyUnplayedMatchPointsAdjustment));
 
   const indexWidth = 42;
   const teamWidth = 132;
@@ -144,8 +145,11 @@ export function renderStandingsStarTableSvg(division: StarTableDivision) {
       parts.push(rect(x, y, opponentWidth, teamRowHeight, "none", "thin"));
       parts.push(rect(x, y + teamRowHeight, opponentWidth, teamRowHeight, "none", "thin"));
 
-      if (!result) {
+      if (!result && division.applyUnplayedMatchPointsAdjustment) {
         parts.push(text("▲", x + opponentWidth / 2, y + teamRowHeight / 2, 20, "middle", false));
+      }
+
+      if (!result) {
         return;
       }
 
@@ -225,7 +229,11 @@ function buildPairResults(matches: StarTableMatch[]) {
   return results;
 }
 
-function buildStats(teams: StarTableTeam[], pairResults: Map<string, PairResult>) {
+function buildStats(
+  teams: StarTableTeam[],
+  pairResults: Map<string, PairResult>,
+  applyUnplayedMatchPointsAdjustment: boolean,
+) {
   const stats = new Map<string, TeamStats>(
     teams.map((team) => [
       team.id,
@@ -259,7 +267,9 @@ function buildStats(teams: StarTableTeam[], pairResults: Map<string, PairResult>
   rows.forEach((row) => {
     row.goalDifference = row.goalsFor - row.goalsAgainst;
     row.remaining = Math.max(teams.length - 1 - row.played, 0);
-    row.points -= row.remaining;
+    if (applyUnplayedMatchPointsAdjustment) {
+      row.points -= row.remaining;
+    }
   });
 
   const playedRows = rows.filter((row) => row.played > 0);

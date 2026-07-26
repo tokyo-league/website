@@ -724,6 +724,20 @@ export async function regenerateStandingsFromMatches(
   _prevState: ResultActionState,
   formData: FormData,
 ): Promise<ResultActionState> {
+  return rebuildStandingsFromMatches(formData, false);
+}
+
+export async function applyUnplayedMatchPointsAdjustment(
+  _prevState: ResultActionState,
+  formData: FormData,
+): Promise<ResultActionState> {
+  return rebuildStandingsFromMatches(formData, true);
+}
+
+async function rebuildStandingsFromMatches(
+  formData: FormData,
+  applyUnplayedMatchPointsAdjustment: boolean,
+): Promise<ResultActionState> {
   try {
     const scope = await getAdminScope();
     const divisionId = sanitizePlainText(String(formData.get("divisionId") ?? ""), 64);
@@ -761,7 +775,7 @@ export async function regenerateStandingsFromMatches(
       return { status: "error", message: "対象リーグが見つかりませんでした。" };
     }
 
-    if (division.matches.length === 0) {
+    if (division.matches.length === 0 && !applyUnplayedMatchPointsAdjustment) {
       return { status: "error", message: "再計算できる試合結果がありません。" };
     }
 
@@ -835,10 +849,12 @@ export async function regenerateStandingsFromMatches(
       }
     }
 
-    const expectedMatchesPerTeam = Math.max(participantTeamIds.length - 1, 0);
+    if (applyUnplayedMatchPointsAdjustment) {
+      const expectedMatchesPerTeam = Math.max(participantTeamIds.length - 1, 0);
 
-    for (const row of table.values()) {
-      row.points -= Math.max(expectedMatchesPerTeam - row.played, 0);
+      for (const row of table.values()) {
+        row.points -= Math.max(expectedMatchesPerTeam - row.played, 0);
+      }
     }
 
     const rows = Array.from(table.values())
@@ -881,19 +897,32 @@ export async function regenerateStandingsFromMatches(
           })),
         });
       }
+
+      await tx.division.update({
+        where: { id: divisionId },
+        data: {
+          unplayedMatchPointsAdjustedAt: applyUnplayedMatchPointsAdjustment ? new Date() : null,
+          lastUpdatedAt: new Date(),
+        },
+      });
     });
 
     revalidatePath("/admin/results");
+    revalidatePath("/competitions", "layout");
 
     return {
       status: "success",
-      message: `${division.matches.length}試合・${rows.length}チームから順位表を再計算しました。`,
+      message: applyUnplayedMatchPointsAdjustment
+        ? `${rows.length}チームの未消化試合を▲表示・勝ち点-1で補正しました。`
+        : `${division.matches.length}試合・${rows.length}チームから順位表を再計算しました。`,
     };
   } catch (error) {
-    console.error("regenerateStandingsFromMatches failed", error);
+    console.error("rebuildStandingsFromMatches failed", error);
     return {
       status: "error",
-      message: "順位表の再計算に失敗しました。ログを確認してください。",
+      message: applyUnplayedMatchPointsAdjustment
+        ? "未消化試合の勝ち点補正に失敗しました。ログを確認してください。"
+        : "順位表の再計算に失敗しました。ログを確認してください。",
     };
   }
 }

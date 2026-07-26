@@ -40,6 +40,8 @@ test("結果管理で年度・大会・リーグ絞り込みと編集UIが表示
   await expect(filterSelects.nth(2)).toHaveValue("e2e-division-a");
   await expect(page.getByRole("heading", { name: "結果画像" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "順位表を作成・更新" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "未消化試合の勝ち点を補正" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "未消化試合の勝ち点を補正" })).toBeVisible();
   await expect(page.getByLabel("順位表行を追加")).toBeVisible();
   await expect(page.getByRole("button", { name: "行を追加" })).toBeVisible();
   await expect(page.getByRole("button", { name: "登録値に戻す" })).toBeVisible();

@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useActionState, useEffect, useState, type FormEvent } from "react";
 import {
   addStandingRow,
+  applyUnplayedMatchPointsAdjustment,
   createMatch,
   deleteMatch,
   deleteStanding,
@@ -33,6 +34,7 @@ type DivisionOption = {
   divisionName: string;
   label: string;
   resultImagePath: string;
+  unplayedMatchPointsAdjustedAt: string;
   description: string;
   teams: Array<{
     id: string;
@@ -115,6 +117,7 @@ export function AdminResultsForms({
   const [standingState, standingAction, standingPending] = useActionState(replaceStandings, initialState);
   const [addStandingState, addStandingAction, addStandingPending] = useActionState(addStandingRow, initialState);
   const [regenState, regenerateAction, regeneratePending] = useActionState(regenerateStandingsFromMatches, initialState);
+  const [correctionState, correctionAction, correctionPending] = useActionState(applyUnplayedMatchPointsAdjustment, initialState);
   const [generatedImageState, generatedImageAction, generatedImagePending] = useActionState(useGeneratedStarTableAsResultImage, initialState);
   const [toast, setToast] = useState(initialState);
   const [resultPreview, setResultPreview] = useState<string | null>(null);
@@ -122,13 +125,13 @@ export function AdminResultsForms({
   const [resultUploadError, setResultUploadError] = useState("");
 
   useEffect(() => {
-    const states = [resultState, matchState, standingState, addStandingState, regenState, generatedImageState];
+    const states = [resultState, matchState, standingState, addStandingState, regenState, correctionState, generatedImageState];
     const latest = [...states].reverse().find((state) => state.status !== "idle");
 
     if (latest) {
       setToast(latest);
     }
-  }, [resultState, matchState, standingState, addStandingState, regenState, generatedImageState]);
+  }, [resultState, matchState, standingState, addStandingState, regenState, correctionState, generatedImageState]);
 
   useEffect(() => {
     if (resultPreview) {
@@ -435,11 +438,32 @@ export function AdminResultsForms({
             </form>
           ) : null}
         </div>
+        {canEditScores ? (
+          <div className="admin-unplayed-match-adjustment">
+            <div>
+              <p className="admin-unplayed-match-adjustment__eyebrow">Final adjustment</p>
+              <h4>未消化試合の勝ち点を補正</h4>
+              <p>未消化の対戦を▲で表示し、各チームの勝ち点を1試合につき1点減算して順位表を作り直します。公開用の結果画像も更新する場合は、上の「この星取表を結果画像にする」を押してください。</p>
+              {selectedDivision.unplayedMatchPointsAdjustedAt ? (
+                <small>補正済みです。再実行すると、現在の試合結果で補正し直します。</small>
+              ) : null}
+            </div>
+            <form action={correctionAction}>
+              <input type="hidden" name="divisionId" value={selectedDivision.id} />
+              <button type="submit" className="button admin-unplayed-match-adjustment__button" disabled={correctionPending}>
+                {correctionPending ? "補正中..." : "未消化試合の勝ち点を補正"}
+              </button>
+            </form>
+          </div>
+        ) : null}
         {!canEditScores ? (
           <p className="admin-muted">過去大会は結果画像を正本として扱います。スコア入力と再計算は今年度大会のみです。</p>
         ) : null}
         {canEditScores && regenState.status !== "idle" ? (
           <p className={`admin-inline-message admin-inline-message--${regenState.status}`}>{regenState.message}</p>
+        ) : null}
+        {canEditScores && correctionState.status !== "idle" ? (
+          <p className={`admin-inline-message admin-inline-message--${correctionState.status}`}>{correctionState.message}</p>
         ) : null}
         {canEditScores ? (
           <>

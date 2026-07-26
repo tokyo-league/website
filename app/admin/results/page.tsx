@@ -107,6 +107,10 @@ export default async function AdminResultsPage() {
           divisionName: division.name,
           label: `${division.competition.season.label} / ${division.competition.name} / ${division.name}`,
           resultImagePath: division.resultImagePath ?? "",
+          unplayedMatchPointsAdjustedAt:
+            "unplayedMatchPointsAdjustedAt" in division && division.unplayedMatchPointsAdjustedAt
+              ? division.unplayedMatchPointsAdjustedAt.toISOString()
+              : "",
           description: division.description ?? "",
           teams: division.teams.map((assignment) => ({
             id: assignment.team.id,

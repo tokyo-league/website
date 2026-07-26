@@ -224,6 +224,7 @@ model Division {
   sortOrder     Int            @default(0)
   status        PublishStatus
   lastUpdatedAt DateTime?
+  unplayedMatchPointsAdjustedAt DateTime?
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   competition   Competition    @relation(fields: [competitionId], references: [id])

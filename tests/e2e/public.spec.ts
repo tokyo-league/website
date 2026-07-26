@@ -154,11 +154,11 @@ test("試合情報一覧からリーグ詳細まで辿れる", async ({ page }) 
   await expect(page.getByRole("heading", { level: 1, name: "Aリーグ" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "試合結果画像" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "所属チーム" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "試合一覧" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "試合一覧" })).toHaveCount(0);
   await expect(page.locator(".standing-table")).toBeVisible();
 
   await page.goto("/competitions/tokyo-league-103/b-league");
   await expect(page.getByText("公式結果は上の結果画像をご確認ください。")).toBeVisible();
-  await expect(page.getByText("過去大会は結果画像を正本として扱います。")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "試合一覧" })).toHaveCount(0);
   await expect(page.getByText(/目視照合済み|OCR/)).toHaveCount(0);
 });

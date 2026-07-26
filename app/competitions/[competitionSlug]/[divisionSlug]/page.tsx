@@ -5,7 +5,7 @@ import { ResultImageLightbox } from "@/components/result-image-lightbox";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { normalizeDivisionSlug } from "@/lib/league-slug";
-import { getPublishedHistoricalMatches, getPublishedHistoricalStandings } from "@/lib/historical-results";
+import { getPublishedHistoricalStandings } from "@/lib/historical-results";
 import { prisma } from "@/lib/prisma";
 import { e2eMockCompetition, isE2ETestMode } from "@/lib/test-mode";
 
@@ -51,14 +51,6 @@ export default async function DivisionDetailPage({
                   },
                   orderBy: { rank: "asc" },
                 },
-                matches: {
-                  include: {
-                    venue: true,
-                    homeTeam: true,
-                    awayTeam: true,
-                  },
-                  orderBy: [{ matchDate: "desc" }, { sortOrder: "asc" }],
-                },
               },
             },
           },
@@ -73,7 +65,6 @@ export default async function DivisionDetailPage({
   const resultImageSrc = division.resultImagePath;
   const logoTeams = division.teams.filter((assignment) => assignment.team.logoPath).slice(0, 8);
   const publishedStandings = getPublishedHistoricalStandings(resultImageSrc, division.standings);
-  const publishedMatches = getPublishedHistoricalMatches(resultImageSrc, division.matches);
 
   return (
     <>
@@ -191,51 +182,10 @@ export default async function DivisionDetailPage({
               )}
             </article>
 
-            <article className="card">
-              <div className="card__header">
-                <div>
-                  <p className="section-kicker">Matches</p>
-                  <h2>試合一覧</h2>
-                </div>
-              </div>
-              {publishedMatches.length > 0 ? (
-                <div className="list-stack">
-                  {publishedMatches.map((match) => (
-                    <article key={match.id} className="list-row division-match-row">
-                      <p className="list-row__meta">
-                        <span>{formatDate(match.matchDate)}</span>
-                        <span>{match.venue?.name || "会場未設定"}</span>
-                        <span>{match.status === "PLAYED" ? "試合終了" : "日程"}</span>
-                      </p>
-                      <div className="division-match-line" aria-label={`${match.homeTeam.name} ${match.homeScore ?? "-"}対${match.awayScore ?? "-"} ${match.awayTeam.name}`}>
-                        <span className="division-match-line__team">{match.homeTeam.name}</span>
-                        <span className="division-match-line__score" aria-hidden="true">
-                          <strong>{match.homeScore ?? "-"}</strong>
-                          <span>-</span>
-                          <strong>{match.awayScore ?? "-"}</strong>
-                        </span>
-                        <span className="division-match-line__team division-match-line__team--away">{match.awayTeam.name}</span>
-                      </div>
-                      {match.note ? <p className="division-match-note">{match.note}</p> : null}
-                    </article>
-                  ))}
-                </div>
-              ) : (
-                <p className="admin-muted">過去大会は結果画像を正本として扱います。</p>
-              )}
-            </article>
           </div>
         </section>
       </main>
       <SiteFooter />
     </>
   );
-}
-
-function formatDate(value: Date) {
-  return new Intl.DateTimeFormat("ja-JP", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(value);
 }

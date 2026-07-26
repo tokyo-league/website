@@ -924,7 +924,11 @@ function BulkStandingEditor({
         row.teamId === teamId
           ? {
               ...row,
-              [field]: field === "teamId" || field === "teamName" ? value : Math.max(0, Number(value) || 0),
+              [field]: field === "teamId" || field === "teamName"
+                ? value
+                : field === "points"
+                  ? Number(value) || 0
+                  : Math.max(0, Number(value) || 0),
             }
           : row,
       ),
@@ -966,7 +970,7 @@ function BulkStandingEditor({
             <input type="number" min="0" value={row.lost} onChange={(event) => updateRow(row.teamId, "lost", event.target.value)} />
             <input type="number" min="0" value={row.goalsFor} onChange={(event) => updateRow(row.teamId, "goalsFor", event.target.value)} />
             <input type="number" min="0" value={row.goalsAgainst} onChange={(event) => updateRow(row.teamId, "goalsAgainst", event.target.value)} />
-            <input type="number" min="0" value={row.points} onChange={(event) => updateRow(row.teamId, "points", event.target.value)} />
+            <input type="number" value={row.points} onChange={(event) => updateRow(row.teamId, "points", event.target.value)} />
           </div>
         ))}
       </div>

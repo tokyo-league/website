@@ -835,6 +835,12 @@ export async function regenerateStandingsFromMatches(
       }
     }
 
+    const expectedMatchesPerTeam = Math.max(participantTeamIds.length - 1, 0);
+
+    for (const row of table.values()) {
+      row.points -= Math.max(expectedMatchesPerTeam - row.played, 0);
+    }
+
     const rows = Array.from(table.values())
       .map((row) => ({
         ...row,

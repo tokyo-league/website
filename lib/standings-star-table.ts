@@ -144,7 +144,10 @@ export function renderStandingsStarTableSvg(division: StarTableDivision) {
       parts.push(rect(x, y, opponentWidth, teamRowHeight, "none", "thin"));
       parts.push(rect(x, y + teamRowHeight, opponentWidth, teamRowHeight, "none", "thin"));
 
-      if (!result) return;
+      if (!result) {
+        parts.push(text("▲", x + opponentWidth / 2, y + teamRowHeight / 2, 20, "middle", false));
+        return;
+      }
 
       const perspective = getPerspectiveResult(team.id, result);
       parts.push(text(perspective.mark, x + opponentWidth / 2, y + teamRowHeight / 2, 22, "middle", false));
@@ -160,7 +163,7 @@ export function renderStandingsStarTableSvg(division: StarTableDivision) {
           valueOrBlank(teamStats.played, teamStats.won),
           valueOrBlank(teamStats.played, teamStats.lost),
           valueOrBlank(teamStats.played, teamStats.drawn),
-          valueOrBlank(teamStats.played, teamStats.points),
+          teamStats.points,
           valueOrBlank(teamStats.played, teamStats.goalsFor),
           valueOrBlank(teamStats.played, teamStats.goalsAgainst),
           valueOrBlank(teamStats.played, teamStats.goalDifference),
@@ -256,6 +259,7 @@ function buildStats(teams: StarTableTeam[], pairResults: Map<string, PairResult>
   rows.forEach((row) => {
     row.goalDifference = row.goalsFor - row.goalsAgainst;
     row.remaining = Math.max(teams.length - 1 - row.played, 0);
+    row.points -= row.remaining;
   });
 
   const playedRows = rows.filter((row) => row.played > 0);

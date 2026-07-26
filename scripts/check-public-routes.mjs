@@ -23,7 +23,7 @@ const routeChecks = [
   {
     label: "リーグ詳細",
     path: "/competitions/tokyo-league-103/a-league",
-    requiredText: ["Aリーグ", "試合結果画像", "所属チーム", "試合一覧"],
+    requiredText: ["Aリーグ", "試合結果画像", "所属チーム"],
     requiredLinks: ["/competitions/tokyo-league-103"],
   },
   {

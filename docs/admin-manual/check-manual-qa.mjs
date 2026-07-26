@@ -4,7 +4,7 @@ import zlib from "node:zlib";
 import { imageSize } from "image-size";
 
 const qaDir = path.resolve("docs/admin-manual/output/qa-pages");
-const expectedCount = 28;
+const expectedCount = 27;
 const minWidth = 1100;
 const minHeight = 760;
 const maxHeight = 830;

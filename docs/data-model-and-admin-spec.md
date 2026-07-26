@@ -230,8 +230,8 @@
 | profile | text nullable | |
 | region | text nullable | |
 | logo_asset_id | uuid fk assets.id nullable | |
-| home_uniform_color | text nullable | `#RRGGBB` |
-| away_uniform_color | text nullable | `#RRGGBB` |
+| home_uniform_color | text nullable | ホーム用ユニフォームの色・デザインの説明（最大80文字） |
+| away_uniform_color | text nullable | アウェイ用ユニフォームの色・デザインの説明（最大80文字） |
 | status | text | `draft`, `published` |
 | sort_order | integer | |
 | created_at | timestamptz | |
@@ -537,7 +537,7 @@
 - 紹介文
 - 地域
 - ロゴ
-- ユニフォーム色（ホーム／アウェイ）
+- ユニフォーム情報（ホーム／アウェイの色・デザイン）
 - 公開状態
 
 ### 資料管理

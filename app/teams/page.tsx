@@ -85,8 +85,8 @@ export default async function TeamsPage() {
                       {team.profile ? <p className="team-card__profile">{team.profile}</p> : null}
                       {team.homeUniformColor || team.awayUniformColor ? (
                         <div className="team-card__uniforms" aria-label="ユニフォームの色">
-                          {team.homeUniformColor ? <UniformColor label="HOME" color={team.homeUniformColor} /> : null}
-                          {team.awayUniformColor ? <UniformColor label="AWAY" color={team.awayUniformColor} /> : null}
+                          {team.homeUniformColor ? <UniformDescription label="ホーム" description={team.homeUniformColor} /> : null}
+                          {team.awayUniformColor ? <UniformDescription label="アウェイ" description={team.awayUniformColor} /> : null}
                         </div>
                       ) : null}
                     </div>
@@ -102,12 +102,11 @@ export default async function TeamsPage() {
   );
 }
 
-function UniformColor({ label, color }: { label: string; color: string }) {
+function UniformDescription({ label, description }: { label: string; description: string }) {
   return (
     <div>
-      <span style={{ backgroundColor: color }} />
       <small>{label}</small>
-      <code>{color}</code>
+      <span>{description}</span>
     </div>
   );
 }

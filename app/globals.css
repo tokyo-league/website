@@ -1961,29 +1961,21 @@ button {
 
 .team-card__uniforms > div {
   display: grid;
-  grid-template-columns: 34px minmax(0, 1fr);
-  gap: 2px 10px;
-  align-items: center;
+  gap: 4px;
+  align-content: start;
 }
 
 .team-card__uniforms span {
-  grid-row: 1 / 3;
-  width: 34px;
-  height: 34px;
-  border: 1px solid rgba(31, 31, 27, 0.18);
-  border-radius: 50%;
-  box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.7);
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
 .team-card__uniforms small {
   color: var(--muted);
   font: 700 10px var(--condensed);
   letter-spacing: 0.1em;
-}
-
-.team-card__uniforms code {
-  color: var(--text);
-  font-size: 11px;
 }
 
 .home-team-logo-grid {
@@ -2051,18 +2043,12 @@ button {
 }
 
 .admin-team-uniforms {
-  display: flex;
-  gap: 7px;
+  display: grid;
+  gap: 4px;
   margin-top: 12px;
-}
-
-.admin-team-uniforms i {
-  display: block;
-  width: 18px;
-  height: 18px;
-  border: 1px solid rgba(31, 31, 27, 0.2);
-  border-radius: 50%;
-  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.65);
+  font-size: 12px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
 }
 
 .admin-uniform-colors {
@@ -2091,59 +2077,6 @@ button {
   gap: 14px;
 }
 
-.uniform-color-field {
-  display: grid;
-  gap: 8px;
-}
-
-.uniform-color-field > span:first-child {
-  color: var(--muted);
-  font-size: 13px;
-}
-
-.uniform-color-field__control {
-  display: grid;
-  grid-template-columns: 56px minmax(0, 1fr) auto;
-  gap: 10px;
-  align-items: center;
-  min-height: 58px;
-  padding: 8px;
-  border: 1px solid var(--line-strong);
-  border-radius: 14px;
-  background: white;
-}
-
-.uniform-color-field__control input[type="color"] {
-  width: 48px;
-  height: 42px;
-  padding: 3px;
-  border: 0;
-  border-radius: 10px;
-  background: transparent;
-  cursor: pointer;
-}
-
-.uniform-color-field__control code {
-  font-size: 13px;
-}
-
-.uniform-color-field__control button {
-  min-height: 34px;
-  padding: 0 10px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  background: var(--surface-soft);
-  color: var(--text);
-  font: inherit;
-  font-size: 11px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.uniform-color-field__control input:disabled {
-  cursor: not-allowed;
-  opacity: 0.32;
-}
 
 .contact-section {
   max-width: 880px;

@@ -171,9 +171,10 @@ test("チーム作成フローが完了できる", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "チーム管理" })).toBeVisible();
   await page.getByLabel("チーム名").fill(teamName);
   await expect(page.getByText("ユニフォームの色", { exact: true })).toBeVisible();
-  await expect(page.getByLabel("ホームの色")).toBeDisabled();
-  await expect(page.getByLabel("アウェイの色")).toBeDisabled();
-  await expect(page.getByText("未設定", { exact: true })).toHaveCount(2);
+  await expect(page.getByLabel("ホーム")).toHaveAttribute("type", "text");
+  await expect(page.getByLabel("アウェイ")).toHaveAttribute("type", "text");
+  await page.getByLabel("ホーム").fill("青・白");
+  await page.getByLabel("アウェイ").fill("白地に青ライン");
   await expect(page.getByText("チーム画像", { exact: true })).toHaveCount(0);
   await expect(page.getByLabel("結成")).toHaveCount(0);
   await expect(page.getByLabel("代表者")).toHaveCount(0);

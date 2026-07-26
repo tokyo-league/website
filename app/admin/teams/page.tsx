@@ -55,9 +55,9 @@ export default async function AdminTeamsPage() {
                 <strong>{team.name}</strong>
                 <span>{team.region ?? "-"}</span>
                 <span className="admin-team-uniforms" aria-label={`ホーム ${team.homeUniformColor ?? "未設定"}、アウェイ ${team.awayUniformColor ?? "未設定"}`}>
-                  {team.homeUniformColor ? <i style={{ backgroundColor: team.homeUniformColor }} /> : null}
-                  {team.awayUniformColor ? <i style={{ backgroundColor: team.awayUniformColor }} /> : null}
-                  {!team.homeUniformColor && !team.awayUniformColor ? "未設定" : null}
+                  {team.homeUniformColor ? <span>ホーム: {team.homeUniformColor}</span> : null}
+                  {team.awayUniformColor ? <span>アウェイ: {team.awayUniformColor}</span> : null}
+                  {!team.homeUniformColor && !team.awayUniformColor ? <span>未設定</span> : null}
                 </span>
                 <span className={referenceCount > 0 ? "admin-team-references" : "admin-team-references is-empty"}>
                   {referenceSummary}

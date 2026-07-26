@@ -208,8 +208,8 @@ async function getTeamPayload(formData: FormData) {
   const profile = sanitizePlainText(String(formData.get("profile") ?? ""), 1000);
   const region = sanitizePlainText(String(formData.get("region") ?? ""), 40);
   const logoPath = normalizeTeamAssetPath(String(formData.get("logoPath") ?? ""), "ロゴ画像URL");
-  const homeUniformColor = normalizeUniformColor(formData.get("homeUniformColor"), "ホーム");
-  const awayUniformColor = normalizeUniformColor(formData.get("awayUniformColor"), "アウェイ");
+  const homeUniformColor = normalizeUniformDescription(formData.get("homeUniformColor"));
+  const awayUniformColor = normalizeUniformDescription(formData.get("awayUniformColor"));
   const uploadedLogoPath = await uploadTeamImage(formData.get("logoFile"), "logos");
   const sortOrder = Number.parseInt(String(formData.get("sortOrder") ?? "0"), 10);
   const status = String(formData.get("status") ?? "PUBLISHED") as PublishStatus;
@@ -236,18 +236,10 @@ function normalizeTeamAssetPath(value: string, label: string) {
   }
 }
 
-function normalizeUniformColor(value: FormDataEntryValue | null, label: string) {
-  const color = String(value ?? "").trim().toUpperCase();
+function normalizeUniformDescription(value: FormDataEntryValue | null) {
+  const description = sanitizePlainText(String(value ?? ""), 80);
 
-  if (!color) {
-    return null;
-  }
-
-  if (!/^#[0-9A-F]{6}$/.test(color)) {
-    throw new TeamInputError(`${label}のユニフォーム色を選択してください。`);
-  }
-
-  return color;
+  return description || null;
 }
 
 async function uploadTeamImage(fileValue: FormDataEntryValue | null, folder: "logos") {

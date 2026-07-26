@@ -45,8 +45,6 @@ export function AdminTeamForm({
   const [uploadedLogoPreview, setUploadedLogoPreview] = useState<string | null>(null);
   const [logoFileName, setLogoFileName] = useState("");
   const [logoUploadError, setLogoUploadError] = useState("");
-  const [homeUniformColor, setHomeUniformColor] = useState(initialValues.homeUniformColor);
-  const [awayUniformColor, setAwayUniformColor] = useState(initialValues.awayUniformColor);
   const logoInputId = useId();
 
   useEffect(() => {
@@ -147,10 +145,28 @@ export function AdminTeamForm({
           </label>
           <fieldset className="admin-uniform-colors">
             <legend>ユニフォームの色</legend>
-            <p>カラーパレットからホームとアウェイの基調色を選択してください。</p>
+            <p>ホームとアウェイそれぞれの色・デザインを文字で入力してください。</p>
             <div className="admin-uniform-colors__grid">
-              <UniformColorField label="ホーム" name="homeUniformColor" value={homeUniformColor} onChange={setHomeUniformColor} />
-              <UniformColorField label="アウェイ" name="awayUniformColor" value={awayUniformColor} onChange={setAwayUniformColor} />
+              <label className="admin-field">
+                <span>ホーム</span>
+                <input
+                  type="text"
+                  name="homeUniformColor"
+                  defaultValue={initialValues.homeUniformColor}
+                  maxLength={80}
+                  placeholder="例：青・白"
+                />
+              </label>
+              <label className="admin-field">
+                <span>アウェイ</span>
+                <input
+                  type="text"
+                  name="awayUniformColor"
+                  defaultValue={initialValues.awayUniformColor}
+                  maxLength={80}
+                  placeholder="例：白地に青ライン"
+                />
+              </label>
             </div>
           </fieldset>
           <label className="admin-field">
@@ -171,40 +187,6 @@ export function AdminTeamForm({
         </form>
       </article>
     </>
-  );
-}
-
-function UniformColorField({
-  label,
-  name,
-  value,
-  onChange,
-}: {
-  label: string;
-  name: string;
-  value: string;
-  onChange: (value: string) => void;
-}) {
-  const isEnabled = Boolean(value);
-
-  return (
-    <div className="uniform-color-field">
-      <span>{label}</span>
-      <span className="uniform-color-field__control">
-        <input
-          type="color"
-          name={isEnabled ? name : undefined}
-          value={value || "#1F3A5F"}
-          disabled={!isEnabled}
-          aria-label={`${label}の色`}
-          onChange={(event) => onChange(event.target.value.toUpperCase())}
-        />
-        <code>{value ? value.toUpperCase() : "未設定"}</code>
-        <button type="button" onClick={() => onChange(isEnabled ? "" : "#1F3A5F")}>
-          {isEnabled ? "設定を解除" : "色を設定"}
-        </button>
-      </span>
-    </div>
   );
 }
 

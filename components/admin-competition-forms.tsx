@@ -16,6 +16,7 @@ import {
   updateCompetition,
   updateDivision,
   updateSeason,
+  uploadCupResultFile,
 } from "@/app/admin/competitions/actions";
 import { ConfirmForm } from "@/components/confirm-form";
 
@@ -41,6 +42,7 @@ type CompetitionOption = {
   competitionType: CompetitionType;
   edition: number | null;
   summary: string;
+  resultFilePath: string;
   startDate: string;
   endDate: string;
   publishedAt: string;
@@ -298,6 +300,10 @@ export function AdminCompetitionEditForms({
     assignTeamToDivision,
     initialCompetitionActionState,
   );
+  const [cupResultState, cupResultAction, cupResultPending] = useActionState(
+    uploadCupResultFile,
+    initialCompetitionActionState,
+  );
   const [toast, setToast] = useState<CompetitionActionState>(initialCompetitionActionState);
   const isClosed = competition.status === "CLOSED";
 
@@ -308,6 +314,10 @@ export function AdminCompetitionEditForms({
   useEffect(() => {
     if (teamAssignmentState.status !== "idle") setToast(teamAssignmentState);
   }, [teamAssignmentState]);
+
+  useEffect(() => {
+    if (cupResultState.status !== "idle") setToast(cupResultState);
+  }, [cupResultState]);
 
   return (
     <>
@@ -328,6 +338,39 @@ export function AdminCompetitionEditForms({
         ) : null}
         <CompetitionEditor competition={competition} seasons={seasons} onDone={setToast} defaultOpen />
       </article>
+
+      {competition.competitionType === "CUP" ? (
+        <article className="admin-card">
+          <div className="card__header">
+            <div>
+              <p className="section-kicker">Result file</p>
+              <h3>山藤杯の結果を入稿</h3>
+              <p className="admin-section-lead">トーナメント表・最終結果をPDFまたは画像で登録します。</p>
+            </div>
+          </div>
+          {competition.resultFilePath ? (
+            <p className="admin-inline-message">
+              現在の結果ファイル：<a href={competition.resultFilePath} target="_blank" rel="noreferrer">確認する</a>
+            </p>
+          ) : null}
+          <form action={cupResultAction} className="admin-form-stack">
+            <input type="hidden" name="competitionId" value={competition.id} />
+            <label className="admin-field">
+              <span>結果ファイル</span>
+              <input
+                type="file"
+                name="resultFile"
+                accept="application/pdf,image/jpeg,image/png,image/webp,.pdf,.jpg,.jpeg,.png,.webp"
+                required
+              />
+              <small className="admin-field__help">PDF（20MB以下）または JPG / PNG / WebP（10MB以下）。入稿すると現在のファイルを置き換えます。</small>
+            </label>
+            <button type="submit" className="button" disabled={cupResultPending}>
+              {cupResultPending ? "入稿中..." : "結果ファイルを入稿"}
+            </button>
+          </form>
+        </article>
+      ) : null}
 
       {competition.competitionType === "LEAGUE" ? (
         <div className="admin-columns">

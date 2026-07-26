@@ -62,6 +62,7 @@ function toCompetitionOption(competition: {
   competitionType: "LEAGUE" | "CUP" | "OTHER";
   edition: number | null;
   summary: string | null;
+  resultFilePath: string | null;
   startDate: Date | null;
   endDate: Date | null;
   publishedAt: Date | null;
@@ -82,6 +83,7 @@ function toCompetitionOption(competition: {
     competitionType: competition.competitionType,
     edition: competition.edition,
     summary: competition.summary ?? "",
+    resultFilePath: competition.resultFilePath ?? "",
     startDate: formatDateInput(competition.startDate),
     endDate: formatDateInput(competition.endDate),
     publishedAt: formatDateInput(competition.publishedAt),

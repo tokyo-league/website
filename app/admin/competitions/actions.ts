@@ -1,8 +1,12 @@
 "use server";
 
+import path from "node:path";
+import { put } from "@vercel/blob";
 import { revalidatePath } from "next/cache";
 import { CompetitionStatus, CompetitionType, PublishStatus } from "@prisma/client";
 import { requireOwner } from "@/lib/admin-access";
+import { assertDownloadFileAllowed } from "@/lib/download-file-validation";
+import { assertImageFileAllowed } from "@/lib/image-file-validation";
 import { normalizeDivisionSlug } from "@/lib/league-slug";
 import { prisma } from "@/lib/prisma";
 import {
@@ -12,11 +16,57 @@ import {
   parseInteger,
   sanitizePlainText,
 } from "@/lib/security";
+import { DOWNLOAD_UPLOAD_MAX_BYTES, IMAGE_UPLOAD_MAX_BYTES, formatUploadLimit } from "@/lib/upload-limits";
 
 export type CompetitionActionState = {
   status: "idle" | "success" | "error";
   message: string;
 };
+
+export async function uploadCupResultFile(
+  _prevState: CompetitionActionState,
+  formData: FormData,
+): Promise<CompetitionActionState> {
+  try {
+    await requireOwner();
+    const competitionId = sanitizePlainText(String(formData.get("competitionId") ?? ""), 64);
+
+    if (!isValidUuid(competitionId)) {
+      return { status: "error", message: "対象の大会が見つかりませんでした。" };
+    }
+
+    const competition = await prisma.competition.findUnique({
+      where: { id: competitionId },
+      select: { id: true, name: true, slug: true, competitionType: true },
+    });
+
+    if (!competition || competition.competitionType !== CompetitionType.CUP) {
+      return { status: "error", message: "山藤杯の結果ファイルのみ入稿できます。" };
+    }
+
+    const resultFilePath = await uploadCupResultAsset(formData.get("resultFile"));
+
+    if (!resultFilePath) {
+      return { status: "error", message: "結果ファイルを選択してください。" };
+    }
+
+    await prisma.competition.update({
+      where: { id: competition.id },
+      data: { resultFilePath },
+    });
+
+    revalidateCompetitionAdminPaths(competition.id);
+    revalidateCupResultPaths(competition.slug);
+
+    return { status: "success", message: "山藤杯の結果ファイルを入稿しました。" };
+  } catch (error) {
+    console.error("uploadCupResultFile failed", error);
+    return {
+      status: "error",
+      message: error instanceof Error ? error.message : "結果ファイルの入稿に失敗しました。",
+    };
+  }
+}
 
 export async function createSeason(
   _prevState: CompetitionActionState,
@@ -750,4 +800,48 @@ function revalidateCompetitionAdminPaths(competitionId?: string | null) {
   if (competitionId) {
     revalidatePath(`/admin/competitions/${competitionId}`);
   }
+}
+
+function revalidateCupResultPaths(slug: string) {
+  revalidatePath("/competitions");
+  revalidatePath("/competitions/sando-cup");
+  revalidatePath(`/competitions/sando-cup/${slug}`);
+}
+
+async function uploadCupResultAsset(fileValue: FormDataEntryValue | null) {
+  if (!(fileValue instanceof File) || fileValue.size === 0) {
+    return null;
+  }
+
+  const ext = path.extname(fileValue.name).toLowerCase();
+  const fileBuffer = Buffer.from(await fileValue.arrayBuffer());
+
+  if (ext === ".pdf") {
+    if (fileValue.size > DOWNLOAD_UPLOAD_MAX_BYTES) {
+      throw new Error(`結果PDFは ${formatUploadLimit(DOWNLOAD_UPLOAD_MAX_BYTES)} 以下にしてください。`);
+    }
+    assertDownloadFileAllowed({
+      filename: fileValue.name,
+      mimeType: fileValue.type,
+      buffer: fileBuffer,
+    });
+  } else if ([".jpg", ".jpeg", ".png", ".webp"].includes(ext)) {
+    assertImageFileAllowed({
+      filename: fileValue.name,
+      mimeType: fileValue.type,
+      size: fileValue.size,
+      buffer: fileBuffer,
+      rules: { label: "結果画像", maxSizeBytes: IMAGE_UPLOAD_MAX_BYTES },
+    });
+  } else {
+    throw new Error("結果ファイルは PDF / JPG / PNG / WebP のみアップロードできます。");
+  }
+
+  const safeName = sanitizePlainText(fileValue.name, 180).replace(/[^a-zA-Z0-9._-]/g, "-");
+  const blob = await put(`cup-results/${Date.now()}-${safeName}`, fileValue, {
+    access: "public",
+    addRandomSuffix: true,
+  });
+
+  return blob.url;
 }

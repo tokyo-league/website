@@ -233,7 +233,7 @@
 | home_uniform_color | text nullable | ホーム用ユニフォームの色・デザインの説明（最大80文字） |
 | away_uniform_color | text nullable | アウェイ用ユニフォームの色・デザインの説明（最大80文字） |
 | status | text | `draft`, `published` |
-| sort_order | integer | |
+| sort_order | integer | 互換用の管理値（チーム一覧はチーム名のあいうえお順） |
 | created_at | timestamptz | |
 | updated_at | timestamptz | |
 

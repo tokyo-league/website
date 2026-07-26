@@ -29,7 +29,6 @@ type TeamFormValues = {
   homeUniformColor: string;
   awayUniformColor: string;
   status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
-  sortOrder: number;
 };
 
 export function AdminTeamForm({
@@ -176,10 +175,6 @@ export function AdminTeamForm({
               <option value="PUBLISHED">公開</option>
               <option value="ARCHIVED">非公開</option>
             </select>
-          </label>
-          <label className="admin-field">
-            <span>表示順</span>
-            <input type="number" name="sortOrder" min="0" defaultValue={initialValues.sortOrder} />
           </label>
           <button type="submit" className="button" disabled={pending}>
             {pending ? "保存中..." : mode === "create" ? "チームを保存" : "更新を保存"}

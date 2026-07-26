@@ -52,7 +52,7 @@ export async function createTeam(
     }
 
     await prisma.team.create({
-      data: payload,
+      data: { ...payload, sortOrder: 0 },
     });
     revalidatePath("/admin/teams");
 
@@ -98,7 +98,7 @@ export async function updateTeam(
 
     const currentTeam = await prisma.team.findUnique({
       where: { id: teamId },
-      select: { slug: true },
+      select: { slug: true, sortOrder: true },
     });
 
     if (!currentTeam) {
@@ -113,6 +113,7 @@ export async function updateTeam(
       data: {
         ...payload,
         slug: currentTeam.slug,
+        sortOrder: currentTeam.sortOrder,
       },
     });
     revalidatePath("/admin/teams");
@@ -211,7 +212,6 @@ async function getTeamPayload(formData: FormData) {
   const homeUniformColor = normalizeUniformDescription(formData.get("homeUniformColor"));
   const awayUniformColor = normalizeUniformDescription(formData.get("awayUniformColor"));
   const uploadedLogoPath = await uploadTeamImage(formData.get("logoFile"), "logos");
-  const sortOrder = Number.parseInt(String(formData.get("sortOrder") ?? "0"), 10);
   const status = String(formData.get("status") ?? "PUBLISHED") as PublishStatus;
 
   return {
@@ -224,7 +224,6 @@ async function getTeamPayload(formData: FormData) {
     homeUniformColor,
     awayUniformColor,
     status: ["DRAFT", "PUBLISHED", "ARCHIVED"].includes(status) ? status : PublishStatus.PUBLISHED,
-    sortOrder: Number.isFinite(sortOrder) ? sortOrder : 0,
   };
 }
 

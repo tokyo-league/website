@@ -18,7 +18,6 @@ export default async function AdminTeamNewPage() {
           homeUniformColor: "",
           awayUniformColor: "",
           status: "PUBLISHED",
-          sortOrder: 0,
         }}
       />
     </AdminLayoutShell>

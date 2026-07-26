@@ -34,7 +34,6 @@ export default async function AdminTeamEditPage({
           homeUniformColor: team.homeUniformColor ?? "",
           awayUniformColor: team.awayUniformColor ?? "",
           status: team.status,
-          sortOrder: team.sortOrder,
         }}
       />
     </AdminLayoutShell>

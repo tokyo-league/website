@@ -23,7 +23,7 @@ test("チーム管理でキーワード・地域・状態を絞り込める", as
   await expect(page.getByRole("heading", { name: "掲載チーム" })).toBeVisible();
   await expect(page.getByLabel("キーワード")).toHaveAttribute("type", "search");
   await expect(page.getByLabel("地域")).toBeVisible();
-  await expect(page.getByLabel("状態")).toBeVisible();
+  await expect(page.getByLabel("状態")).toHaveValue("PUBLISHED");
   await expect(page.getByRole("button", { name: "絞り込む" })).toBeVisible();
   await expect(page.getByRole("link", { name: "条件をクリア" })).toHaveAttribute("href", "/admin/teams");
 

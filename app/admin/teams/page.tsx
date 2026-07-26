@@ -16,7 +16,7 @@ export default async function AdminTeamsPage({
   const params = await searchParams;
   const query = params.q?.trim().slice(0, 80) ?? "";
   const region = params.region?.trim().slice(0, 40) ?? "";
-  const status = teamStatuses.find((candidate) => candidate === params.status);
+  const status = params.status === "" ? undefined : teamStatuses.find((candidate) => candidate === params.status) ?? "PUBLISHED";
   const where = {
     ...(status ? { status } : {}),
     ...(region ? { region } : {}),

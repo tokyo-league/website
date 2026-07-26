@@ -17,6 +17,22 @@ test("管理ニュース一覧が表示できる", async ({ page }) => {
   await expect(page.getByRole("link", { name: "新規作成" })).toBeVisible();
 });
 
+test("チーム管理でキーワード・地域・状態を絞り込める", async ({ page }) => {
+  await page.goto("/admin/teams");
+
+  await expect(page.getByRole("heading", { name: "掲載チーム" })).toBeVisible();
+  await expect(page.getByLabel("キーワード")).toHaveAttribute("type", "search");
+  await expect(page.getByLabel("地域")).toBeVisible();
+  await expect(page.getByLabel("状態")).toBeVisible();
+  await expect(page.getByRole("button", { name: "絞り込む" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "条件をクリア" })).toHaveAttribute("href", "/admin/teams");
+
+  await page.getByLabel("状態").selectOption("PUBLISHED");
+  await page.getByRole("button", { name: "絞り込む" }).click();
+  await expect(page).toHaveURL(/\/admin\/teams\?.*status=PUBLISHED/);
+  await expect(page.getByText(/件（チーム名のあいうえお順）/)).toBeVisible();
+});
+
 test("結果管理で年度・大会・リーグ絞り込みと編集UIが表示できる", async ({ page }) => {
   await page.goto("/admin/results");
 

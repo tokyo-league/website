@@ -3,22 +3,60 @@ import { AdminLayoutShell } from "@/components/admin-layout-shell";
 import { AdminTeamDeleteButton } from "@/components/admin-team-delete-button";
 import { requireOwner } from "@/lib/admin-access";
 import { prisma } from "@/lib/prisma";
+import { sortTeamsByName } from "@/lib/team-sort";
 
-export default async function AdminTeamsPage() {
+const teamStatuses = ["DRAFT", "PUBLISHED", "ARCHIVED"] as const;
+
+export default async function AdminTeamsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; region?: string; status?: string }>;
+}) {
   const scope = await requireOwner();
-  const teams = await prisma.team.findMany({
-    include: {
-      _count: {
-        select: {
-          divisions: true,
-          homeMatches: true,
-          awayMatches: true,
-          standings: true,
+  const params = await searchParams;
+  const query = params.q?.trim().slice(0, 80) ?? "";
+  const region = params.region?.trim().slice(0, 40) ?? "";
+  const status = teamStatuses.find((candidate) => candidate === params.status);
+  const where = {
+    ...(status ? { status } : {}),
+    ...(region ? { region } : {}),
+    ...(query
+      ? {
+          OR: [
+            { name: { contains: query, mode: "insensitive" as const } },
+            { shortName: { contains: query, mode: "insensitive" as const } },
+            { region: { contains: query, mode: "insensitive" as const } },
+          ],
+        }
+      : {}),
+  };
+  const [teams, regionRows] = await Promise.all([
+    prisma.team.findMany({
+      where,
+      include: {
+        _count: {
+          select: {
+            divisions: true,
+            homeMatches: true,
+            awayMatches: true,
+            standings: true,
+          },
         },
       },
-    },
-    orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
-  });
+    }),
+    prisma.team.findMany({
+      where: { region: { not: null } },
+      select: { region: true },
+      distinct: ["region"],
+    }),
+  ]);
+  const regions = sortTeamsByName(
+    regionRows
+      .map((team) => team.region?.trim())
+      .filter((value): value is string => Boolean(value))
+      .map((name) => ({ name })),
+  ).map((team) => team.name);
+  const sortedTeams = sortTeamsByName(teams);
 
   return (
     <AdminLayoutShell currentPath="/admin/teams" title="チーム管理" kicker="Teams" scope={scope}>
@@ -32,6 +70,43 @@ export default async function AdminTeamsPage() {
             新規追加
           </Link>
         </div>
+        <form className="admin-team-filters" action="/admin/teams">
+          <label className="admin-field">
+            <span>キーワード</span>
+            <input name="q" type="search" defaultValue={query} placeholder="チーム名・略称・地域" />
+          </label>
+          <label className="admin-field">
+            <span>地域</span>
+            <select name="region" defaultValue={region}>
+              <option value="">すべての地域</option>
+              {regions.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="admin-field">
+            <span>状態</span>
+            <select name="status" defaultValue={status ?? ""}>
+              <option value="">すべての状態</option>
+              <option value="PUBLISHED">公開</option>
+              <option value="DRAFT">下書き</option>
+              <option value="ARCHIVED">非公開</option>
+            </select>
+          </label>
+          <div className="admin-team-filters__actions">
+            <button type="submit" className="button">
+              絞り込む
+            </button>
+            <Link href="/admin/teams" className="button button--ghost">
+              条件をクリア
+            </Link>
+          </div>
+        </form>
+        <p className="admin-team-results" aria-live="polite">
+          {sortedTeams.length}件（チーム名のあいうえお順）
+        </p>
         <div className="admin-table">
           <div className="admin-table__row admin-table__row--head admin-table__row--teams">
             <span>チーム名</span>
@@ -40,7 +115,7 @@ export default async function AdminTeamsPage() {
             <span>削除前確認</span>
             <span>操作</span>
           </div>
-          {teams.map((team) => {
+          {sortedTeams.map((team) => {
             const matchCount = team._count.homeMatches + team._count.awayMatches;
             const referenceCount = team._count.divisions + matchCount + team._count.standings;
             const referenceSummary =

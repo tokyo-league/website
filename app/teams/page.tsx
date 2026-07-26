@@ -5,15 +5,15 @@ import { SiteHeader } from "@/components/site-header";
 import { prisma } from "@/lib/prisma";
 import { siteAssets } from "@/lib/site-data";
 import { getTeamInitial, isDisplayableTeamLogo } from "@/lib/team-logo";
+import { sortTeamsByName } from "@/lib/team-sort";
 
 export const dynamic = "force-dynamic";
 
 export default async function TeamsPage() {
-  const teams = await prisma.team.findMany({
+  const teams = sortTeamsByName(await prisma.team.findMany({
     where: {
       status: "PUBLISHED",
     },
-    orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
     select: {
       id: true,
       name: true,
@@ -23,7 +23,7 @@ export default async function TeamsPage() {
       awayUniformColor: true,
       profile: true,
     },
-  });
+  }));
 
   return (
     <>

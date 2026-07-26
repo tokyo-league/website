@@ -36,6 +36,9 @@ export default async function TeamsPage() {
               <h1>参加チーム</h1>
               <p>東京リーグに参加するチームをご紹介します。ロゴと基本情報から、各チームの個性をご覧いただけます。</p>
               <div className="page-intro__actions">
+                <Link href="/teams/important" className="button">
+                  参加チーム向け重要事項
+                </Link>
                 <Link href="/competitions" className="button">
                   試合情報へ
                 </Link>

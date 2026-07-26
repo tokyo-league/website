@@ -7,6 +7,7 @@ import { getPublishedNews } from "@/lib/public-news";
 import { getHomeMessages } from "@/lib/home-messages";
 import { siteAssets, teams as fallbackTeams } from "@/lib/site-data";
 import { getTeamInitial, isDisplayableTeamLogo } from "@/lib/team-logo";
+import { TeamImportantInformation } from "@/components/team-important-information";
 
 export async function PublicHome() {
   const [latestNews, featuredTeams, messages] = await Promise.all([
@@ -60,6 +61,14 @@ export async function PublicHome() {
           <div><small>TEAMS</small><strong>88</strong></div>
           <div><small>SEASON</small><strong>103</strong></div>
         </div>
+      </section>
+
+      <section className="heritage-content heritage-important-information">
+        <div className="heritage-section-title">
+          <div><p className="section-kicker">FOR PARTICIPATING TEAMS</p><h2>参加チーム向け重要事項</h2></div>
+          <Link href="/teams/important">すべて見る <span>→</span></Link>
+        </div>
+        <TeamImportantInformation compact />
       </section>
 
       <section className="heritage-content heritage-news">

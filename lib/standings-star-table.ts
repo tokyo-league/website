@@ -56,7 +56,6 @@ const SUMMARY_HEADERS = [
   ["得点", "得点"],
   ["失点", "失点"],
   ["得失", "得失点差"],
-  ["判定値", "判定値"],
   ["順位", "順位"],
 ];
 
@@ -68,7 +67,7 @@ export function renderStandingsStarTableSvg(division: StarTableDivision) {
   const indexWidth = 42;
   const teamWidth = 132;
   const opponentWidth = 66;
-  const summaryWidths = [58, 46, 46, 46, 46, 58, 58, 58, 58, 82, 58];
+  const summaryWidths = [58, 46, 46, 46, 46, 58, 58, 58, 58, 58];
   const titleHeight = 58;
   const spacerHeight = 22;
   const dateHeight = 28;
@@ -116,7 +115,7 @@ export function renderStandingsStarTableSvg(division: StarTableDivision) {
   let summaryX = summaryStartX;
   SUMMARY_HEADERS.forEach(([main, sub], index) => {
     const cellWidth = summaryWidths[index];
-    parts.push(rect(summaryX, headerY, cellWidth, headerHeight, "none", index === 0 || index === 10 ? "heavy" : "thin"));
+    parts.push(rect(summaryX, headerY, cellWidth, headerHeight, "none", index === 0 || index === SUMMARY_HEADERS.length - 1 ? "heavy" : "thin"));
     parts.push(text(main, summaryX + cellWidth / 2, headerY + 24, 16, "middle", false));
     if (sub) {
       parts.push(text(sub, summaryX + cellWidth / 2, headerY + 46, 11, "middle", false));
@@ -171,7 +170,6 @@ export function renderStandingsStarTableSvg(division: StarTableDivision) {
           valueOrBlank(teamStats.played, teamStats.goalsFor),
           valueOrBlank(teamStats.played, teamStats.goalsAgainst),
           valueOrBlank(teamStats.played, teamStats.goalDifference),
-          teamStats.judgeValue ?? "",
           teamStats.rank ?? "",
         ]
       : Array.from({ length: SUMMARY_HEADERS.length }, () => "");
@@ -179,8 +177,9 @@ export function renderStandingsStarTableSvg(division: StarTableDivision) {
     let x = summaryStartX;
     summaryValues.forEach((value, index) => {
       const cellWidth = summaryWidths[index];
-      parts.push(rect(x, y, cellWidth, teamRowHeight * 2, "none", index === 0 || index === 10 ? "heavy" : "thin"));
-      parts.push(text(String(value), x + cellWidth / 2, y + teamRowHeight, index === 10 ? 20 : 18, "middle", index === 10));
+      const isRankColumn = index === SUMMARY_HEADERS.length - 1;
+      parts.push(rect(x, y, cellWidth, teamRowHeight * 2, "none", index === 0 || isRankColumn ? "heavy" : "thin"));
+      parts.push(text(String(value), x + cellWidth / 2, y + teamRowHeight, isRankColumn ? 20 : 18, "middle", isRankColumn));
       x += cellWidth;
     });
   });

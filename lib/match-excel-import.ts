@@ -91,9 +91,12 @@ export async function parseMatchResultsWorkbook(
       continue;
     }
 
+    const matchDateValue = cleanText(row[5], 40);
     const matchDate = toIsoDate(row[5]);
 
-    if (!matchDate) {
+    // 結果管理表には試合日が記載されていない過去結果があるため、空欄は許容する。
+    // ただし、値があるにもかかわらず日付として解釈できない場合は取り込み対象にしない。
+    if (matchDateValue && !matchDate) {
       errors.push(`${sourceRow}行目: 試合日を確認してください。`);
       continue;
     }

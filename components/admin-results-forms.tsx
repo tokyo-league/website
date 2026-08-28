@@ -373,7 +373,7 @@ export function AdminResultsForms({
               <input type="hidden" name="divisionId" value={selectedDivision.id} />
               <label className="admin-field">
                 <span>試合日</span>
-                <input type="date" name="matchDate" required />
+                <input type="date" name="matchDate" />
               </label>
               <label className="admin-field">
                 <span>ホーム</span>
@@ -666,7 +666,8 @@ function ExcelImportPanel({
 
   const createCount = preview?.rows.filter((row) => row.operation === "create").length ?? 0;
   const updateCount = preview?.rows.filter((row) => row.operation === "update").length ?? 0;
-  const canImport = Boolean(preview && preview.rows.length > 0 && preview.errors.length === 0);
+  // エラーになった行はプレビュー時点で rows から除外済み。抽出できた有効行は反映できる。
+  const canImport = Boolean(preview && preview.rows.length > 0);
 
   return (
     <article className="admin-card admin-excel-import" id="excel-import">
@@ -719,7 +720,8 @@ function ExcelImportPanel({
           ))}
           {preview.errors.length > 0 ? (
             <div className="admin-import-errors" role="alert">
-              <strong>Excelを修正して、もう一度読み取ってください</strong>
+              <strong>以下の行は反映対象から除外されています</strong>
+              <p>抽出できた試合は、このまま反映できます。エラー行はExcelを修正後、あらためて読み取ってください。</p>
               <ul>{preview.errors.map((error) => <li key={error}>{error}</li>)}</ul>
             </div>
           ) : null}
@@ -750,7 +752,7 @@ function ExcelImportPanel({
             <input type="hidden" name="rowsJson" value={JSON.stringify(preview.rows)} />
             <div>
               <strong>{divisionLabel} に反映します</strong>
-              <p>同じ対戦カードは更新し、新しい対戦は追加します。Excelにない既存試合は残ります。</p>
+              <p>同じ対戦カードは更新し、新しい対戦は追加します。Excelにない既存試合は残ります。試合日が空欄の新規試合は「未設定」として登録し、既存試合は現在の試合日を維持します。</p>
             </div>
             <button type="submit" className="button" disabled={!canImport || importPending}>
               {importPending ? "反映中..." : `${preview.rows.length}試合を反映する`}
@@ -762,7 +764,8 @@ function ExcelImportPanel({
   );
 }
 
-function formatJapanDate(value: string) {
+function formatJapanDate(value: string | null) {
+  if (!value) return "未設定";
   const [year, month, day] = value.split("-");
   return `${year}/${month}/${day}`;
 }
@@ -867,7 +870,7 @@ function ExistingMatchEditor({
         <div className="admin-form-preview__grid admin-match-edit-grid">
           <label className="admin-field">
             <span>試合日</span>
-            <input type="date" name="matchDate" defaultValue={match.matchDate} required />
+            <input type="date" name="matchDate" defaultValue={match.matchDate} />
           </label>
           <label className="admin-field">
             <span>ホーム</span>

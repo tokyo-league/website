@@ -137,7 +137,7 @@ export async function createMatch(
   const awayScore = parseInteger(String(formData.get("awayScore") ?? ""));
   const note = sanitizePlainText(String(formData.get("note") ?? ""), 240);
 
-  if (!isValidUuid(divisionId) || !isValidUuid(homeTeamId) || !isValidUuid(awayTeamId) || !matchDateText) {
+  if (!isValidUuid(divisionId) || !isValidUuid(homeTeamId) || !isValidUuid(awayTeamId)) {
     return { status: "error", message: "試合情報の入力内容を確認してください。" };
   }
 
@@ -149,9 +149,9 @@ export async function createMatch(
     return { status: "error", message: "このリーグを編集する権限がありません。" };
   }
 
-  const matchDate = new Date(matchDateText);
+  const matchDate = matchDateText ? new Date(matchDateText) : null;
 
-  if (Number.isNaN(matchDate.getTime())) {
+  if (matchDate && Number.isNaN(matchDate.getTime())) {
     return { status: "error", message: "試合日を確認してください。" };
   }
 
@@ -208,7 +208,7 @@ export async function importMatchesFromExcel(
       const row = typeof raw === "object" && raw !== null ? raw as Record<string, unknown> : {};
       return {
         sourceRow: parseInteger(String(row.sourceRow ?? "")) ?? 0,
-        matchDate: sanitizePlainText(String(row.matchDate ?? ""), 10),
+        matchDate: sanitizePlainText(String(row.matchDate ?? ""), 10) || null,
         homeTeamId: sanitizePlainText(String(row.homeTeamId ?? ""), 64),
         awayTeamId: sanitizePlainText(String(row.awayTeamId ?? ""), 64),
         homeScore: parseInteger(String(row.homeScore ?? "")),
@@ -222,7 +222,7 @@ export async function importMatchesFromExcel(
         !isValidUuid(row.homeTeamId) ||
         !isValidUuid(row.awayTeamId) ||
         row.homeTeamId === row.awayTeamId ||
-        !isValidImportDate(row.matchDate) ||
+        (row.matchDate !== null && !isValidImportDate(row.matchDate)) ||
         row.homeScore === null ||
         row.awayScore === null ||
         row.homeScore < 0 ||
@@ -240,7 +240,7 @@ export async function importMatchesFromExcel(
       select: {
         teams: { select: { teamId: true } },
         matches: {
-          select: { id: true, homeTeamId: true, awayTeamId: true },
+          select: { id: true, homeTeamId: true, awayTeamId: true, matchDate: true },
           orderBy: { createdAt: "asc" },
         },
       },
@@ -280,7 +280,10 @@ export async function importMatchesFromExcel(
           : null;
         const existing = existingByPair.get(buildMatchPairKey(row.homeTeamId, row.awayTeamId));
         const data = {
-          matchDate: new Date(`${row.matchDate}T00:00:00.000Z`),
+          // 日付が空欄の場合は、既存試合の日付を消さず、新規試合だけ未設定にする。
+          matchDate: row.matchDate
+            ? new Date(`${row.matchDate}T00:00:00.000Z`)
+            : existing?.matchDate ?? null,
           venueId: venue?.id ?? null,
           homeTeamId: row.homeTeamId,
           awayTeamId: row.awayTeamId,
@@ -358,9 +361,9 @@ export async function updateMatch(
     return { status: "error", message: "このリーグを編集する権限がありません。" };
   }
 
-  const matchDate = new Date(matchDateText);
+  const matchDate = matchDateText ? new Date(matchDateText) : null;
 
-  if (Number.isNaN(matchDate.getTime())) {
+  if (matchDate && Number.isNaN(matchDate.getTime())) {
     return { status: "error", message: "試合日を確認してください。" };
   }
 

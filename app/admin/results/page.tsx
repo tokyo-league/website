@@ -118,7 +118,7 @@ export default async function AdminResultsPage() {
           })),
           matches: division.matches.map((match) => ({
             id: match.id,
-            matchDate: match.matchDate.toISOString().slice(0, 10),
+            matchDate: match.matchDate?.toISOString().slice(0, 10) ?? "",
             homeTeamId: "homeTeamId" in match ? match.homeTeamId : "",
             awayTeamId: "awayTeamId" in match ? match.awayTeamId : "",
             homeScore: match.homeScore ?? null,

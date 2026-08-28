@@ -1,6 +1,7 @@
 export type MatchExcelPreviewRow = {
   sourceRow: number;
-  matchDate: string;
+  /** 空欄は試合日未設定として取り込みます。 */
+  matchDate: string | null;
   homeTeamId: string;
   homeTeamName: string;
   homeScore: number;

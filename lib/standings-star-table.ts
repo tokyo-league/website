@@ -6,7 +6,7 @@ export type StarTableTeam = {
 
 export type StarTableMatch = {
   id: string;
-  matchDate: Date;
+  matchDate: Date | null;
   homeTeamId: string;
   awayTeamId: string;
   homeTeamName: string;
@@ -39,7 +39,7 @@ type TeamStats = {
 };
 
 type PairResult = {
-  matchDate: Date;
+  matchDate: Date | null;
   homeTeamId: string;
   awayTeamId: string;
   homeScore: number;
@@ -214,7 +214,7 @@ function buildTeamOrder(division: StarTableDivision) {
 function buildPairResults(matches: StarTableMatch[]) {
   const results = new Map<string, PairResult>();
 
-  for (const match of [...matches].sort((a, b) => a.matchDate.getTime() - b.matchDate.getTime())) {
+  for (const match of [...matches].sort((a, b) => (a.matchDate?.getTime() ?? 0) - (b.matchDate?.getTime() ?? 0))) {
     if (match.homeScore === null || match.awayScore === null) continue;
 
     results.set(pairKey(match.homeTeamId, match.awayTeamId), {
@@ -317,6 +317,7 @@ function getLatestMatchDate(matches: StarTableMatch[]) {
   const dates = matches
     .filter((match) => match.homeScore !== null && match.awayScore !== null)
     .map((match) => match.matchDate)
+    .filter((date): date is Date => date !== null)
     .sort((a, b) => b.getTime() - a.getTime());
 
   return dates[0] ?? null;

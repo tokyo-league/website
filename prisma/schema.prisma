@@ -311,7 +311,7 @@ model Venue {
 model Match {
   id          String       @id @default(uuid()) @db.Uuid
   divisionId  String       @db.Uuid
-  matchDate   DateTime     @db.Date
+  matchDate   DateTime?    @db.Date
   kickoffTime DateTime?    @db.Time(0)
   venueId     String?      @db.Uuid
   homeTeamId  String       @db.Uuid

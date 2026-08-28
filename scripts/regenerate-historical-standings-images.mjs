@@ -4,6 +4,12 @@ import { renderStandingsStarTableSvg } from "../lib/standings-star-table.ts";
 
 const prisma = new PrismaClient();
 const apply = process.argv.includes("--apply");
+const verbose = process.argv.includes("--verbose");
+const currentJapanYear = Number(
+  new Intl.DateTimeFormat("ja-JP", { timeZone: "Asia/Tokyo", year: "numeric" })
+    .formatToParts(new Date())
+    .find((part) => part.type === "year")?.value,
+);
 
 try {
   const divisions = await prisma.division.findMany({
@@ -11,7 +17,7 @@ try {
       resultImagePath: { not: null },
       competition: {
         competitionType: CompetitionType.LEAGUE,
-        season: { isCurrent: false },
+        season: { year: { lt: currentJapanYear } },
       },
     },
     include: {
@@ -36,10 +42,12 @@ try {
   const eligible = divisions.filter((division) => division.teams.length > 0 && division.matches.length > 0);
   const skipped = divisions.filter((division) => !eligible.includes(division));
 
-  console.log(`対象: ${eligible.length}件、スキップ: ${skipped.length}件${apply ? "" : "（dry-run）"}`);
-  skipped.forEach((division) => {
-    console.log(`SKIP ${division.competition.season.year} ${division.competition.name} ${division.name}（チームまたは試合結果なし）`);
-  });
+  console.log(`${currentJapanYear}年より前の対象: ${eligible.length}件、スキップ: ${skipped.length}件${apply ? "" : "（dry-run）"}`);
+  if (verbose) {
+    skipped.forEach((division) => {
+      console.log(`SKIP ${division.competition.season.year} ${division.competition.name} ${division.name}（チームまたは試合結果なし）`);
+    });
+  }
 
   if (!apply) {
     eligible.forEach((division) => {

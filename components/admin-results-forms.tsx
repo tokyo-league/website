@@ -376,7 +376,7 @@ export function AdminResultsForms({
                 <input type="date" name="matchDate" />
               </label>
               <label className="admin-field">
-                <span>ホーム</span>
+                <span>ホーム <em className="admin-required">※必須</em></span>
                 <select name="homeTeamId" required>
                   <option value="">選択してください</option>
                   {selectedDivision.teams.map((team) => (
@@ -387,7 +387,7 @@ export function AdminResultsForms({
                 </select>
               </label>
               <label className="admin-field">
-                <span>アウェイ</span>
+                <span>アウェイ <em className="admin-required">※必須</em></span>
                 <select name="awayTeamId" required>
                   <option value="">選択してください</option>
                   {selectedDivision.teams.map((team) => (
@@ -399,12 +399,12 @@ export function AdminResultsForms({
               </label>
               <div className="admin-form-preview__grid">
                 <label className="admin-field">
-                  <span>ホーム得点</span>
-                  <input type="number" name="homeScore" min="0" />
+                  <span>ホーム得点 <em className="admin-required">※必須</em></span>
+                  <input type="number" name="homeScore" min="0" max="99" required />
                 </label>
                 <label className="admin-field">
-                  <span>アウェイ得点</span>
-                  <input type="number" name="awayScore" min="0" />
+                  <span>アウェイ得点 <em className="admin-required">※必須</em></span>
+                  <input type="number" name="awayScore" min="0" max="99" required />
                 </label>
               </div>
               <label className="admin-field">

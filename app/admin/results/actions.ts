@@ -137,7 +137,17 @@ export async function createMatch(
   const awayScore = parseInteger(String(formData.get("awayScore") ?? ""));
   const note = sanitizePlainText(String(formData.get("note") ?? ""), 240);
 
-  if (!isValidUuid(divisionId) || !isValidUuid(homeTeamId) || !isValidUuid(awayTeamId)) {
+  if (
+    !isValidUuid(divisionId) ||
+    !isValidUuid(homeTeamId) ||
+    !isValidUuid(awayTeamId) ||
+    homeScore === null ||
+    awayScore === null ||
+    homeScore < 0 ||
+    awayScore < 0 ||
+    homeScore > 99 ||
+    awayScore > 99
+  ) {
     return { status: "error", message: "試合情報の入力内容を確認してください。" };
   }
 

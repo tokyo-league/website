@@ -6,6 +6,15 @@ import { SiteHeader } from "@/components/site-header";
 import { getAboutContent } from "@/lib/about-content";
 import { getBoardMembers } from "@/lib/board-members";
 import { siteAssets } from "@/lib/site-data";
+import { createPageMetadata } from "@/lib/site-seo";
+
+export const metadata = createPageMetadata({
+  title: "東京リーグについて",
+  description: "東京少年サッカー連盟 東京リーグの組織概要、主な事業、理事会、規約・資料をご案内します。",
+  path: "/about",
+  image: siteAssets.aboutHero,
+  keywords: ["組織概要", "理事会", "規約"],
+});
 
 export default async function AboutPage() {
   noStore();

@@ -3,8 +3,15 @@ import { SiteHeader } from "@/components/site-header";
 import { resolveAssetUrl } from "@/lib/asset-url";
 import { formatDownloadCategory } from "@/lib/downloads";
 import { prisma } from "@/lib/prisma";
+import { createPageMetadata } from "@/lib/site-seo";
 
 export const dynamic = "force-dynamic";
+export const metadata = createPageMetadata({
+  title: "資料ダウンロード",
+  description: "東京リーグの規約、要項、注意事項など、公開資料をダウンロードできます。",
+  path: "/downloads",
+  keywords: ["規約", "大会要項", "資料"],
+});
 
 export default async function DownloadsPage() {
   const downloads = await prisma.download

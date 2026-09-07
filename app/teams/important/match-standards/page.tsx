@@ -1,6 +1,14 @@
 import Link from "next/link";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { createPageMetadata } from "@/lib/site-seo";
+
+export const metadata = createPageMetadata({
+  title: "試合開催基準・中止判断",
+  description: "荒天、会場状況、暑熱環境などで試合への影響が見込まれる際に確認する、東京リーグの開催・中止判断に関する案内です。",
+  path: "/teams/important/match-standards",
+  keywords: ["試合中止", "荒天", "大会運営"],
+});
 
 export default function MatchStandardsPage() {
   return (

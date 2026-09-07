@@ -1,6 +1,14 @@
 import Link from "next/link";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { createPageMetadata } from "@/lib/site-seo";
+
+export const metadata = createPageMetadata({
+  title: "暑さ対策・熱中症予防",
+  description: "東京リーグの暑い時期の試合に向けた、選手と帯同者のための暑さ対策・熱中症予防の確認事項です。",
+  path: "/teams/important/heat-safety",
+  keywords: ["熱中症予防", "暑さ対策", "少年サッカー"],
+});
 
 export default function HeatSafetyPage() {
   return (

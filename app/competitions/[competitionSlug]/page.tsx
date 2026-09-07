@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
@@ -7,9 +8,26 @@ import { SiteHeader } from "@/components/site-header";
 import { getCompetitionCategory, getCompetitionCategorySlug } from "@/lib/competition-category";
 import { prisma } from "@/lib/prisma";
 import { siteAssets } from "@/lib/site-data";
+import { createPageMetadata } from "@/lib/site-seo";
 import { e2eMockCompetition, isE2ETestMode } from "@/lib/test-mode";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({ params }: { params: Promise<{ competitionSlug: string }> }): Promise<Metadata> {
+  const { competitionSlug } = await params;
+  const category = getCompetitionCategory(competitionSlug);
+  if (category) {
+    return createPageMetadata({
+      title: category.name,
+      description: category.description,
+      path: `/competitions/${category.slug}`,
+      image: siteAssets.competitionMainVisual,
+      keywords: [category.name, "大会結果"],
+    });
+  }
+
+  return { robots: { index: false, follow: false } };
+}
 
 export default async function CompetitionRoutePage({ params }: { params: Promise<{ competitionSlug: string }> }) {
   const { competitionSlug } = await params;

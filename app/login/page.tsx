@@ -1,5 +1,8 @@
 import { auth } from "@/auth";
 import { GoogleSignIn } from "@/components/google-sign-in";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "管理画面ログイン", robots: { index: false, follow: false } };
 
 const hasGoogleCredentials =
   Boolean(process.env.AUTH_GOOGLE_ID) && Boolean(process.env.AUTH_GOOGLE_SECRET);

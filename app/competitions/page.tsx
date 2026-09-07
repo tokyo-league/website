@@ -4,8 +4,16 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { competitionCategories } from "@/lib/competition-category";
 import { siteAssets } from "@/lib/site-data";
+import { createPageMetadata } from "@/lib/site-seo";
 
 export const dynamic = "force-dynamic";
+export const metadata = createPageMetadata({
+  title: "試合情報・大会結果",
+  description: "東京リーグと山藤杯の大会情報、リーグ別の試合結果、順位表、所属チームを確認できます。",
+  path: "/competitions",
+  image: siteAssets.competitionMainVisual,
+  keywords: ["試合結果", "順位表", "山藤杯"],
+});
 
 export default function CompetitionsPage() {
   return (

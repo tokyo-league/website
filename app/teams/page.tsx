@@ -6,8 +6,16 @@ import { prisma } from "@/lib/prisma";
 import { siteAssets } from "@/lib/site-data";
 import { getTeamInitial, isDisplayableTeamLogo } from "@/lib/team-logo";
 import { sortTeamsByName } from "@/lib/team-sort";
+import { createPageMetadata } from "@/lib/site-seo";
 
 export const dynamic = "force-dynamic";
+export const metadata = createPageMetadata({
+  title: "参加チーム",
+  description: "東京リーグに参加する少年サッカーチームの基本情報、活動地域、チーム紹介を掲載しています。",
+  path: "/teams",
+  image: siteAssets.teamsHero,
+  keywords: ["参加チーム", "少年サッカーチーム", "東京都"],
+});
 
 export default async function TeamsPage() {
   const teams = sortTeamsByName(await prisma.team.findMany({

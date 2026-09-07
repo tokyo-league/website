@@ -8,6 +8,7 @@ import { SiteHeader } from "@/components/site-header";
 import { normalizeNewsBody } from "@/lib/news-text";
 import { getPublishedNewsBySlug } from "@/lib/public-news";
 import { siteAssets } from "@/lib/site-data";
+import { createPageMetadata } from "@/lib/site-seo";
 
 export const dynamic = "force-dynamic";
 
@@ -21,10 +22,14 @@ export async function generateMetadata({ params }: NewsDetailPageProps): Promise
 
   if (!news) return {};
 
-  return {
+  return createPageMetadata({
     title: news.title,
     description: news.excerpt,
-  };
+    path: `/news/${news.slug}`,
+    image: news.imageUrl || siteAssets.newsHero,
+    type: "article",
+    keywords: [news.categoryName, "お知らせ"],
+  });
 }
 
 export default async function NewsDetailPage({ params }: NewsDetailPageProps) {

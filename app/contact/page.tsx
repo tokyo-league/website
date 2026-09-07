@@ -4,6 +4,15 @@ import { SiteHeader } from "@/components/site-header";
 import { ContactForm } from "@/components/contact-form";
 import { getTurnstileSiteKey } from "@/lib/contact";
 import { contactInfo, siteAssets } from "@/lib/site-data";
+import { createPageMetadata } from "@/lib/site-seo";
+
+export const metadata = createPageMetadata({
+  title: "お問い合わせ",
+  description: "東京少年サッカー連盟 東京リーグへのご質問・ご相談はお問い合わせフォームからお送りください。",
+  path: "/contact",
+  image: siteAssets.contactHero,
+  keywords: ["問い合わせ", "連絡先"],
+});
 
 export default function ContactPage() {
   return (

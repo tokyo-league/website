@@ -2,6 +2,14 @@ import Link from "next/link";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { TeamImportantInformation } from "@/components/team-important-information";
+import { createPageMetadata } from "@/lib/site-seo";
+
+export const metadata = createPageMetadata({
+  title: "参加チーム向け重要事項",
+  description: "東京リーグに参加するチームの運営と試合参加に必要な重要事項、暑さ対策、試合開催基準をご案内します。",
+  path: "/teams/important",
+  keywords: ["参加チーム", "試合運営", "重要事項"],
+});
 
 export default function ImportantTeamInformationPage() {
   return (

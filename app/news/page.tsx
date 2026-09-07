@@ -4,8 +4,16 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { getPublishedNews } from "@/lib/public-news";
 import { siteAssets } from "@/lib/site-data";
+import { createPageMetadata } from "@/lib/site-seo";
 
 export const dynamic = "force-dynamic";
+export const metadata = createPageMetadata({
+  title: "ニュース",
+  description: "東京リーグからのお知らせ、大会情報、試合に関する最新情報を掲載しています。",
+  path: "/news",
+  image: siteAssets.newsHero,
+  keywords: ["お知らせ", "大会情報", "最新情報"],
+});
 
 export default async function NewsPage() {
   const posts = await getPublishedNews();

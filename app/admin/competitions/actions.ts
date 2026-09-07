@@ -395,25 +395,18 @@ export async function deleteCompetition(
   await requireOwner();
 
   const competitionId = sanitizePlainText(String(formData.get("competitionId") ?? ""), 64);
+  const forceDeleteConfirmed = String(formData.get("forceDeleteConfirmed") ?? "") === "true";
 
-  if (!isValidUuid(competitionId)) {
+  if (!isValidUuid(competitionId) || !forceDeleteConfirmed) {
     return {
       status: "error",
-      message: "削除対象の大会が見つかりませんでした。",
+      message: "確認画面で強制削除を確認してから実行してください。",
     };
   }
 
   const competition = await prisma.competition.findUnique({
     where: { id: competitionId },
-    include: {
-      _count: {
-        select: {
-          divisions: true,
-          files: true,
-          newsPosts: true,
-        },
-      },
-    },
+    select: { id: true, name: true },
   });
 
   if (!competition) {
@@ -423,24 +416,74 @@ export async function deleteCompetition(
     };
   }
 
-  const referenceCount = competition._count.divisions + competition._count.files + competition._count.newsPosts;
+  const deleted = await prisma.$transaction(async (tx) => {
+    const [divisions, newsPosts] = await Promise.all([
+      tx.division.findMany({
+        where: { competitionId },
+        select: { id: true },
+      }),
+      tx.newsPost.findMany({
+        where: { relatedCompetitionId: competitionId },
+        select: { id: true },
+      }),
+    ]);
+    const divisionIds = divisions.map((division) => division.id);
+    const newsPostIds = newsPosts.map((newsPost) => newsPost.id);
 
-  if (referenceCount > 0) {
+    // Team and asset records can be shared by other competitions, so only their
+    // associations are deleted here.
+    const deletedAssignments = await tx.divisionEditorAssignment.deleteMany({
+      where: { divisionId: { in: divisionIds } },
+    });
+    const deletedStandings = await tx.standing.deleteMany({
+      where: { divisionId: { in: divisionIds } },
+    });
+    const deletedMatches = await tx.match.deleteMany({
+      where: { divisionId: { in: divisionIds } },
+    });
+    const deletedTeamMemberships = await tx.divisionTeam.deleteMany({
+      where: { divisionId: { in: divisionIds } },
+    });
+    const deletedNewsImages = await tx.newsPostImage.deleteMany({
+      where: { newsPostId: { in: newsPostIds } },
+    });
+    const deletedNewsPosts = await tx.newsPost.deleteMany({
+      where: { id: { in: newsPostIds } },
+    });
+    const deletedFiles = await tx.competitionFile.deleteMany({
+      where: { competitionId },
+    });
+    const deletedDivisions = await tx.division.deleteMany({
+      where: { id: { in: divisionIds } },
+    });
+
+    await tx.competition.delete({ where: { id: competitionId } });
+
     return {
-      status: "error",
-      message: "リーグ、関連ファイル、ニュースが紐づいているため大会を削除できません。",
+      assignments: deletedAssignments.count,
+      standings: deletedStandings.count,
+      matches: deletedMatches.count,
+      teamMemberships: deletedTeamMemberships.count,
+      newsImages: deletedNewsImages.count,
+      newsPosts: deletedNewsPosts.count,
+      files: deletedFiles.count,
+      divisions: deletedDivisions.count,
     };
-  }
-
-  await prisma.competition.delete({
-    where: { id: competitionId },
   });
 
   revalidateCompetitionAdminPaths(competitionId);
+  revalidatePath("/admin/results");
+  revalidatePath("/admin/assignments");
+  revalidatePath("/competitions", "layout");
+  revalidatePath("/news", "layout");
 
   return {
     status: "success",
-    message: `${competition.name} を削除しました。`,
+    message:
+      `${competition.name} を削除しました。` +
+      ` リーグ${deleted.divisions}件・所属${deleted.teamMemberships}件・試合${deleted.matches}件・` +
+      `順位表${deleted.standings}件・担当割当${deleted.assignments}件・関連ファイル${deleted.files}件・` +
+      `ニュース${deleted.newsPosts}件を削除しました。`,
   };
 }
 

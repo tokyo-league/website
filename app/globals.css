@@ -2571,6 +2571,78 @@ button {
   align-items: center;
 }
 
+.button--danger {
+  border-color: #a63324;
+  background: #a63324;
+  color: #fff;
+}
+
+.button--danger:hover:not(:disabled) {
+  border-color: #7d271c;
+  background: #7d271c;
+}
+
+.admin-force-delete-dialog {
+  width: min(560px, calc(100vw - 32px));
+  max-height: min(720px, calc(100vh - 32px));
+  padding: 0;
+  border: 1px solid rgba(166, 51, 36, 0.32);
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: 0 28px 90px rgba(18, 19, 16, 0.28);
+  color: var(--text);
+}
+
+.admin-force-delete-dialog::backdrop {
+  background: rgba(18, 19, 16, 0.58);
+}
+
+.admin-force-delete-dialog__form {
+  display: grid;
+  gap: 16px;
+  padding: 28px;
+}
+
+.admin-force-delete-dialog h3,
+.admin-force-delete-dialog p {
+  margin: 0;
+}
+
+.admin-force-delete-dialog h3 {
+  font-size: 22px;
+  line-height: 1.35;
+}
+
+.admin-force-delete-dialog ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 14px 16px 14px 34px;
+  border-left: 3px solid #a63324;
+  background: #fff5f3;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.admin-force-delete-dialog__note {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.admin-force-delete-dialog__acknowledgement {
+  padding: 14px;
+  border: 1px solid var(--line);
+  background: var(--surface-soft);
+}
+
+.admin-force-delete-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 4px;
+}
+
 .admin-item-card__summary {
   display: grid;
   gap: 6px;

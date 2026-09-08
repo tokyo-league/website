@@ -745,8 +745,8 @@ function DivisionEditor({
 }) {
   const [updateState, updateAction, updatePending] = useActionState(updateDivision, initialCompetitionActionState);
   const [deleteState, deleteAction, deletePending] = useActionState(deleteDivision, initialCompetitionActionState);
-  const referenceCount = division.teamCount + division.matchCount + division.standingCount + division.assignmentCount;
-  const deletable = referenceCount === 0;
+  const deleteDialogRef = useRef<HTMLDialogElement>(null);
+  const [forceDeleteAcknowledged, setForceDeleteAcknowledged] = useState(false);
   const leagueCompetitions = competitions.filter((competition) => competition.competitionType === "LEAGUE");
 
   useEffect(() => {
@@ -806,17 +806,58 @@ function DivisionEditor({
           </button>
         </div>
       </form>
-      <ConfirmForm action={deleteAction} message="このリーグを削除します。よろしいですか？">
-        <input type="hidden" name="divisionId" value={division.id} />
-        <div className="admin-item-card__actions">
-          <button type="submit" className="button button--ghost" disabled={deletePending || !deletable}>
-            {deletePending ? "削除中..." : "リーグを削除"}
-          </button>
-          {!deletable ? (
-            <span className="admin-inline-message">所属チーム・試合・順位表・担当割当があるリーグは削除できません。</span>
-          ) : null}
-        </div>
-      </ConfirmForm>
+      <div className="admin-item-card__actions">
+        <button
+          type="button"
+          className="button button--ghost"
+          disabled={deletePending}
+          onClick={() => {
+            setForceDeleteAcknowledged(false);
+            deleteDialogRef.current?.showModal();
+          }}
+        >
+          {deletePending ? "削除中..." : "リーグを削除"}
+        </button>
+        <span className="admin-inline-message">関連データを含めて削除します。</span>
+      </div>
+      <dialog
+        ref={deleteDialogRef}
+        className="admin-force-delete-dialog"
+        aria-labelledby={`force-delete-division-title-${division.id}`}
+        onClose={() => setForceDeleteAcknowledged(false)}
+      >
+        <form action={deleteAction} className="admin-force-delete-dialog__form">
+          <input type="hidden" name="divisionId" value={division.id} />
+          <input type="hidden" name="forceDeleteConfirmed" value="true" />
+          <p className="section-kicker">Permanent deletion</p>
+          <h3 id={`force-delete-division-title-${division.id}`}>「{division.name}」を完全に削除しますか？</h3>
+          <p>この操作は取り消せません。次の関連データも一括で削除されます。</p>
+          <ul>
+            <li>リーグ所属 {division.teamCount}件</li>
+            <li>試合 {division.matchCount}件、順位表 {division.standingCount}件</li>
+            <li>担当割当 {division.assignmentCount}件</li>
+          </ul>
+          <p className="admin-force-delete-dialog__note">
+            チーム本体は他のリーグでも利用できるため削除しません。
+          </p>
+          <label className="admin-check admin-force-delete-dialog__acknowledgement">
+            <input
+              type="checkbox"
+              checked={forceDeleteAcknowledged}
+              onChange={(event) => setForceDeleteAcknowledged(event.target.checked)}
+            />
+            <span>削除対象と、元に戻せないことを確認しました。</span>
+          </label>
+          <div className="admin-force-delete-dialog__actions">
+            <button type="button" className="button button--ghost" onClick={() => deleteDialogRef.current?.close()}>
+              キャンセル
+            </button>
+            <button type="submit" className="button button--danger" disabled={!forceDeleteAcknowledged || deletePending}>
+              {deletePending ? "削除中..." : "関連データを含めて削除"}
+            </button>
+          </div>
+        </form>
+      </dialog>
     </details>
   );
 }

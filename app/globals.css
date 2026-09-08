@@ -2565,6 +2565,10 @@ button {
   padding: 0 16px;
 }
 
+.admin-item-card--disclosure > .admin-item-card__actions {
+  padding: 0 16px;
+}
+
 .admin-item-card__actions {
   display: flex;
   gap: 12px;

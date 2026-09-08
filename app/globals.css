@@ -3289,7 +3289,7 @@ button {
 .admin-standings-table__head,
 .admin-standings-table__row {
   display: grid;
-  grid-template-columns: minmax(180px, 2fr) repeat(8, minmax(72px, 1fr));
+  grid-template-columns: minmax(180px, 2fr) repeat(8, minmax(72px, 1fr)) minmax(76px, auto);
   gap: 8px;
   align-items: center;
 }
@@ -3325,6 +3325,12 @@ button {
   background: white;
   color: var(--text);
   font: inherit;
+}
+
+.admin-standings-table__delete {
+  min-height: 42px;
+  padding-inline: 12px;
+  font-size: 12px;
 }
 
 .admin-standings-summary {

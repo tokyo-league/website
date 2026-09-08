@@ -500,33 +500,59 @@ export async function deleteStanding(
   formData: FormData,
 ): Promise<ResultActionState> {
   const scope = await getAdminScope();
-  const standingId = sanitizePlainText(String(formData.get("standingId") ?? ""), 64);
   const divisionId = sanitizePlainText(String(formData.get("divisionId") ?? ""), 64);
+  const teamId = sanitizePlainText(String(formData.get("teamId") ?? ""), 64);
 
-  if (!isValidUuid(standingId) || !isValidUuid(divisionId)) {
-    return { status: "error", message: "削除対象の順位表行が見つかりませんでした。" };
+  if (!isValidUuid(teamId) || !isValidUuid(divisionId)) {
+    return { status: "error", message: "削除対象のチームが見つかりませんでした。" };
   }
 
   if (!canEditDivision(scope, divisionId)) {
     return { status: "error", message: "このリーグを編集する権限がありません。" };
   }
 
-  const result = await prisma.standing.deleteMany({
-    where: {
-      id: standingId,
-      divisionId,
-    },
-  });
+  const [standing, membership, matchCount] = await Promise.all([
+    prisma.standing.findUnique({
+      where: { divisionId_teamId: { divisionId, teamId } },
+      include: { team: { select: { name: true } } },
+    }),
+    prisma.divisionTeam.findUnique({
+      where: { divisionId_teamId: { divisionId, teamId } },
+      include: { team: { select: { name: true } } },
+    }),
+    prisma.match.count({
+      where: {
+        divisionId,
+        OR: [{ homeTeamId: teamId }, { awayTeamId: teamId }],
+      },
+    }),
+  ]);
 
-  if (result.count === 0) {
-    return { status: "error", message: "削除対象の順位表行が見つかりませんでした。" };
+  if (!standing && !membership) {
+    return { status: "error", message: "削除対象のチームが見つかりませんでした。" };
   }
 
+  if (matchCount > 0) {
+    return {
+      status: "error",
+      message: "このチームは試合結果に使われているため削除できません。先に該当する試合を削除または変更してください。",
+    };
+  }
+
+  await prisma.$transaction([
+    prisma.standing.deleteMany({ where: { divisionId, teamId } }),
+    prisma.divisionTeam.deleteMany({ where: { divisionId, teamId } }),
+  ]);
+
   revalidatePath("/admin/results");
+  revalidatePath("/admin/competitions");
+  revalidatePath("/competitions", "layout");
+
+  const teamName = standing?.team.name ?? membership?.team.name ?? "チーム";
 
   return {
     status: "success",
-    message: "順位表の行を削除しました。",
+    message: `${teamName} を順位表とリーグ所属から削除しました。`,
   };
 }
 

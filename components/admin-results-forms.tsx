@@ -480,6 +480,7 @@ export function AdminResultsForms({
               standings={selectedDivision.standings}
               action={standingAction}
               pending={standingPending}
+              onToast={setToast}
             />
           </>
         ) : null}
@@ -932,14 +933,17 @@ function BulkStandingEditor({
   standings,
   action,
   pending,
+  onToast,
 }: {
   divisionId: string;
   teams: DivisionOption["teams"];
   standings: DivisionOption["standings"];
   action: (payload: FormData) => void;
   pending: boolean;
+  onToast: (state: ResultActionState) => void;
 }) {
   const [rows, setRows] = useState(() => buildStandingRows(teams, standings));
+  const formId = `bulk-standing-form-${divisionId}`;
 
   useEffect(() => {
     setRows(buildStandingRows(teams, standings));
@@ -971,9 +975,11 @@ function BulkStandingEditor({
   }
 
   return (
-    <form action={action} className="admin-form-stack">
-      <input type="hidden" name="divisionId" value={divisionId} />
-      <input type="hidden" name="rowsJson" value={JSON.stringify(rows)} />
+    <>
+      <form id={formId} action={action}>
+        <input type="hidden" name="divisionId" value={divisionId} />
+        <input type="hidden" name="rowsJson" value={JSON.stringify(rows)} />
+      </form>
       <p className="admin-inline-message">「順位表をまとめて保存」を押すと、結果画像の有無にかかわらず試合結果ページへ反映されます。</p>
       <div className="admin-standings-table">
         <div className="admin-standings-table__head">
@@ -986,6 +992,7 @@ function BulkStandingEditor({
           <span>得点</span>
           <span>失点</span>
           <span>勝点</span>
+          <span>操作</span>
         </div>
         {rows.map((row) => (
           <div key={row.teamId} className="admin-standings-table__row">
@@ -998,11 +1005,18 @@ function BulkStandingEditor({
             <input type="number" min="0" value={row.goalsFor} onChange={(event) => updateRow(row.teamId, "goalsFor", event.target.value)} />
             <input type="number" min="0" value={row.goalsAgainst} onChange={(event) => updateRow(row.teamId, "goalsAgainst", event.target.value)} />
             <input type="number" value={row.points} onChange={(event) => updateRow(row.teamId, "points", event.target.value)} />
+            <StandingTeamDeleteButton
+              divisionId={divisionId}
+              teamId={row.teamId}
+              teamName={row.teamName}
+              disabled={pending}
+              onToast={onToast}
+            />
           </div>
         ))}
       </div>
       <div className="admin-item-card__actions">
-        <button type="submit" className="button" disabled={pending}>
+        <button type="submit" form={formId} className="button" disabled={pending}>
           {pending ? "保存中..." : "順位表をまとめて保存"}
         </button>
         <button type="button" className="button button--ghost" onClick={resetToSavedRows} disabled={pending}>
@@ -1012,7 +1026,7 @@ function BulkStandingEditor({
           入力をクリア
         </button>
       </div>
-    </form>
+    </>
   );
 }
 
@@ -1075,9 +1089,9 @@ function ExistingStandingEditor({
       <td>{standing.goalDifference >= 0 ? `+${standing.goalDifference}` : standing.goalDifference}</td>
       <td className="admin-standings-summary__points">{standing.points}</td>
       <td className="admin-standings-summary__action">
-        <ConfirmForm action={deleteAction} message="この順位表の行を削除します。よろしいですか？">
-          <input type="hidden" name="standingId" value={standing.id} />
+        <ConfirmForm action={deleteAction} message={`${standing.teamName} を順位表とリーグ所属から削除します。よろしいですか？`}>
           <input type="hidden" name="divisionId" value={divisionId} />
+          <input type="hidden" name="teamId" value={standing.teamId} />
           <button
             type="submit"
             className="button button--ghost admin-standings-summary__delete"
@@ -1088,6 +1102,40 @@ function ExistingStandingEditor({
         </ConfirmForm>
       </td>
     </tr>
+  );
+}
+
+function StandingTeamDeleteButton({
+  divisionId,
+  teamId,
+  teamName,
+  disabled,
+  onToast,
+}: {
+  divisionId: string;
+  teamId: string;
+  teamName: string;
+  disabled: boolean;
+  onToast: (state: ResultActionState) => void;
+}) {
+  const [deleteState, deleteAction, deletePending] = useActionState(deleteStanding, initialState);
+
+  useEffect(() => {
+    if (deleteState.status !== "idle") onToast(deleteState);
+  }, [deleteState, onToast]);
+
+  return (
+    <ConfirmForm action={deleteAction} message={`${teamName} を順位表とリーグ所属から削除します。よろしいですか？`}>
+      <input type="hidden" name="divisionId" value={divisionId} />
+      <input type="hidden" name="teamId" value={teamId} />
+      <button
+        type="submit"
+        className="button button--ghost admin-standings-table__delete"
+        disabled={disabled || deletePending}
+      >
+        {deletePending ? "削除中..." : "削除"}
+      </button>
+    </ConfirmForm>
   );
 }
 

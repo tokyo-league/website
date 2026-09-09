@@ -40,11 +40,10 @@ test("結果管理で年度・大会・リーグ絞り込みと編集UIが表示
 
   await expect(page.getByRole("heading", { name: "結果管理" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "対象リーグ" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "入稿方法を選ぶ" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Excelファイルがある場合" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Excelファイルがない場合" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Excel入稿へ進む" })).toHaveAttribute("href", "#excel-import");
-  await expect(page.getByRole("link", { name: "手入力へ進む" })).toHaveAttribute("href", "#manual-match-entry");
+  await expect(page.getByRole("heading", { name: "入稿の進行状況" })).toBeVisible();
+  await expect(page.getByRole("list", { name: "Excel入稿の進行状況" })).toContainText("Excelを選択");
+  await expect(page.getByRole("list", { name: "Excel入稿の進行状況" })).toContainText("順位表をまとめて保存");
+  await expect(page.getByRole("link", { name: "次へ進む" })).toHaveAttribute("href", "#excel-import");
   await expect(page.getByRole("heading", { name: "Excelで試合結果を入稿" })).toBeVisible();
   await expect(page.getByRole("list", { name: "Excel入稿の手順" })).toContainText("対象を選択");
   await expect(page.getByRole("list", { name: "Excel入稿の手順" })).toContainText("内容を確認");
@@ -54,7 +53,8 @@ test("結果管理で年度・大会・リーグ絞り込みと編集UIが表示
   await expect(filterSelects.nth(0)).toHaveValue("2026");
   await expect(filterSelects.nth(1)).toHaveValue("第103回 東京リーグ");
   await expect(filterSelects.nth(2)).toHaveValue("e2e-division-a");
-  await expect(page.getByRole("heading", { name: "結果画像" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "結果画像を直接アップロード" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "星取表を結果画像として登録" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "順位表を作成・更新" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "未消化試合の勝ち点を補正" })).toBeVisible();
   await expect(page.getByRole("button", { name: "未消化試合の勝ち点を補正" })).toBeVisible();

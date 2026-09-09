@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useActionState, useEffect, useState, type FormEvent } from "react";
+import { useActionState, useCallback, useEffect, useState, type FormEvent } from "react";
 import {
   addStandingRow,
   applyUnplayedMatchPointsAdjustment,
@@ -123,6 +123,24 @@ export function AdminResultsForms({
   const [resultPreview, setResultPreview] = useState<string | null>(null);
   const [resultFileName, setResultFileName] = useState("");
   const [resultUploadError, setResultUploadError] = useState("");
+  const [submissionProgress, setSubmissionProgress] = useState({
+    fileSelected: false,
+    previewReady: false,
+    matchesImported: false,
+    standingsRecalculated: false,
+    standingsSaved: false,
+    resultImageRegistered: false,
+  });
+  const handleExcelProgress = useCallback((change: Partial<{
+    fileSelected: boolean;
+    previewReady: boolean;
+    matchesImported: boolean;
+    standingsRecalculated: boolean;
+    standingsSaved: boolean;
+    resultImageRegistered: boolean;
+  }>) => {
+    setSubmissionProgress((current) => ({ ...current, ...change }));
+  }, []);
 
   useEffect(() => {
     const states = [resultState, matchState, standingState, addStandingState, regenState, correctionState, generatedImageState];
@@ -143,11 +161,37 @@ export function AdminResultsForms({
     setResultUploadError("");
     setResultFileName("");
     setResultPreview(null);
+    setSubmissionProgress({
+      fileSelected: false,
+      previewReady: false,
+      matchesImported: false,
+      standingsRecalculated: false,
+      standingsSaved: false,
+      resultImageRegistered: false,
+    });
   }, [selectedDivisionId]);
+
+  useEffect(() => {
+    if (regenState.status === "success") {
+      setSubmissionProgress((current) => ({ ...current, standingsRecalculated: true }));
+    }
+  }, [regenState.status]);
+
+  useEffect(() => {
+    if (standingState.status === "success") {
+      setSubmissionProgress((current) => ({ ...current, standingsSaved: true }));
+    }
+  }, [standingState.status]);
+
+  useEffect(() => {
+    if (generatedImageState.status === "success") {
+      setSubmissionProgress((current) => ({ ...current, resultImageRegistered: true }));
+    }
+  }, [generatedImageState.status]);
 
   if (!selectedDivision) {
     return (
-      <article className="admin-card">
+      <article className="admin-card admin-selected-league" id="league-selector">
         <p className="admin-muted">対象リーグがありません。大会とリーグを先に作成してください。</p>
       </article>
     );
@@ -168,7 +212,7 @@ export function AdminResultsForms({
         </div>
       ) : null}
 
-      <article className="admin-card">
+      <article className="admin-card admin-selected-league" id="league-selector">
         <div className="card__header">
           <div>
             <p className="section-kicker">Step 1</p>
@@ -208,9 +252,21 @@ export function AdminResultsForms({
             </select>
           </label>
         </div>
+        <div className="admin-selected-league__context" aria-live="polite">
+          <span>現在編集中のリーグ</span>
+          <strong>{selectedDivision.label}</strong>
+          <small>これから行うExcel入稿・順位表更新・結果画像登録は、すべてこのリーグに反映されます。</small>
+        </div>
       </article>
 
-      <ImportFlowGuide canEditScores={canEditScores} />
+      <SubmissionNavigator
+        divisionLabel={selectedDivision.label}
+        canEditScores={canEditScores}
+        hasExistingMatches={selectedDivision.matches.length > 0}
+        hasExistingStandings={selectedDivision.standings.length > 0}
+        hasResultImage={Boolean(selectedDivision.resultImagePath)}
+        progress={submissionProgress}
+      />
 
       <article className="admin-card">
         <div className="card__header">
@@ -252,14 +308,16 @@ export function AdminResultsForms({
         divisionId={selectedDivision.id}
         divisionLabel={selectedDivision.label}
         onToast={setToast}
+        onProgressChange={handleExcelProgress}
       />
 
       <div className="admin-columns">
-        <article className="admin-card" id="result-image-entry">
+        <article className="admin-card" id="result-image-upload">
           <div className="card__header">
             <div>
-              <p className="section-kicker">Result Image</p>
-              <h3>結果画像</h3>
+              <p className="section-kicker">Optional</p>
+              <h3>結果画像を直接アップロード</h3>
+              <p className="admin-section-lead">Excel入稿の通常フローでは、下部の「星取表を結果画像として登録」を使います。</p>
             </div>
           </div>
           <form action={resultAction} className="admin-form-stack">
@@ -285,19 +343,6 @@ export function AdminResultsForms({
             ) : (
               <p className="admin-muted">このリーグには結果画像がまだ登録されていません。</p>
             )}
-            {selectedDivision.teams.length > 0 ? (
-              <div className="admin-item-card__actions">
-                <a href={standingsImageHref} target="_blank" rel="noreferrer" className="button button--ghost">
-                  星取表画像を開く
-                </a>
-                <a href={`${standingsImageHref}?download=1`} className="button button--ghost">
-                  SVGを保存
-                </a>
-                <button type="submit" formAction={generatedImageAction} className="button" disabled={generatedImagePending}>
-                  {generatedImagePending ? "登録中..." : "この星取表を結果画像にする"}
-                </button>
-              </div>
-            ) : null}
             <label className="admin-field">
               <span>結果画像</span>
               <UploadField
@@ -423,7 +468,7 @@ export function AdminResultsForms({
         ) : null}
       </div>
 
-      <article className="admin-card">
+      <article className="admin-card" id="standings-workbench">
         <div className="card__header">
           <div>
             <p className="section-kicker">Standing</p>
@@ -462,6 +507,9 @@ export function AdminResultsForms({
         {canEditScores && regenState.status !== "idle" ? (
           <p className={`admin-inline-message admin-inline-message--${regenState.status}`}>{regenState.message}</p>
         ) : null}
+        {canEditScores && regenState.status === "success" ? (
+          <p className="admin-next-notice">再計算できました。内容を確認したら、下の<strong>「順位表をまとめて保存」</strong>を押してください。</p>
+        ) : null}
         {canEditScores && correctionState.status !== "idle" ? (
           <p className={`admin-inline-message admin-inline-message--${correctionState.status}`}>{correctionState.message}</p>
         ) : null}
@@ -482,45 +530,23 @@ export function AdminResultsForms({
               pending={standingPending}
               onToast={setToast}
             />
+            {standingState.status === "success" ? (
+              <p className="admin-next-notice">順位表を保存しました。<a href="#result-image-entry">次は星取表を結果画像として登録</a>します。</p>
+            ) : null}
           </>
         ) : null}
       </article>
 
-      {canEditScores ? (
-        <article className="admin-card">
-          <div className="card__header">
-            <div>
-              <p className="section-kicker">Registered Matches</p>
-              <h3>登録済み試合</h3>
-            </div>
-          </div>
-          {selectedDivision.matches.length === 0 ? (
-            <p className="admin-muted">まだ試合結果は登録されていません。</p>
-          ) : (
-            <div className="admin-item-list">
-              {selectedDivision.matches.map((match) => (
-                <ExistingMatchEditor
-                  key={match.id}
-                  divisionId={selectedDivision.id}
-                  teams={selectedDivision.teams}
-                  match={match}
-                  onToast={setToast}
-                />
-              ))}
-            </div>
-          )}
-        </article>
-      ) : null}
-
-      <article className="admin-card">
+      <article className="admin-card admin-registered-standings">
         <div className="card__header">
           <div>
             <p className="section-kicker">Registered Standings</p>
             <h3>登録済み順位表の確認</h3>
+            <p className="admin-section-lead">現在公開される順位表です。試合一覧より先に確認できます。</p>
           </div>
         </div>
         {selectedDivision.standings.length === 0 ? (
-          <p className="admin-muted">まだ順位表は登録されていません。</p>
+          <p className="admin-muted">まだ順位表は登録されていません。上の「試合結果から再計算」後に「順位表をまとめて保存」を押してください。</p>
         ) : (
           <div className="admin-standings-summary">
             <table className="admin-standings-summary__table">
@@ -548,70 +574,153 @@ export function AdminResultsForms({
           </div>
         )}
       </article>
+
+      {selectedDivision.teams.length > 0 ? (
+        <article className="admin-card admin-result-image-finish" id="result-image-entry">
+          <div className="card__header">
+            <div>
+              <p className="section-kicker">Final Step</p>
+              <h3>星取表を結果画像として登録</h3>
+              <p className="admin-section-lead">順位表を保存した後に、公開される結果画像をここで更新します。</p>
+            </div>
+          </div>
+          <div className="admin-result-image-actions">
+            <p className="admin-next-notice">まず星取表を開いて内容を確認し、問題なければ<strong>結果画像として登録</strong>してください。</p>
+            <div className="admin-item-card__actions">
+              <a href={standingsImageHref} target="_blank" rel="noreferrer" className="button button--ghost">星取表画像を開く</a>
+              <a href={`${standingsImageHref}?download=1`} className="button button--ghost">SVGを保存</a>
+              <form action={generatedImageAction}>
+                <input type="hidden" name="divisionId" value={selectedDivision.id} />
+                <button type="submit" className="button" disabled={generatedImagePending}>
+                  {generatedImagePending ? "登録中..." : "この星取表を結果画像として登録"}
+                </button>
+              </form>
+            </div>
+            {generatedImageState.status === "success" ? <p className="admin-inline-message admin-inline-message--success">登録完了。公開ページの結果画像を更新しました。</p> : null}
+          </div>
+        </article>
+      ) : null}
+
+      {canEditScores ? (
+        <article className="admin-card admin-registered-matches">
+          <div className="card__header">
+            <div>
+              <p className="section-kicker">Registered Matches</p>
+              <h3>登録済み試合</h3>
+            </div>
+          </div>
+          {selectedDivision.matches.length === 0 ? (
+            <p className="admin-muted">まだ試合結果は登録されていません。</p>
+          ) : (
+            <div className="admin-item-list admin-item-list--compact">
+              {selectedDivision.matches.map((match) => (
+                <ExistingMatchEditor
+                  key={match.id}
+                  divisionId={selectedDivision.id}
+                  teams={selectedDivision.teams}
+                  match={match}
+                  onToast={setToast}
+                />
+              ))}
+            </div>
+          )}
+        </article>
+      ) : null}
+
     </>
   );
 }
 
-function ImportFlowGuide({ canEditScores }: { canEditScores: boolean }) {
+function SubmissionNavigator({
+  divisionLabel,
+  canEditScores,
+  hasExistingMatches,
+  hasExistingStandings,
+  hasResultImage,
+  progress,
+}: {
+  divisionLabel: string;
+  canEditScores: boolean;
+  hasExistingMatches: boolean;
+  hasExistingStandings: boolean;
+  hasResultImage: boolean;
+  progress: {
+    fileSelected: boolean;
+    previewReady: boolean;
+    matchesImported: boolean;
+    standingsRecalculated: boolean;
+    standingsSaved: boolean;
+    resultImageRegistered: boolean;
+  };
+}) {
+  const steps = [
+    { label: "対象リーグを確認", detail: divisionLabel, href: "#league-selector", complete: true },
+    { label: "Excelを選択", detail: progress.fileSelected ? "ファイルを選択済み" : "管理表をアップロード", href: "#excel-import", complete: progress.fileSelected, current: !progress.fileSelected },
+    { label: "Excelの内容を読む", detail: progress.previewReady ? "読み取り・確認済み" : "チーム名・試合数を確認", href: "#excel-import", complete: progress.previewReady, current: progress.fileSelected && !progress.previewReady },
+    { label: "試合結果へ反映", detail: "新規追加・既存更新", href: "#excel-import", complete: progress.matchesImported, current: progress.previewReady && !progress.matchesImported },
+    { label: "順位表を再計算", detail: "試合結果から作成", href: "#standings-workbench", complete: progress.standingsRecalculated, current: progress.matchesImported && !progress.standingsRecalculated },
+    { label: "順位表をまとめて保存", detail: "公開する順位表を確定", href: "#standing-save", complete: progress.standingsSaved, current: progress.standingsRecalculated && !progress.standingsSaved },
+    { label: "星取表を結果画像に登録", detail: "公開用の結果画像を更新", href: "#result-image-entry", complete: progress.resultImageRegistered, current: progress.standingsSaved && !progress.resultImageRegistered },
+  ];
+  const nextStep = steps.find((step) => step.current) ?? steps.find((step) => !step.complete);
+  const readyForImage = progress.standingsSaved || (hasExistingStandings && !progress.matchesImported);
+
   return (
-    <article className="admin-card admin-import-guide" aria-labelledby="import-guide-title">
-      <div className="card__header">
+    <article className="admin-card admin-submission-navigator" aria-labelledby="submission-navigator-title">
+      <div className="card__header admin-submission-navigator__header">
         <div>
-          <p className="section-kicker">Start Here</p>
-          <h3 id="import-guide-title">入稿方法を選ぶ</h3>
-          <p className="admin-section-lead">手元にExcelの結果管理表があるかどうかで、進む手順が変わります。</p>
+          <p className="section-kicker">Excel Submission Guide</p>
+          <h3 id="submission-navigator-title">入稿の進行状況</h3>
+          <p className="admin-section-lead">この順番で進めれば、試合結果・順位表・結果画像まで反映できます。</p>
         </div>
+        {nextStep ? <a className="button" href={nextStep.href}>次へ進む</a> : <span className="admin-submission-navigator__complete">入稿完了</span>}
       </div>
-
-      <div className="admin-import-routes">
-        <section className="admin-import-route admin-import-route--recommended">
-          <div className="admin-import-route__header">
-            <div>
-              <span className="admin-import-route__label">おすすめ・一括入稿</span>
-              <h4>Excelファイルがある場合</h4>
-            </div>
-            <span className="admin-import-route__icon" aria-hidden="true">XLSX</span>
-          </div>
-          <ol>
-            <li><span>1</span><p><strong>対象リーグを選ぶ</strong><small>年度・大会・リーグを確認</small></p></li>
-            <li><span>2</span><p><strong>結果管理表を選ぶ</strong><small>「管理表」シート入りの .xlsx</small></p></li>
-            <li><span>3</span><p><strong>読み取り内容を確認</strong><small>チーム名・得点・日付・会場を確認</small></p></li>
-            <li><span>4</span><p><strong>試合結果へ反映</strong><small>新規試合を追加、同じ対戦は更新</small></p></li>
-          </ol>
-          <a href="#excel-import" className="button">Excel入稿へ進む</a>
-        </section>
-
-        <section className="admin-import-route">
-          <div className="admin-import-route__header">
-            <div>
-              <span className="admin-import-route__label">手入力</span>
-              <h4>Excelファイルがない場合</h4>
-            </div>
-            <span className="admin-import-route__icon admin-import-route__icon--manual" aria-hidden="true">入力</span>
-          </div>
-          {canEditScores ? (
-            <>
-              <ol>
-                <li><span>1</span><p><strong>対象リーグを選ぶ</strong><small>年度・大会・リーグを確認</small></p></li>
-                <li><span>2</span><p><strong>試合結果を1件ずつ追加</strong><small>日付・対戦・得点・会場を入力</small></p></li>
-                <li><span>3</span><p><strong>登録済み試合を確認</strong><small>誤りがあれば更新または削除</small></p></li>
-                <li><span>4</span><p><strong>順位表を再計算</strong><small>全試合の入力後に実行</small></p></li>
-              </ol>
-              <a href="#manual-match-entry" className="button button--ghost">手入力へ進む</a>
-            </>
-          ) : (
-            <>
-              <ol>
-                <li><span>1</span><p><strong>対象リーグを選ぶ</strong><small>過去大会であることを確認</small></p></li>
-                <li><span>2</span><p><strong>結果画像を用意</strong><small>JPG・PNG・WebPに対応</small></p></li>
-                <li><span>3</span><p><strong>結果画像を登録</strong><small>過去大会は画像を正本として掲載</small></p></li>
-              </ol>
-              <a href="#result-image-entry" className="button button--ghost">結果画像の登録へ進む</a>
-            </>
-          )}
-        </section>
-      </div>
+      <ol className="admin-submission-steps" aria-label="Excel入稿の進行状況">
+        {steps.map((step, index) => (
+          <li key={step.label} className={`${step.complete ? "is-complete" : ""}${step.current ? " is-current" : ""}`}>
+            <span>{step.complete ? "✓" : index + 1}</span>
+            <a href={step.href}>
+              <strong>{step.label}</strong>
+              <small>{step.detail}</small>
+            </a>
+          </li>
+        ))}
+      </ol>
+      {!canEditScores ? <p className="admin-inline-message">過去大会は試合入力・再計算を行わず、結果画像の登録のみを行います。</p> : null}
+      {progress.matchesImported ? <p className="admin-next-notice">試合結果を反映しました。<strong>次は「順位表を再計算」</strong>です。</p> : null}
+      {progress.standingsRecalculated ? <p className="admin-next-notice">順位表を再計算しました。<strong>次は「順位表をまとめて保存」</strong>です。</p> : null}
+      {readyForImage && !progress.resultImageRegistered ? <p className="admin-next-notice">順位表を保存したら、<strong>星取表を結果画像に登録</strong>して公開用画像も更新します。</p> : null}
+      {hasExistingMatches && !progress.matchesImported ? <p className="admin-inline-message">すでに登録済みの試合があります。Excelの反映では同じ対戦カードを更新し、Excelにない試合は残ります。</p> : null}
+      {hasResultImage && !progress.resultImageRegistered ? <p className="admin-inline-message">現在の結果画像は、星取表を登録するまでそのまま保持されます。</p> : null}
     </article>
+  );
+}
+
+function CopyImportErrors({ errors }: { errors: string[] }) {
+  const [copied, setCopied] = useState(false);
+  const copyText = errors.map((error) => `- ${error}`).join("\n");
+
+  async function copyErrors() {
+    try {
+      await navigator.clipboard.writeText(copyText);
+      setCopied(true);
+    } catch {
+      setCopied(false);
+    }
+  }
+
+  return (
+    <div className="admin-import-errors__copy">
+      <label className="admin-field">
+        <span>チーム名の名寄せ用（コピーしてチーム編集へ）</span>
+        <textarea readOnly rows={Math.min(Math.max(errors.length + 1, 3), 8)} value={copyText} aria-label="Excel読み取りエラーのコピー用テキスト" />
+      </label>
+      <div className="admin-inline-actions">
+        <button type="button" className="button button--ghost" onClick={copyErrors}>エラー一覧をコピー</button>
+        <a className="button button--ghost" href="/admin/teams" target="_blank" rel="noreferrer">チーム編集を開く</a>
+        {copied ? <span className="admin-inline-message admin-inline-message--success">コピーしました</span> : null}
+      </div>
+    </div>
   );
 }
 
@@ -619,10 +728,19 @@ function ExcelImportPanel({
   divisionId,
   divisionLabel,
   onToast,
+  onProgressChange,
 }: {
   divisionId: string;
   divisionLabel: string;
   onToast: (state: ResultActionState) => void;
+  onProgressChange: (change: Partial<{
+    fileSelected: boolean;
+    previewReady: boolean;
+    matchesImported: boolean;
+    standingsRecalculated: boolean;
+    standingsSaved: boolean;
+    resultImageRegistered: boolean;
+  }>) => void;
 }) {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<MatchExcelPreview | null>(null);
@@ -632,7 +750,8 @@ function ExcelImportPanel({
 
   useEffect(() => {
     if (importState.status !== "idle") onToast(importState);
-  }, [importState, onToast]);
+    if (importState.status === "success") onProgressChange({ matchesImported: true });
+  }, [importState, onProgressChange, onToast]);
 
   async function handlePreview(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -658,6 +777,7 @@ function ExcelImportPanel({
 
       if (!response.ok) throw new Error(data.message || "Excelを読み取れませんでした。");
       setPreview(data);
+      onProgressChange({ previewReady: true });
     } catch (error) {
       setPreviewError(error instanceof Error ? error.message : "Excelを読み取れませんでした。");
     } finally {
@@ -697,14 +817,29 @@ function ExcelImportPanel({
               setFile(nextFile);
               setPreview(null);
               setPreviewError("");
+              onProgressChange({
+                fileSelected: Boolean(nextFile),
+                previewReady: false,
+                matchesImported: false,
+                standingsRecalculated: false,
+                standingsSaved: false,
+                resultImageRegistered: false,
+              });
             }}
           />
           <small className="admin-field__help">「管理表」シートが入った .xlsx（5MB以下）を選択してください。</small>
         </div>
         {previewError ? <p className="admin-inline-message admin-inline-message--error" role="alert">{previewError}</p> : null}
-        <button type="submit" className="button" disabled={!file || previewPending || importPending}>
-          {previewPending ? "読み取り中..." : "Excelの内容を読み取る"}
-        </button>
+        <div className={`admin-next-action${file ? " is-ready" : ""}`}>
+          <div>
+            <span>次にすること</span>
+            <strong>{file ? `「${file.name}」を読み取る` : "Excelファイルを選択する"}</strong>
+            <small>{file ? "ファイルを選んだだけでは反映されません。まず内容を読み取って確認します。" : "「管理表」シートを含む .xlsx を選択してください。"}</small>
+          </div>
+          <button type="submit" className="button" disabled={!file || previewPending || importPending}>
+            {previewPending ? "読み取り中..." : "Excelの内容を読み取る"}
+          </button>
+        </div>
       </form>
 
       {preview ? (
@@ -722,8 +857,9 @@ function ExcelImportPanel({
           {preview.errors.length > 0 ? (
             <div className="admin-import-errors" role="alert">
               <strong>以下の行は反映対象から除外されています</strong>
-              <p>抽出できた試合は、このまま反映できます。エラー行はExcelを修正後、あらためて読み取ってください。</p>
+              <p>チーム名の不一致は、下の一覧をコピーしてチーム編集で名寄せしてください。抽出できた試合は、このまま反映できます。</p>
               <ul>{preview.errors.map((error) => <li key={error}>{error}</li>)}</ul>
+              <CopyImportErrors errors={preview.errors} />
             </div>
           ) : null}
 
@@ -752,7 +888,8 @@ function ExcelImportPanel({
             <input type="hidden" name="divisionId" value={divisionId} />
             <input type="hidden" name="rowsJson" value={JSON.stringify(preview.rows)} />
             <div>
-              <strong>{divisionLabel} に反映します</strong>
+              <span className="admin-next-action__label">確認できたら次にすること</span>
+              <strong>{divisionLabel} に {preview.rows.length} 試合を反映する</strong>
               <p>同じ対戦カードは更新し、新しい対戦は追加します。Excelにない既存試合は残ります。試合日が空欄の新規試合は「未設定」として登録し、既存試合は現在の試合日を維持します。</p>
             </div>
             <button type="submit" className="button" disabled={!canImport || importPending}>
@@ -863,8 +1000,22 @@ function ExistingMatchEditor({
     if (deleteState.status !== "idle") onToast(deleteState);
   }, [deleteState, onToast]);
 
+  const homeTeamName = teams.find((team) => team.id === match.homeTeamId)?.name ?? "ホーム未設定";
+  const awayTeamName = teams.find((team) => team.id === match.awayTeamId)?.name ?? "アウェイ未設定";
+  const score = match.homeScore === null || match.awayScore === null
+    ? "結果未入力"
+    : `${match.homeScore} - ${match.awayScore}`;
+
   return (
-    <div className="admin-item-card">
+    <details className="admin-item-card admin-item-card--disclosure admin-match-disclosure">
+      <summary>
+        <div className="admin-match-disclosure__summary">
+          <span className="admin-match-disclosure__date">{formatJapanDate(match.matchDate || null)}</span>
+          <strong>{homeTeamName} <b>{score}</b> {awayTeamName}</strong>
+          <small>{match.venueName || "会場未設定"}</small>
+        </div>
+        <span className="admin-match-disclosure__edit">編集</span>
+      </summary>
       <form action={updateAction} className="admin-form-stack">
         <input type="hidden" name="matchId" value={match.id} />
         <input type="hidden" name="divisionId" value={divisionId} />
@@ -923,7 +1074,7 @@ function ExistingMatchEditor({
           {deletePending ? "削除中..." : "削除"}
         </button>
       </ConfirmForm>
-    </div>
+    </details>
   );
 }
 
@@ -1015,7 +1166,7 @@ function BulkStandingEditor({
           </div>
         ))}
       </div>
-      <div className="admin-item-card__actions">
+      <div className="admin-item-card__actions" id="standing-save">
         <button type="submit" form={formId} className="button" disabled={pending}>
           {pending ? "保存中..." : "順位表をまとめて保存"}
         </button>

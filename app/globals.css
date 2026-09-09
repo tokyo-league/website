@@ -3004,16 +3004,23 @@ button {
   background: rgba(255, 255, 255, 0.84);
 }
 
-.admin-submission-steps li > span {
+.admin-submission-steps li > button {
   display: grid;
   place-items: center;
   width: 30px;
   height: 30px;
+  padding: 0;
+  border: 0;
   border-radius: 50%;
   background: #e7e9ee;
   color: #5d6470;
+  cursor: pointer;
   font-size: 12px;
   font-weight: 800;
+}
+
+.admin-submission-steps li > button:hover {
+  background: #cfd7e6;
 }
 
 .admin-submission-steps a {
@@ -3043,14 +3050,32 @@ button {
   box-shadow: 0 8px 20px rgba(31, 78, 163, 0.1);
 }
 
-.admin-submission-steps li.is-current > span {
+.admin-submission-steps li.is-current > button {
   background: #1f4ea3;
   color: #fff;
 }
 
-.admin-submission-steps li.is-complete > span {
+.admin-submission-steps li.is-complete > button {
   background: #20794a;
   color: #fff;
+}
+
+.workflow-action-highlight {
+  position: relative;
+  z-index: 1;
+  outline: 3px solid #d83a2e !important;
+  outline-offset: 4px;
+  animation: workflow-action-pulse 1.2s ease-in-out 4;
+}
+
+@keyframes workflow-action-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(216, 58, 46, 0);
+  }
+
+  45% {
+    box-shadow: 0 0 0 10px rgba(216, 58, 46, 0.26);
+  }
 }
 
 .admin-next-notice {

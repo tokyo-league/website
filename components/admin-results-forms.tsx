@@ -72,6 +72,8 @@ type TeamOption = {
   region: string;
 };
 
+type WorkflowAction = "league" | "file" | "read" | "import" | "recalculate" | "save" | "image" | "complete";
+
 export function AdminResultsForms({
   divisions,
   teams,
@@ -131,6 +133,19 @@ export function AdminResultsForms({
     standingsSaved: false,
     resultImageRegistered: false,
   });
+  const [highlightedAction, setHighlightedAction] = useState<WorkflowAction>("file");
+  const returnToProgress = useCallback((action: WorkflowAction) => {
+    setHighlightedAction("complete");
+    window.requestAnimationFrame(() => setHighlightedAction(action));
+    document.getElementById("submission-navigator")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
+  const goToWorkflowAction = useCallback((action: WorkflowAction) => {
+    setHighlightedAction("complete");
+    window.requestAnimationFrame(() => {
+      setHighlightedAction(action);
+      document.getElementById(`workflow-action-${action}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  }, []);
   const handleExcelProgress = useCallback((change: Partial<{
     fileSelected: boolean;
     previewReady: boolean;
@@ -140,7 +155,9 @@ export function AdminResultsForms({
     resultImageRegistered: boolean;
   }>) => {
     setSubmissionProgress((current) => ({ ...current, ...change }));
-  }, []);
+    if (change.previewReady) returnToProgress("import");
+    if (change.matchesImported) returnToProgress("recalculate");
+  }, [returnToProgress]);
 
   useEffect(() => {
     const states = [resultState, matchState, standingState, addStandingState, regenState, correctionState, generatedImageState];
@@ -169,25 +186,29 @@ export function AdminResultsForms({
       standingsSaved: false,
       resultImageRegistered: false,
     });
+    setHighlightedAction("file");
   }, [selectedDivisionId]);
 
   useEffect(() => {
     if (regenState.status === "success") {
       setSubmissionProgress((current) => ({ ...current, standingsRecalculated: true }));
+      returnToProgress("save");
     }
-  }, [regenState.status]);
+  }, [regenState.status, returnToProgress]);
 
   useEffect(() => {
     if (standingState.status === "success") {
       setSubmissionProgress((current) => ({ ...current, standingsSaved: true }));
+      returnToProgress("image");
     }
-  }, [standingState.status]);
+  }, [standingState.status, returnToProgress]);
 
   useEffect(() => {
     if (generatedImageState.status === "success") {
       setSubmissionProgress((current) => ({ ...current, resultImageRegistered: true }));
+      returnToProgress("complete");
     }
-  }, [generatedImageState.status]);
+  }, [generatedImageState.status, returnToProgress]);
 
   if (!selectedDivision) {
     return (
@@ -252,7 +273,7 @@ export function AdminResultsForms({
             </select>
           </label>
         </div>
-        <div className="admin-selected-league__context" aria-live="polite">
+        <div id="workflow-action-league" className={`admin-selected-league__context${highlightedAction === "league" ? " workflow-action-highlight" : ""}`} aria-live="polite">
           <span>現在編集中のリーグ</span>
           <strong>{selectedDivision.label}</strong>
           <small>これから行うExcel入稿・順位表更新・結果画像登録は、すべてこのリーグに反映されます。</small>
@@ -266,6 +287,7 @@ export function AdminResultsForms({
         hasExistingStandings={selectedDivision.standings.length > 0}
         hasResultImage={Boolean(selectedDivision.resultImagePath)}
         progress={submissionProgress}
+        onStepSelect={goToWorkflowAction}
       />
 
       <article className="admin-card">
@@ -309,6 +331,7 @@ export function AdminResultsForms({
         divisionLabel={selectedDivision.label}
         onToast={setToast}
         onProgressChange={handleExcelProgress}
+        highlightedAction={highlightedAction}
       />
 
       <div className="admin-columns">
@@ -477,7 +500,7 @@ export function AdminResultsForms({
           {canEditScores ? (
             <form action={regenerateAction}>
               <input type="hidden" name="divisionId" value={selectedDivision.id} />
-              <button type="submit" className="button button--ghost" disabled={regeneratePending}>
+              <button id="workflow-action-recalculate" type="submit" className={`button button--ghost${highlightedAction === "recalculate" ? " workflow-action-highlight" : ""}`} disabled={regeneratePending}>
                 {regeneratePending ? "計算中..." : "試合結果から再計算"}
               </button>
             </form>
@@ -529,6 +552,7 @@ export function AdminResultsForms({
               action={standingAction}
               pending={standingPending}
               onToast={setToast}
+              highlightedAction={highlightedAction}
             />
             {standingState.status === "success" ? (
               <p className="admin-next-notice">順位表を保存しました。<a href="#result-image-entry">次は星取表を結果画像として登録</a>します。</p>
@@ -591,7 +615,7 @@ export function AdminResultsForms({
               <a href={`${standingsImageHref}?download=1`} className="button button--ghost">SVGを保存</a>
               <form action={generatedImageAction}>
                 <input type="hidden" name="divisionId" value={selectedDivision.id} />
-                <button type="submit" className="button" disabled={generatedImagePending}>
+                <button id="workflow-action-image" type="submit" className={`button${highlightedAction === "image" ? " workflow-action-highlight" : ""}`} disabled={generatedImagePending}>
                   {generatedImagePending ? "登録中..." : "この星取表を結果画像として登録"}
                 </button>
               </form>
@@ -638,6 +662,7 @@ function SubmissionNavigator({
   hasExistingStandings,
   hasResultImage,
   progress,
+  onStepSelect,
 }: {
   divisionLabel: string;
   canEditScores: boolean;
@@ -652,21 +677,22 @@ function SubmissionNavigator({
     standingsSaved: boolean;
     resultImageRegistered: boolean;
   };
+  onStepSelect: (action: WorkflowAction) => void;
 }) {
   const steps = [
-    { label: "対象リーグを確認", detail: divisionLabel, href: "#league-selector", complete: true },
-    { label: "Excelを選択", detail: progress.fileSelected ? "ファイルを選択済み" : "管理表をアップロード", href: "#excel-import", complete: progress.fileSelected, current: !progress.fileSelected },
-    { label: "Excelの内容を読む", detail: progress.previewReady ? "読み取り・確認済み" : "チーム名・試合数を確認", href: "#excel-import", complete: progress.previewReady, current: progress.fileSelected && !progress.previewReady },
-    { label: "試合結果へ反映", detail: "新規追加・既存更新", href: "#excel-import", complete: progress.matchesImported, current: progress.previewReady && !progress.matchesImported },
-    { label: "順位表を再計算", detail: "試合結果から作成", href: "#standings-workbench", complete: progress.standingsRecalculated, current: progress.matchesImported && !progress.standingsRecalculated },
-    { label: "順位表をまとめて保存", detail: "公開する順位表を確定", href: "#standing-save", complete: progress.standingsSaved, current: progress.standingsRecalculated && !progress.standingsSaved },
-    { label: "星取表を結果画像に登録", detail: "公開用の結果画像を更新", href: "#result-image-entry", complete: progress.resultImageRegistered, current: progress.standingsSaved && !progress.resultImageRegistered },
+    { label: "対象リーグを確認", detail: divisionLabel, href: "#league-selector", action: "league" as const, complete: true },
+    { label: "Excelを選択", detail: progress.fileSelected ? "ファイルを選択済み" : "管理表をアップロード", href: "#excel-import", action: "file" as const, complete: progress.fileSelected, current: !progress.fileSelected },
+    { label: "Excelの内容を読む", detail: progress.previewReady ? "読み取り・確認済み" : "チーム名・試合数を確認", href: "#excel-import", action: "read" as const, complete: progress.previewReady, current: progress.fileSelected && !progress.previewReady },
+    { label: "試合結果へ反映", detail: "新規追加・既存更新", href: "#excel-import", action: "import" as const, complete: progress.matchesImported, current: progress.previewReady && !progress.matchesImported },
+    { label: "順位表を再計算", detail: "試合結果から作成", href: "#standings-workbench", action: "recalculate" as const, complete: progress.standingsRecalculated, current: progress.matchesImported && !progress.standingsRecalculated },
+    { label: "順位表をまとめて保存", detail: "公開する順位表を確定", href: "#standing-save", action: "save" as const, complete: progress.standingsSaved, current: progress.standingsRecalculated && !progress.standingsSaved },
+    { label: "星取表を結果画像に登録", detail: "公開用の結果画像を更新", href: "#result-image-entry", action: "image" as const, complete: progress.resultImageRegistered, current: progress.standingsSaved && !progress.resultImageRegistered },
   ];
   const nextStep = steps.find((step) => step.current) ?? steps.find((step) => !step.complete);
   const readyForImage = progress.standingsSaved || (hasExistingStandings && !progress.matchesImported);
 
   return (
-    <article className="admin-card admin-submission-navigator" aria-labelledby="submission-navigator-title">
+    <article className="admin-card admin-submission-navigator" id="submission-navigator" aria-labelledby="submission-navigator-title">
       <div className="card__header admin-submission-navigator__header">
         <div>
           <p className="section-kicker">Excel Submission Guide</p>
@@ -678,7 +704,7 @@ function SubmissionNavigator({
       <ol className="admin-submission-steps" aria-label="Excel入稿の進行状況">
         {steps.map((step, index) => (
           <li key={step.label} className={`${step.complete ? "is-complete" : ""}${step.current ? " is-current" : ""}`}>
-            <span>{step.complete ? "✓" : index + 1}</span>
+            <button type="button" onClick={() => onStepSelect(step.action)} aria-label={`${index + 1}. ${step.label}の操作へ移動`}>{step.complete ? "✓" : index + 1}</button>
             <a href={step.href}>
               <strong>{step.label}</strong>
               <small>{step.detail}</small>
@@ -729,6 +755,7 @@ function ExcelImportPanel({
   divisionLabel,
   onToast,
   onProgressChange,
+  highlightedAction,
 }: {
   divisionId: string;
   divisionLabel: string;
@@ -741,6 +768,7 @@ function ExcelImportPanel({
     standingsSaved: boolean;
     resultImageRegistered: boolean;
   }>) => void;
+  highlightedAction: WorkflowAction;
 }) {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<MatchExcelPreview | null>(null);
@@ -813,6 +841,7 @@ function ExcelImportPanel({
           <span>第99回東京リーグなどの結果管理表</span>
           <ExcelUploadField
             fileName={file?.name ?? ""}
+            highlighted={highlightedAction === "file"}
             onFileChange={(nextFile) => {
               setFile(nextFile);
               setPreview(null);
@@ -836,7 +865,7 @@ function ExcelImportPanel({
             <strong>{file ? `「${file.name}」を読み取る` : "Excelファイルを選択する"}</strong>
             <small>{file ? "ファイルを選んだだけでは反映されません。まず内容を読み取って確認します。" : "「管理表」シートを含む .xlsx を選択してください。"}</small>
           </div>
-          <button type="submit" className="button" disabled={!file || previewPending || importPending}>
+          <button id="workflow-action-read" type="submit" className={`button${highlightedAction === "read" ? " workflow-action-highlight" : ""}`} disabled={!file || previewPending || importPending}>
             {previewPending ? "読み取り中..." : "Excelの内容を読み取る"}
           </button>
         </div>
@@ -892,7 +921,7 @@ function ExcelImportPanel({
               <strong>{divisionLabel} に {preview.rows.length} 試合を反映する</strong>
               <p>同じ対戦カードは更新し、新しい対戦は追加します。Excelにない既存試合は残ります。試合日が空欄の新規試合は「未設定」として登録し、既存試合は現在の試合日を維持します。</p>
             </div>
-            <button type="submit" className="button" disabled={!canImport || importPending}>
+            <button id="workflow-action-import" type="submit" className={`button${highlightedAction === "import" ? " workflow-action-highlight" : ""}`} disabled={!canImport || importPending}>
               {importPending ? "反映中..." : `${preview.rows.length}試合を反映する`}
             </button>
           </form>
@@ -1085,6 +1114,7 @@ function BulkStandingEditor({
   action,
   pending,
   onToast,
+  highlightedAction,
 }: {
   divisionId: string;
   teams: DivisionOption["teams"];
@@ -1092,6 +1122,7 @@ function BulkStandingEditor({
   action: (payload: FormData) => void;
   pending: boolean;
   onToast: (state: ResultActionState) => void;
+  highlightedAction: WorkflowAction;
 }) {
   const [rows, setRows] = useState(() => buildStandingRows(teams, standings));
   const formId = `bulk-standing-form-${divisionId}`;
@@ -1167,7 +1198,7 @@ function BulkStandingEditor({
         ))}
       </div>
       <div className="admin-item-card__actions" id="standing-save">
-        <button type="submit" form={formId} className="button" disabled={pending}>
+        <button id="workflow-action-save" type="submit" form={formId} className={`button${highlightedAction === "save" ? " workflow-action-highlight" : ""}`} disabled={pending}>
           {pending ? "保存中..." : "順位表をまとめて保存"}
         </button>
         <button type="button" className="button button--ghost" onClick={resetToSavedRows} disabled={pending}>
@@ -1356,9 +1387,11 @@ function UploadField({
 function ExcelUploadField({
   fileName,
   onFileChange,
+  highlighted,
 }: {
   fileName: string;
   onFileChange: (file: File | null) => void;
+  highlighted: boolean;
 }) {
   const [isDragging, setIsDragging] = useState(false);
 
@@ -1374,7 +1407,8 @@ function ExcelUploadField({
       />
       <label
         htmlFor="matchResultsExcel"
-        className={`upload-field__label${isDragging ? " is-dragging" : ""}`}
+        id="workflow-action-file"
+        className={`upload-field__label${isDragging ? " is-dragging" : ""}${highlighted ? " workflow-action-highlight" : ""}`}
         onDragOver={(event) => {
           event.preventDefault();
           setIsDragging(true);

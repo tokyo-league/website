@@ -7,6 +7,7 @@ import { isValidUuid, sanitizePlainText } from "@/lib/security";
 export const runtime = "nodejs";
 
 const EXCEL_IMPORT_MAX_BYTES = 5 * 1024 * 1024;
+const XLS_SIGNATURE = [0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1];
 
 export async function POST(request: Request) {
   try {
@@ -29,8 +30,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: "Excelファイルを選択してください。" }, { status: 400 });
     }
 
-    if (!file.name.toLowerCase().endsWith(".xlsx")) {
-      return NextResponse.json({ message: "入稿できるファイルは .xlsx 形式です。" }, { status: 400 });
+    const extension = file.name.toLowerCase().split(".").pop();
+    if (extension !== "xlsx" && extension !== "xls") {
+      return NextResponse.json({ message: "入稿できるファイルは .xlsx / .xls 形式です。" }, { status: 400 });
     }
 
     if (file.size > EXCEL_IMPORT_MAX_BYTES) {
@@ -39,7 +41,10 @@ export async function POST(request: Request) {
 
     const buffer = Buffer.from(await file.arrayBuffer());
 
-    if (buffer.length < 4 || buffer[0] !== 0x50 || buffer[1] !== 0x4b) {
+    const isXlsx = extension === "xlsx" && buffer.length >= 4 && buffer[0] === 0x50 && buffer[1] === 0x4b;
+    const isXls = extension === "xls" && buffer.length >= XLS_SIGNATURE.length && XLS_SIGNATURE.every((byte, index) => buffer[index] === byte);
+
+    if (!isXlsx && !isXls) {
       return NextResponse.json({ message: "Excelファイルの内容を確認してください。" }, { status: 400 });
     }
 
@@ -63,6 +68,7 @@ export async function POST(request: Request) {
       buffer,
       division.teams.map((assignment) => assignment.team),
       division.matches,
+      extension,
     );
 
     return NextResponse.json(preview);

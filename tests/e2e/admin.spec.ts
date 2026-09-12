@@ -58,6 +58,8 @@ test("結果管理で年度・大会・リーグ絞り込みと編集UIが表示
   await expect(page).toHaveURL(/\/admin\/results\/import/);
   await expect(page.getByRole("heading", { name: "Excel一括入稿" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "入稿の進行状況" })).toBeVisible();
+  await expect(page.locator("#matchResultsExcel")).toHaveAttribute("accept", /\.xlsx.*\.xls/);
+  await expect(page.getByText("「管理表」シートが入った .xlsx / .xls（5MB以下）を選択してください。")).toBeVisible();
 });
 
 test("大会管理はトップをコンパクトにして大会編集へ遷移できる", async ({ page }) => {

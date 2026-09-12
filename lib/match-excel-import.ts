@@ -1,4 +1,5 @@
 import readExcelFile from "read-excel-file/node";
+import * as XLSX from "xlsx";
 import type { MatchExcelPreview, MatchExcelPreviewRow } from "@/lib/match-excel-import-types";
 
 type DivisionTeam = {
@@ -20,8 +21,9 @@ export async function parseMatchResultsWorkbook(
   buffer: Buffer,
   teams: DivisionTeam[],
   existingMatches: ExistingMatch[],
+  format: "xlsx" | "xls" = "xlsx",
 ): Promise<MatchExcelPreview> {
-  const sheets = await readExcelFile(buffer);
+  const sheets = await readWorkbookSheets(buffer, format);
   const sheet =
     sheets.find((item) => normalizeLabel(item.sheet) === "管理表") ??
     sheets.find((item) => findHeaderRow(item.data as CellValue[][]) !== -1);
@@ -66,12 +68,16 @@ export async function parseMatchResultsWorkbook(
     const awayName = cleanText(row[3], 80);
     const homeScore = toScore(row[2]);
     const awayScore = toScore(row[4]);
+
+    // 管理表には対戦だけを先に入力し、スコアが未入力の試合が並びます。
+    // それらは未消化試合として扱い、エラーにせず入稿対象から外します。
+    if (homeScore === null && awayScore === null) {
+      if (hasMatchEntry(row)) skippedRows += 1;
+      continue;
+    }
+
     if (!homeName || !awayName || homeScore === null || awayScore === null) {
-      if (homeScore !== null || awayScore !== null || (homeName && awayName && !isBrokenReference(awayName))) {
-        errors.push(`${sourceRow}行目: チーム名と両チームの得点を確認してください。`);
-      } else {
-        skippedRows += 1;
-      }
+      errors.push(`${sourceRow}行目: チーム名と両チームの得点を確認してください。`);
       continue;
     }
 
@@ -138,7 +144,7 @@ export async function parseMatchResultsWorkbook(
   }
 
   const warnings = skippedRows > 0
-    ? [`未入力の組み合わせ ${skippedRows} 行は入稿対象から除外します。`]
+    ? [`得点が未入力の試合 ${skippedRows} 行は、エラーにせず入稿対象から除外します。`]
     : [];
 
   return {
@@ -149,6 +155,24 @@ export async function parseMatchResultsWorkbook(
     unmatchedTeamNames: Array.from(unmatchedTeamNames),
     warnings,
   };
+}
+
+async function readWorkbookSheets(buffer: Buffer, format: "xlsx" | "xls") {
+  if (format === "xlsx") return readExcelFile(buffer);
+
+  const workbook = XLSX.read(buffer, { type: "buffer", cellDates: true, dense: true });
+  return workbook.SheetNames.map((sheetName) => ({
+    sheet: sheetName,
+    data: XLSX.utils.sheet_to_json<CellValue[]>(workbook.Sheets[sheetName], {
+      header: 1,
+      defval: null,
+      raw: true,
+    }),
+  }));
+}
+
+function hasMatchEntry(row: CellValue[]) {
+  return [row[1], row[2], row[3], row[4], row[5], row[7]].some((value) => cleanText(value, 80) !== "");
 }
 
 function findHeaderRow(rows: CellValue[][]) {

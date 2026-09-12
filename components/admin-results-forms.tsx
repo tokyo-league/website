@@ -829,7 +829,7 @@ function ExcelImportPanel({
           <h3>Excelで試合結果を入稿</h3>
           <p className="admin-section-lead">「管理表」シートを読み取り、確認してから試合結果へ反映します。</p>
         </div>
-        <span className="admin-excel-import__badge">.xlsx</span>
+        <span className="admin-excel-import__badge">.xlsx / .xls</span>
       </div>
 
       <ol className="admin-import-steps" aria-label="Excel入稿の手順">
@@ -859,14 +859,14 @@ function ExcelImportPanel({
               });
             }}
           />
-          <small className="admin-field__help">「管理表」シートが入った .xlsx（5MB以下）を選択してください。</small>
+          <small className="admin-field__help">「管理表」シートが入った .xlsx / .xls（5MB以下）を選択してください。</small>
         </div>
         {previewError ? <p className="admin-inline-message admin-inline-message--error" role="alert">{previewError}</p> : null}
         <div className={`admin-next-action${file ? " is-ready" : ""}`}>
           <div>
             <span>次にすること</span>
             <strong>{file ? `「${file.name}」を読み取る` : "Excelファイルを選択する"}</strong>
-            <small>{file ? "ファイルを選んだだけでは反映されません。まず内容を読み取って確認します。" : "「管理表」シートを含む .xlsx を選択してください。"}</small>
+            <small>{file ? "ファイルを選んだだけでは反映されません。まず内容を読み取って確認します。" : "「管理表」シートを含む .xlsx / .xls を選択してください。"}</small>
           </div>
           <button id="workflow-action-read" type="submit" data-workflow-label="次はここをクリック" className={`button${highlightedAction === "read" ? " workflow-action-highlight" : ""}`} disabled={!file || previewPending || importPending}>
             {previewPending ? "読み取り中..." : "Excelの内容を読み取る"}
@@ -1413,7 +1413,7 @@ function ExcelUploadField({
         id="matchResultsExcel"
         type="file"
         aria-label="第99回東京リーグなどの結果管理表"
-        accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
         className="upload-field__input"
         onChange={(event) => onFileChange(event.target.files?.[0] ?? null)}
       />

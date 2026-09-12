@@ -3307,6 +3307,106 @@ button {
   padding-bottom: 13px;
 }
 
+.admin-reconciliation-context,
+.admin-reconciliation-submit {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.admin-reconciliation-context h3 {
+  margin: 0;
+}
+
+.admin-reconciliation-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: #edf4ff;
+  color: #1b427f;
+}
+
+.admin-reconciliation-summary span {
+  font-size: 13px;
+}
+
+.admin-reconciliation-groups {
+  display: grid;
+  gap: 12px;
+}
+
+.admin-reconciliation-group {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.8fr) minmax(300px, 1.2fr);
+  gap: 18px;
+  padding: 18px;
+  border: 1px solid rgba(31, 78, 163, 0.2);
+  border-radius: 18px;
+  background: #fff;
+}
+
+.admin-reconciliation-group.is-unresolved {
+  border-color: rgba(179, 58, 39, 0.42);
+  background: #fff8f6;
+}
+
+.admin-reconciliation-group__alias,
+.admin-reconciliation-group__proposal {
+  display: grid;
+  gap: 5px;
+}
+
+.admin-reconciliation-group span,
+.admin-reconciliation-group small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.admin-reconciliation-group strong {
+  font-size: 16px;
+}
+
+.admin-reconciliation-group details {
+  margin-top: 8px;
+}
+
+.admin-reconciliation-group summary {
+  cursor: pointer;
+  color: #1f4ea3;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.admin-reconciliation-group details select {
+  width: 100%;
+  min-height: 42px;
+  margin-top: 10px;
+  padding: 0 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  background: #fff;
+  font: inherit;
+}
+
+.admin-reconciliation-submit {
+  padding: 18px;
+  border: 1px solid rgba(31, 78, 163, 0.2);
+  border-radius: 18px;
+  background: #f4f8ff;
+}
+
+.admin-reconciliation-submit p {
+  max-width: 760px;
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
 .admin-import-table-wrap {
   max-height: 420px;
   overflow: auto;
@@ -4127,8 +4227,20 @@ button {
     grid-template-columns: 1fr;
   }
 
+  .admin-reconciliation-group {
+    grid-template-columns: 1fr;
+  }
+
   .admin-team-reconciliation__row > strong {
     padding-bottom: 0;
+  }
+
+  .admin-results-import-entry,
+  .admin-reconciliation-context,
+  .admin-reconciliation-submit,
+  .admin-reconciliation-summary {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .division-grid,

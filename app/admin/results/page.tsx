@@ -12,7 +12,7 @@ export default async function AdminResultsPage() {
 export async function ResultsManagementPage({ mode }: { mode: "manager" | "import" }) {
   const scope = await getAdminScope();
 
-  const [divisions, teams, reconciliationTeams] = isE2ETestMode()
+  const [divisions, teams] = isE2ETestMode()
     ? [
         e2eMockCompetition.divisions.map((division) => ({
           ...division,
@@ -23,7 +23,6 @@ export async function ResultsManagementPage({ mode }: { mode: "manager" | "impor
           },
         })),
         buildE2ETeamOptions(),
-        buildE2ETeamOptions().map((team) => ({ ...team, shortName: "", status: "PUBLISHED" as const, profile: "", logoPath: "", homeUniformColor: "", awayUniformColor: "" })),
       ]
     : await Promise.all([
         prisma.division.findMany({
@@ -77,20 +76,6 @@ export async function ResultsManagementPage({ mode }: { mode: "manager" | "impor
             id: true,
             name: true,
             region: true,
-          },
-        }),
-        prisma.team.findMany({
-          orderBy: [{ name: "asc" }],
-          select: {
-            id: true,
-            name: true,
-            region: true,
-            shortName: true,
-            status: true,
-            profile: true,
-            logoPath: true,
-            homeUniformColor: true,
-            awayUniformColor: true,
           },
         }),
       ]);
@@ -170,17 +155,6 @@ export async function ResultsManagementPage({ mode }: { mode: "manager" | "impor
             goalDifference: standing.goalDifference,
             points: standing.points,
           })),
-        }))}
-        reconciliationTeams={reconciliationTeams.map((team) => ({
-          id: team.id,
-          name: team.name,
-          region: team.region ?? "",
-          shortName: team.shortName ?? "",
-          status: team.status,
-          profile: team.profile ?? "",
-          logoPath: team.logoPath ?? "",
-          homeUniformColor: team.homeUniformColor ?? "",
-          awayUniformColor: team.awayUniformColor ?? "",
         }))}
       />
     </AdminLayoutShell>

@@ -503,7 +503,7 @@ export function AdminResultsForms({
           {canEditScores ? (
             <form action={regenerateAction}>
               <input type="hidden" name="divisionId" value={selectedDivision.id} />
-              <button id="workflow-action-recalculate" type="submit" className={`button button--ghost${highlightedAction === "recalculate" ? " workflow-action-highlight" : ""}`} disabled={regeneratePending}>
+              <button id="workflow-action-recalculate" type="submit" data-workflow-label="次はここをクリック" className={`button button--ghost${highlightedAction === "recalculate" ? " workflow-action-highlight" : ""}`} disabled={regeneratePending}>
                 {regeneratePending ? "計算中..." : "試合結果から再計算"}
               </button>
             </form>
@@ -512,8 +512,8 @@ export function AdminResultsForms({
         {canEditScores ? (
           <div className="admin-unplayed-match-adjustment">
             <div>
-              <p className="admin-unplayed-match-adjustment__eyebrow">Final adjustment</p>
-              <h4>未消化試合の勝ち点を補正</h4>
+              <p className="admin-unplayed-match-adjustment__eyebrow">Optional adjustment</p>
+              <h4>未消化試合がある場合のみ：勝ち点を補正</h4>
               <p>未消化の対戦を▲で表示し、各チームの勝ち点を1試合につき1点減算して順位表を作り直します。公開用の結果画像も更新する場合は、上の「この星取表を結果画像にする」を押してください。</p>
               {selectedDivision.unplayedMatchPointsAdjustedAt ? (
                 <small>補正済みです。再実行すると、現在の試合結果で補正し直します。</small>
@@ -618,7 +618,7 @@ export function AdminResultsForms({
               <a href={`${standingsImageHref}?download=1`} className="button button--ghost">SVGを保存</a>
               <form action={generatedImageAction}>
                 <input type="hidden" name="divisionId" value={selectedDivision.id} />
-                <button id="workflow-action-image" type="submit" className={`button${highlightedAction === "image" ? " workflow-action-highlight" : ""}`} disabled={generatedImagePending}>
+                <button id="workflow-action-image" type="submit" data-workflow-label="次はここをクリック" className={`button${highlightedAction === "image" ? " workflow-action-highlight" : ""}`} disabled={generatedImagePending}>
                   {generatedImagePending ? "登録中..." : "この星取表を結果画像として登録"}
                 </button>
               </form>
@@ -868,7 +868,7 @@ function ExcelImportPanel({
             <strong>{file ? `「${file.name}」を読み取る` : "Excelファイルを選択する"}</strong>
             <small>{file ? "ファイルを選んだだけでは反映されません。まず内容を読み取って確認します。" : "「管理表」シートを含む .xlsx を選択してください。"}</small>
           </div>
-          <button id="workflow-action-read" type="submit" className={`button${highlightedAction === "read" ? " workflow-action-highlight" : ""}`} disabled={!file || previewPending || importPending}>
+          <button id="workflow-action-read" type="submit" data-workflow-label="次はここをクリック" className={`button${highlightedAction === "read" ? " workflow-action-highlight" : ""}`} disabled={!file || previewPending || importPending}>
             {previewPending ? "読み取り中..." : "Excelの内容を読み取る"}
           </button>
         </div>
@@ -933,7 +933,7 @@ function ExcelImportPanel({
               <strong>{divisionLabel} に {preview.rows.length} 試合を反映する</strong>
               <p>同じ対戦カードは更新し、新しい対戦は追加します。Excelにない既存試合は残ります。試合日が空欄の新規試合は「未設定」として登録し、既存試合は現在の試合日を維持します。</p>
             </div>
-            <button id="workflow-action-import" type="submit" className={`button${highlightedAction === "import" ? " workflow-action-highlight" : ""}`} disabled={!canImport || importPending}>
+            <button id="workflow-action-import" type="submit" data-workflow-label="次はここをクリック" className={`button${highlightedAction === "import" ? " workflow-action-highlight" : ""}`} disabled={!canImport || importPending}>
               {importPending ? "反映中..." : `${preview.rows.length}試合を反映する`}
             </button>
           </form>
@@ -1210,7 +1210,7 @@ function BulkStandingEditor({
         ))}
       </div>
       <div className="admin-item-card__actions" id="standing-save">
-        <button id="workflow-action-save" type="submit" form={formId} className={`button${highlightedAction === "save" ? " workflow-action-highlight" : ""}`} disabled={pending}>
+        <button id="workflow-action-save" type="submit" form={formId} data-workflow-label="次はここをクリック" className={`button${highlightedAction === "save" ? " workflow-action-highlight" : ""}`} disabled={pending}>
           {pending ? "保存中..." : "順位表をまとめて保存"}
         </button>
         <button type="button" className="button button--ghost" onClick={resetToSavedRows} disabled={pending}>
@@ -1420,6 +1420,7 @@ function ExcelUploadField({
       <label
         htmlFor="matchResultsExcel"
         id="workflow-action-file"
+        data-workflow-label="次はここをクリック"
         className={`upload-field__label${isDragging ? " is-dragging" : ""}${highlighted ? " workflow-action-highlight" : ""}`}
         onDragOver={(event) => {
           event.preventDefault();

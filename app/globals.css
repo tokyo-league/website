@@ -3077,8 +3077,26 @@ button {
   position: relative;
   z-index: 1;
   outline: 3px solid #d83a2e !important;
-  outline-offset: 4px;
-  animation: workflow-action-pulse 1.2s ease-in-out 4;
+  outline-offset: 5px;
+  animation: workflow-action-pulse 1.2s ease-in-out infinite;
+}
+
+.workflow-action-highlight::after {
+  position: absolute;
+  z-index: 2;
+  top: calc(100% + 10px);
+  left: 50%;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #d83a2e;
+  color: #fff;
+  content: attr(data-workflow-label);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.2;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  animation: workflow-action-label-pulse 1.2s ease-in-out infinite;
 }
 
 @keyframes workflow-action-pulse {
@@ -3087,8 +3105,13 @@ button {
   }
 
   45% {
-    box-shadow: 0 0 0 10px rgba(216, 58, 46, 0.26);
+    box-shadow: 0 0 0 12px rgba(216, 58, 46, 0.38);
   }
+}
+
+@keyframes workflow-action-label-pulse {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(-4px); }
 }
 
 .admin-next-notice {
@@ -3900,13 +3923,13 @@ button {
   gap: 20px;
   margin: 20px 0;
   padding: 20px;
-  border: 2px solid #b42318;
-  background: #fff5f3;
+  border: 1px solid #d9dde5;
+  background: #f7f8fa;
 }
 
 .admin-unplayed-match-adjustment__eyebrow {
   margin: 0 0 6px;
-  color: #b42318;
+  color: #68707d;
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.14em;
@@ -3920,25 +3943,25 @@ button {
 }
 
 .admin-unplayed-match-adjustment h4 {
-  color: #7a271a;
+  color: #303844;
   font-size: 20px;
 }
 
 .admin-unplayed-match-adjustment > div > p:not(.admin-unplayed-match-adjustment__eyebrow) {
   margin-top: 8px;
-  color: #5c261d;
+  color: #59606b;
 }
 
 .admin-unplayed-match-adjustment small {
   display: block;
   margin-top: 8px;
-  color: #7a271a;
+  color: #59606b;
   font-weight: 700;
 }
 
 .admin-unplayed-match-adjustment__button {
-  border-color: #b42318;
-  background: #b42318;
+  border-color: #59606b;
+  background: #59606b;
   color: #fff;
   white-space: nowrap;
 }

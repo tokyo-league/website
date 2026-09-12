@@ -9,6 +9,7 @@ import {
   deleteMatch,
   deleteStanding,
   importMatchesFromExcel,
+  reconcileExcelTeamAliases,
   regenerateStandingsFromMatches,
   replaceStandings,
   type ResultActionState,
@@ -77,10 +78,15 @@ type WorkflowAction = "league" | "file" | "read" | "import" | "recalculate" | "s
 export function AdminResultsForms({
   divisions,
   teams,
+  reconciliationTeams = [],
+  mode = "manager",
 }: {
   divisions: DivisionOption[];
   teams: TeamOption[];
+  reconciliationTeams?: Array<TeamOption & { shortName: string; status: "DRAFT" | "PUBLISHED" | "ARCHIVED"; profile: string; logoPath: string; homeUniformColor: string; awayUniformColor: string }>;
+  mode?: "manager" | "import";
 }) {
+  const isImportWizard = mode === "import";
   const seasons = Array.from(new Map(divisions.map((division) => [division.seasonYear, division.seasonLabel])).entries())
     .sort((left, right) => right[0] - left[0]);
   const [selectedSeasonYear, setSelectedSeasonYear] = useState(seasons[0]?.[0] ?? 0);
@@ -280,7 +286,7 @@ export function AdminResultsForms({
         </div>
       </article>
 
-      <SubmissionNavigator
+      {isImportWizard ? <SubmissionNavigator
         divisionLabel={selectedDivision.label}
         canEditScores={canEditScores}
         hasExistingMatches={selectedDivision.matches.length > 0}
@@ -288,9 +294,9 @@ export function AdminResultsForms({
         hasResultImage={Boolean(selectedDivision.resultImagePath)}
         progress={submissionProgress}
         onStepSelect={goToWorkflowAction}
-      />
+      /> : null}
 
-      <article className="admin-card">
+      {isImportWizard ? <article className="admin-card">
         <div className="card__header">
           <div>
             <p className="section-kicker">Overview</p>
@@ -323,18 +329,19 @@ export function AdminResultsForms({
             <p>{selectedDivision.description || "未登録"}</p>
           </div>
         </div>
-      </article>
+      </article> : null}
 
-      <ExcelImportPanel
+      {isImportWizard ? <ExcelImportPanel
         key={selectedDivision.id}
         divisionId={selectedDivision.id}
         divisionLabel={selectedDivision.label}
         onToast={setToast}
         onProgressChange={handleExcelProgress}
         highlightedAction={highlightedAction}
-      />
+        reconciliationTeams={reconciliationTeams}
+      /> : null}
 
-      <div className="admin-columns">
+      {!isImportWizard ? <div className="admin-columns">
         <article className="admin-card" id="result-image-upload">
           <div className="card__header">
             <div>
@@ -489,7 +496,7 @@ export function AdminResultsForms({
             </form>
           </article>
         ) : null}
-      </div>
+      </div> : null}
 
       <article className="admin-card" id="standings-workbench">
         <div className="card__header">
@@ -561,7 +568,7 @@ export function AdminResultsForms({
         ) : null}
       </article>
 
-      <article className="admin-card admin-registered-standings">
+      {!isImportWizard ? <article className="admin-card admin-registered-standings">
         <div className="card__header">
           <div>
             <p className="section-kicker">Registered Standings</p>
@@ -597,9 +604,9 @@ export function AdminResultsForms({
             </table>
           </div>
         )}
-      </article>
+      </article> : null}
 
-      {selectedDivision.teams.length > 0 ? (
+      {isImportWizard && selectedDivision.teams.length > 0 ? (
         <article className="admin-card admin-result-image-finish" id="result-image-entry">
           <div className="card__header">
             <div>
@@ -625,7 +632,7 @@ export function AdminResultsForms({
         </article>
       ) : null}
 
-      {canEditScores ? (
+      {!isImportWizard && canEditScores ? (
         <article className="admin-card admin-registered-matches">
           <div className="card__header">
             <div>
@@ -750,12 +757,79 @@ function CopyImportErrors({ errors }: { errors: string[] }) {
   );
 }
 
+function ExcelTeamReconciliationPanel({
+  divisionId,
+  unmatchedNames,
+  teams,
+  onToast,
+}: {
+  divisionId: string;
+  unmatchedNames: string[];
+  teams: Array<TeamOption & { shortName: string; status: "DRAFT" | "PUBLISHED" | "ARCHIVED"; profile: string; logoPath: string; homeUniformColor: string; awayUniformColor: string }>;
+  onToast: (state: ResultActionState) => void;
+}) {
+  const [state, action, pending] = useActionState(reconcileExcelTeamAliases, initialState);
+  const [mappings, setMappings] = useState(() => unmatchedNames.map((importedName) => ({ importedName, canonicalTeamId: "", sourceTeamId: "" })));
+
+  useEffect(() => {
+    setMappings(unmatchedNames.map((importedName) => ({ importedName, canonicalTeamId: "", sourceTeamId: "" })));
+  }, [unmatchedNames]);
+
+  useEffect(() => {
+    if (state.status !== "idle") onToast(state);
+  }, [onToast, state]);
+
+  function updateMapping(index: number, field: "canonicalTeamId" | "sourceTeamId", value: string) {
+    setMappings((current) => current.map((mapping, mappingIndex) => mappingIndex === index ? { ...mapping, [field]: value } : mapping));
+  }
+
+  return (
+    <section className="admin-team-reconciliation" aria-labelledby="team-reconciliation-title">
+      <div>
+        <p className="section-kicker">Bulk team matching</p>
+        <h4 id="team-reconciliation-title">チーム名を一括名寄せ</h4>
+        <p>Excel上の表記を正式名称チームの略称に追加します。必要なら情報を持つ短い表記のチームを選ぶと、地域・ロゴ・ユニフォーム・紹介を正式名称側の空欄へ補完し、公開状態にします。</p>
+      </div>
+      <form action={action} className="admin-form-stack">
+        <input type="hidden" name="divisionId" value={divisionId} />
+        <input type="hidden" name="mappingsJson" value={JSON.stringify(mappings)} />
+        <div className="admin-team-reconciliation__table">
+          {mappings.map((mapping, index) => (
+            <div key={mapping.importedName} className="admin-team-reconciliation__row">
+              <strong>Excel: {mapping.importedName}</strong>
+              <label className="admin-field">
+                <span>正式名称として使うチーム <em className="admin-required">※必須</em></span>
+                <select value={mapping.canonicalTeamId} onChange={(event) => updateMapping(index, "canonicalTeamId", event.target.value)} required>
+                  <option value="">選択してください</option>
+                  {teams.map((team) => <option key={team.id} value={team.id}>{team.name}（{team.status === "PUBLISHED" ? "公開" : team.status === "DRAFT" ? "下書き" : "非公開"}）</option>)}
+                </select>
+              </label>
+              <label className="admin-field">
+                <span>情報を移す短い表記のチーム（任意）</span>
+                <select value={mapping.sourceTeamId} onChange={(event) => updateMapping(index, "sourceTeamId", event.target.value)}>
+                  <option value="">移さない</option>
+                  {teams.filter((team) => team.id !== mapping.canonicalTeamId).map((team) => <option key={team.id} value={team.id}>{team.name}</option>)}
+                </select>
+              </label>
+            </div>
+          ))}
+        </div>
+        <button type="submit" className="button" disabled={pending || mappings.some((mapping) => !mapping.canonicalTeamId)}>
+          {pending ? "名寄せ中..." : `${mappings.length}件を一括名寄せする`}
+        </button>
+      </form>
+      {state.status !== "idle" ? <p className={`admin-inline-message admin-inline-message--${state.status}`}>{state.message}</p> : null}
+    </section>
+  );
+}
+
 function ExcelImportPanel({
   divisionId,
   divisionLabel,
   onToast,
   onProgressChange,
   highlightedAction,
+  reconciliationTeams,
 }: {
   divisionId: string;
   divisionLabel: string;
@@ -769,6 +843,7 @@ function ExcelImportPanel({
     resultImageRegistered: boolean;
   }>) => void;
   highlightedAction: WorkflowAction;
+  reconciliationTeams: Array<TeamOption & { shortName: string; status: "DRAFT" | "PUBLISHED" | "ARCHIVED"; profile: string; logoPath: string; homeUniformColor: string; awayUniformColor: string }>;
 }) {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<MatchExcelPreview | null>(null);
@@ -890,6 +965,15 @@ function ExcelImportPanel({
               <ul>{preview.errors.map((error) => <li key={error}>{error}</li>)}</ul>
               <CopyImportErrors errors={preview.errors} />
             </div>
+          ) : null}
+
+          {preview.unmatchedTeamNames.length > 0 ? (
+            <ExcelTeamReconciliationPanel
+              divisionId={divisionId}
+              unmatchedNames={preview.unmatchedTeamNames}
+              teams={reconciliationTeams}
+              onToast={onToast}
+            />
           ) : null}
 
           {preview.rows.length > 0 ? (

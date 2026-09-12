@@ -17,5 +17,7 @@ export type MatchExcelPreview = {
   rows: MatchExcelPreviewRow[];
   skippedRows: number;
   errors: string[];
+  /** 所属チームと一致せず、名寄せが必要なExcel上のチーム名。 */
+  unmatchedTeamNames: string[];
   warnings: string[];
 };

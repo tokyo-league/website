@@ -40,21 +40,10 @@ test("結果管理で年度・大会・リーグ絞り込みと編集UIが表示
 
   await expect(page.getByRole("heading", { name: "結果管理" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "対象リーグ" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "入稿の進行状況" })).toBeVisible();
-  await expect(page.getByRole("list", { name: "Excel入稿の進行状況" })).toContainText("Excelを選択");
-  await expect(page.getByRole("list", { name: "Excel入稿の進行状況" })).toContainText("順位表をまとめて保存");
-  await expect(page.getByRole("link", { name: "次へ進む" })).toHaveAttribute("href", "#excel-import");
-  await expect(page.getByRole("heading", { name: "Excelで試合結果を入稿" })).toBeVisible();
-  await expect(page.getByRole("list", { name: "Excel入稿の手順" })).toContainText("対象を選択");
-  await expect(page.getByRole("list", { name: "Excel入稿の手順" })).toContainText("内容を確認");
-  await expect(page.locator(".admin-excel-import .upload-field__button", { hasText: "Excelを選択" })).toBeVisible();
-  await expect(page.getByLabel("第99回東京リーグなどの結果管理表")).toHaveAttribute("accept", /\.xlsx/);
-  await expect(page.getByRole("button", { name: "Excelの内容を読み取る" })).toBeDisabled();
   await expect(filterSelects.nth(0)).toHaveValue("2026");
   await expect(filterSelects.nth(1)).toHaveValue("第103回 東京リーグ");
   await expect(filterSelects.nth(2)).toHaveValue("e2e-division-a");
   await expect(page.getByRole("heading", { name: "結果画像を直接アップロード" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "星取表を結果画像として登録" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "順位表を作成・更新" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "未消化試合の勝ち点を補正" })).toBeVisible();
   await expect(page.getByRole("button", { name: "未消化試合の勝ち点を補正" })).toBeVisible();
@@ -65,6 +54,10 @@ test("結果管理で年度・大会・リーグ絞り込みと編集UIが表示
   await expect(page.getByText(/結果画像の有無にかかわらず試合結果ページへ反映/)).toBeVisible();
   await expect(page.getByRole("heading", { name: "登録済み順位表の確認" })).toBeVisible();
   await expect(page.locator(".admin-standings-summary form").getByRole("button", { name: "削除" }).first()).toBeVisible();
+  await page.getByRole("link", { name: "入稿ウィザードを開く" }).click();
+  await expect(page).toHaveURL(/\/admin\/results\/import/);
+  await expect(page.getByRole("heading", { name: "Excel一括入稿" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "入稿の進行状況" })).toBeVisible();
 });
 
 test("大会管理はトップをコンパクトにして大会編集へ遷移できる", async ({ page }) => {

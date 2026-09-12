@@ -1,13 +1,18 @@
 import { AdminLayoutShell } from "@/components/admin-layout-shell";
 import { AdminResultsForms } from "@/components/admin-results-forms";
+import Link from "next/link";
 import { getAdminScope } from "@/lib/admin-access";
 import { prisma } from "@/lib/prisma";
 import { e2eMockCompetition, isE2ETestMode } from "@/lib/test-mode";
 
 export default async function AdminResultsPage() {
+  return <ResultsManagementPage mode="manager" />;
+}
+
+export async function ResultsManagementPage({ mode }: { mode: "manager" | "import" }) {
   const scope = await getAdminScope();
 
-  const [divisions, teams] = isE2ETestMode()
+  const [divisions, teams, reconciliationTeams] = isE2ETestMode()
     ? [
         e2eMockCompetition.divisions.map((division) => ({
           ...division,
@@ -18,6 +23,7 @@ export default async function AdminResultsPage() {
           },
         })),
         buildE2ETeamOptions(),
+        buildE2ETeamOptions().map((team) => ({ ...team, shortName: "", status: "PUBLISHED" as const, profile: "", logoPath: "", homeUniformColor: "", awayUniformColor: "" })),
       ]
     : await Promise.all([
         prisma.division.findMany({
@@ -73,11 +79,25 @@ export default async function AdminResultsPage() {
             region: true,
           },
         }),
+        prisma.team.findMany({
+          orderBy: [{ name: "asc" }],
+          select: {
+            id: true,
+            name: true,
+            region: true,
+            shortName: true,
+            status: true,
+            profile: true,
+            logoPath: true,
+            homeUniformColor: true,
+            awayUniformColor: true,
+          },
+        }),
       ]);
 
   return (
-    <AdminLayoutShell currentPath="/admin/results" title="結果管理" kicker="Results" scope={scope}>
-      <div className="admin-stats">
+    <AdminLayoutShell currentPath="/admin/results" title={mode === "import" ? "Excel一括入稿" : "結果管理"} kicker={mode === "import" ? "Excel Submission" : "Results"} scope={scope}>
+      {mode === "manager" ? <div className="admin-stats">
         <article className="admin-card">
           <span>対象リーグ</span>
           <strong>{scope.admin.role === "OWNER" ? divisions.length : scope.accessibleDivisions.length}</strong>
@@ -90,9 +110,19 @@ export default async function AdminResultsPage() {
           <span>順位表登録</span>
           <strong>{divisions.reduce((sum, division) => sum + division.standings.length, 0)}</strong>
         </article>
-      </div>
+      </div> : null}
+
+      {mode === "manager" ? <article className="admin-card admin-results-import-entry">
+        <div>
+          <p className="section-kicker">Excel Submission</p>
+          <h3>Excelで一括入稿する</h3>
+          <p className="admin-section-lead">試合反映から順位表・結果画像の登録まで、順番どおりに進める専用画面です。</p>
+        </div>
+        <Link href="/admin/results/import" className="button">入稿ウィザードを開く</Link>
+      </article> : null}
 
       <AdminResultsForms
+        mode={mode}
         teams={teams.map((team) => ({
           id: team.id,
           name: team.name,
@@ -140,6 +170,17 @@ export default async function AdminResultsPage() {
             goalDifference: standing.goalDifference,
             points: standing.points,
           })),
+        }))}
+        reconciliationTeams={reconciliationTeams.map((team) => ({
+          id: team.id,
+          name: team.name,
+          region: team.region ?? "",
+          shortName: team.shortName ?? "",
+          status: team.status,
+          profile: team.profile ?? "",
+          logoPath: team.logoPath ?? "",
+          homeUniformColor: team.homeUniformColor ?? "",
+          awayUniformColor: team.awayUniformColor ?? "",
         }))}
       />
     </AdminLayoutShell>

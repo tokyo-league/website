@@ -17,6 +17,102 @@ export type ResultActionState = {
   message: string;
 };
 
+type TeamAliasMapping = {
+  importedName: string;
+  canonicalTeamId: string;
+  sourceTeamId?: string;
+};
+
+export async function reconcileExcelTeamAliases(
+  _prevState: ResultActionState,
+  formData: FormData,
+): Promise<ResultActionState> {
+  const scope = await getAdminScope();
+  const divisionId = sanitizePlainText(String(formData.get("divisionId") ?? ""), 64);
+  const mappingsJson = String(formData.get("mappingsJson") ?? "");
+
+  if (scope.admin.role !== "OWNER") {
+    return { status: "error", message: "チーム名の一括名寄せは管理者のみ実行できます。" };
+  }
+  if (!isValidUuid(divisionId) || !mappingsJson || mappingsJson.length > 50_000) {
+    return { status: "error", message: "名寄せするチームを確認してください。" };
+  }
+
+  let mappings: TeamAliasMapping[];
+  try {
+    const parsed = JSON.parse(mappingsJson) as unknown;
+    if (!Array.isArray(parsed) || parsed.length === 0 || parsed.length > 40) throw new Error("invalid");
+    mappings = parsed.map((item) => {
+      const record = typeof item === "object" && item !== null ? item as Record<string, unknown> : {};
+      return {
+        importedName: sanitizePlainText(String(record.importedName ?? ""), 80),
+        canonicalTeamId: sanitizePlainText(String(record.canonicalTeamId ?? ""), 64),
+        sourceTeamId: sanitizePlainText(String(record.sourceTeamId ?? ""), 64) || undefined,
+      };
+    });
+  } catch {
+    return { status: "error", message: "名寄せデータを読み取れませんでした。" };
+  }
+
+  if (mappings.some((mapping) => !mapping.importedName || !isValidUuid(mapping.canonicalTeamId) || (mapping.sourceTeamId && !isValidUuid(mapping.sourceTeamId)))) {
+    return { status: "error", message: "正式名称のチームを選択してください。" };
+  }
+
+  try {
+    await prisma.$transaction(async (tx) => {
+      const division = await tx.division.findUnique({ where: { id: divisionId }, select: { id: true } });
+      if (!division) throw new Error("division-not-found");
+
+      for (const mapping of mappings) {
+        const [canonical, source] = await Promise.all([
+          tx.team.findUnique({ where: { id: mapping.canonicalTeamId } }),
+          mapping.sourceTeamId && mapping.sourceTeamId !== mapping.canonicalTeamId
+            ? tx.team.findUnique({ where: { id: mapping.sourceTeamId } })
+            : null,
+        ]);
+        if (!canonical) throw new Error("team-not-found");
+
+        const aliases = Array.from(new Set([...splitTeamAliases(canonical.shortName), mapping.importedName]));
+        const shortName = aliases.join("\n");
+        if (shortName.length > 80) throw new Error(`alias-too-long:${canonical.name}`);
+
+        await tx.team.update({
+          where: { id: canonical.id },
+          data: {
+            shortName,
+            profile: canonical.profile || source?.profile || null,
+            region: canonical.region || source?.region || null,
+            logoPath: canonical.logoPath || source?.logoPath || null,
+            homeUniformColor: canonical.homeUniformColor || source?.homeUniformColor || null,
+            awayUniformColor: canonical.awayUniformColor || source?.awayUniformColor || null,
+            status: PublishStatus.PUBLISHED,
+          },
+        });
+        await tx.divisionTeam.upsert({
+          where: { divisionId_teamId: { divisionId, teamId: canonical.id } },
+          create: { divisionId, teamId: canonical.id, sortOrder: canonical.sortOrder },
+          update: {},
+        });
+      }
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "";
+    if (message.startsWith("alias-too-long:")) return { status: "error", message: `${message.slice(15)} の略称が長すぎます。不要な略称を整理してください。` };
+    if (message === "division-not-found" || message === "team-not-found") return { status: "error", message: "名寄せ対象のリーグまたはチームが見つかりませんでした。" };
+    console.error("reconcileExcelTeamAliases failed", error);
+    return { status: "error", message: "チーム名の一括名寄せに失敗しました。" };
+  }
+
+  revalidatePath("/admin/results");
+  revalidatePath("/admin/results/import");
+  revalidatePath("/admin/teams");
+  return { status: "success", message: `${mappings.length}件のチーム名を名寄せし、正式名称側へ情報を補完して公開しました。Excelをもう一度読み取ってください。` };
+}
+
+function splitTeamAliases(value: string | null) {
+  return (value ?? "").split(/[\n|]/).map((label) => label.trim()).filter(Boolean);
+}
+
 export async function updateDivisionResultImage(
   _prevState: ResultActionState,
   formData: FormData,

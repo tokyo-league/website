@@ -2457,6 +2457,19 @@ button {
   font-size: 16px;
 }
 
+.admin-results-import-entry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  border-color: rgba(31, 78, 163, 0.24);
+  background: linear-gradient(135deg, #f2f6fe, #fff);
+}
+
+.admin-results-import-entry h3 {
+  margin: 0;
+}
+
 .admin-team-filters {
   display: grid;
   grid-template-columns: minmax(200px, 1.4fr) repeat(2, minmax(150px, 0.8fr)) auto;
@@ -3250,6 +3263,48 @@ button {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 12px;
   line-height: 1.6;
+}
+
+.admin-team-reconciliation {
+  display: grid;
+  gap: 16px;
+  padding: 20px;
+  border: 1px solid rgba(31, 78, 163, 0.3);
+  border-radius: 18px;
+  background: #f4f8ff;
+}
+
+.admin-team-reconciliation h4,
+.admin-team-reconciliation p {
+  margin: 0;
+}
+
+.admin-team-reconciliation p {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.admin-team-reconciliation__table {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-team-reconciliation__row {
+  display: grid;
+  grid-template-columns: minmax(150px, 0.75fr) minmax(220px, 1.2fr) minmax(220px, 1.2fr);
+  gap: 12px;
+  align-items: end;
+  padding: 14px;
+  border: 1px solid rgba(31, 78, 163, 0.16);
+  border-radius: 14px;
+  background: #fff;
+}
+
+.admin-team-reconciliation__row > strong {
+  overflow-wrap: anywhere;
+  padding-bottom: 13px;
 }
 
 .admin-import-table-wrap {
@@ -4066,6 +4121,14 @@ button {
   .admin-standing-add,
   .admin-table__row {
     grid-template-columns: 1fr;
+  }
+
+  .admin-team-reconciliation__row {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-team-reconciliation__row > strong {
+    padding-bottom: 0;
   }
 
   .division-grid,

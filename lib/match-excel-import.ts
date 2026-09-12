@@ -32,6 +32,7 @@ export async function parseMatchResultsWorkbook(
       rows: [],
       skippedRows: 0,
       errors: ["「管理表」シートが見つかりません。東京リーグの結果管理表を選択してください。"],
+      unmatchedTeamNames: [],
       warnings: [],
     };
   }
@@ -45,6 +46,7 @@ export async function parseMatchResultsWorkbook(
       rows: [],
       skippedRows: 0,
       errors: ["管理表の見出し（チーム名・得点・年月日）を確認できませんでした。"],
+      unmatchedTeamNames: [],
       warnings: [],
     };
   }
@@ -54,6 +56,7 @@ export async function parseMatchResultsWorkbook(
   const importedPairs = new Set<string>();
   const rows: MatchExcelPreviewRow[] = [];
   const errors: string[] = [];
+  const unmatchedTeamNames = new Set<string>();
   let skippedRows = 0;
 
   for (let index = headerIndex + 1; index < data.length; index += 1) {
@@ -82,6 +85,8 @@ export async function parseMatchResultsWorkbook(
 
     if (!homeTeam || !awayTeam) {
       const missing = [!homeTeam ? homeName : "", !awayTeam ? awayName : ""].filter(Boolean).join(" / ");
+      if (!homeTeam) unmatchedTeamNames.add(homeName);
+      if (!awayTeam) unmatchedTeamNames.add(awayName);
       errors.push(`${sourceRow}行目: 「${missing}」を選択中リーグの所属チームと照合できません。`);
       continue;
     }
@@ -141,6 +146,7 @@ export async function parseMatchResultsWorkbook(
     rows,
     skippedRows,
     errors,
+    unmatchedTeamNames: Array.from(unmatchedTeamNames),
     warnings,
   };
 }
@@ -156,12 +162,16 @@ function buildTeamLookup(teams: DivisionTeam[]) {
   const lookup = new Map<string, DivisionTeam>();
 
   for (const team of teams) {
-    for (const label of [team.name, team.shortName]) {
+    for (const label of [team.name, ...splitAliases(team.shortName)]) {
       if (label) lookup.set(normalizeTeamName(label), team);
     }
   }
 
   return lookup;
+}
+
+function splitAliases(value?: string | null) {
+  return (value ?? "").split(/[\n|]/).map((label) => label.trim()).filter(Boolean);
 }
 
 function normalizeTeamName(value: string) {

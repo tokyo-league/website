@@ -3407,6 +3407,89 @@ button {
   line-height: 1.65;
 }
 
+.admin-completion-modal {
+  position: fixed;
+  z-index: 100;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.admin-completion-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(16, 24, 40, 0.58);
+}
+
+.admin-completion-modal__content {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  width: min(560px, 100%);
+  gap: 14px;
+  padding: 32px;
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 28px 80px rgba(15, 23, 42, 0.34);
+  text-align: center;
+}
+
+.admin-completion-modal__content h3,
+.admin-completion-modal__content p {
+  margin: 0;
+}
+
+.admin-completion-modal__content h3 {
+  font-size: 24px;
+}
+
+.admin-completion-modal__content > p {
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.admin-completion-modal__icon {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: #eaf7ef;
+  color: #20794a;
+  font-size: 28px;
+  font-weight: 900;
+}
+
+.admin-completion-modal__next {
+  display: grid;
+  width: 100%;
+  gap: 6px;
+  margin-top: 6px;
+  padding: 18px;
+  border: 2px solid #1f4ea3;
+  border-radius: 18px;
+  background: #f2f6fe;
+  text-align: left;
+}
+
+.admin-completion-modal__next span,
+.admin-completion-modal__next small {
+  color: #536173;
+  font-size: 12px;
+}
+
+.admin-completion-modal__next strong {
+  color: #153b81;
+  font-size: 18px;
+}
+
+.admin-completion-modal__next .button {
+  width: 100%;
+  margin-top: 8px;
+  text-align: center;
+}
+
 .admin-import-table-wrap {
   max-height: 420px;
   overflow: auto;

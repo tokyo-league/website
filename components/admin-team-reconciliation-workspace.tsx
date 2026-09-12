@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useMemo, useState } from "react";
+import { useActionState, useEffect, useMemo, useState } from "react";
 import { reconcileExcelTeamAliases, type ResultActionState } from "@/app/admin/results/actions";
 
 type CandidateTeam = {
@@ -30,7 +30,12 @@ export function AdminTeamReconciliationWorkspace({
   );
   const [mappings, setMappings] = useState(initialMappings);
   const [state, action, pending] = useActionState(reconcileExcelTeamAliases, initialState);
+  const [showCompletion, setShowCompletion] = useState(false);
   const unresolved = mappings.filter((mapping) => !mapping.canonicalTeamId);
+
+  useEffect(() => {
+    if (state.status === "success") setShowCompletion(true);
+  }, [state.status]);
 
   function setCanonical(importedName: string, canonicalTeamId: string) {
     setMappings((current) => current.map((mapping) => {
@@ -109,7 +114,25 @@ export function AdminTeamReconciliationWorkspace({
           </button>
         </div>
       </form>
-      {state.status !== "idle" ? <p className={`admin-inline-message admin-inline-message--${state.status}`}>{state.message} {state.status === "success" ? "入稿ウィザードへ戻ってExcelを再読込してください。" : ""}</p> : null}
+      {state.status === "error" ? <p className="admin-inline-message admin-inline-message--error">{state.message}</p> : null}
+      {showCompletion ? (
+        <div className="admin-completion-modal" role="dialog" aria-modal="true" aria-labelledby="reconciliation-complete-title">
+          <div className="admin-completion-modal__backdrop" />
+          <section className="admin-completion-modal__content">
+            <span className="admin-completion-modal__icon" aria-hidden="true">✓</span>
+            <p className="section-kicker">Team matching complete</p>
+            <h3 id="reconciliation-complete-title">チーム名の名寄せが完了しました</h3>
+            <p>{state.message}</p>
+            <div className="admin-completion-modal__next">
+              <span>次にすること</span>
+              <strong>Excelをもう一度読み取る</strong>
+              <small>追加した略称を使って、先ほどのExcelファイルを再読込してください。</small>
+              <a href="/admin/results/import" className="button">入稿ウィザードに戻ってExcelを再読込する</a>
+            </div>
+            <button type="button" className="button button--ghost" onClick={() => setShowCompletion(false)}>この画面にとどまる</button>
+          </section>
+        </div>
+      ) : null}
     </article>
   );
 }

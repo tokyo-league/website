@@ -26,6 +26,8 @@ test("チーム管理でキーワード・地域・状態を絞り込める", as
   await expect(page.getByLabel("状態")).toHaveValue("PUBLISHED");
   await expect(page.getByRole("button", { name: "絞り込む" })).toBeVisible();
   await expect(page.getByRole("link", { name: "条件をクリア" })).toHaveAttribute("href", "/admin/teams");
+  await expect(page.locator(".admin-table__row--teams").first()).toContainText("状態");
+  await expect(page.locator(".admin-team-status").first()).toHaveText("公開");
 
   await page.getByLabel("状態").selectOption("PUBLISHED");
   await page.getByRole("button", { name: "絞り込む" }).click();

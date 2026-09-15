@@ -111,6 +111,7 @@ export default async function AdminTeamsPage({
           <div className="admin-table__row admin-table__row--head admin-table__row--teams">
             <span>チーム名</span>
             <span>地域</span>
+            <span>状態</span>
             <span>ユニフォーム</span>
             <span>削除前確認</span>
             <span>操作</span>
@@ -129,6 +130,9 @@ export default async function AdminTeamsPage({
               <div key={team.id} className="admin-table__row admin-table__row--teams">
                 <strong>{team.name}</strong>
                 <span>{team.region ?? "-"}</span>
+                <span className={`admin-team-status admin-team-status--${team.status.toLowerCase()}`}>
+                  {teamStatusLabel[team.status]}
+                </span>
                 <span className="admin-team-uniforms" aria-label={`ホーム ${team.homeUniformColor ?? "未設定"}、アウェイ ${team.awayUniformColor ?? "未設定"}`}>
                   {team.homeUniformColor ? <span>ホーム: {team.homeUniformColor}</span> : null}
                   {team.awayUniformColor ? <span>アウェイ: {team.awayUniformColor}</span> : null}
@@ -151,3 +155,9 @@ export default async function AdminTeamsPage({
     </AdminLayoutShell>
   );
 }
+
+const teamStatusLabel = {
+  PUBLISHED: "公開",
+  DRAFT: "下書き",
+  ARCHIVED: "非公開",
+} as const;

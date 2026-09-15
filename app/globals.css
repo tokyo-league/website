@@ -3695,7 +3695,32 @@ button {
 }
 
 .admin-table__row--teams {
-  grid-template-columns: 1.2fr 0.8fr 0.7fr minmax(180px, 1fr) auto;
+  grid-template-columns: 1.15fr 0.7fr auto 0.75fr minmax(180px, 1fr) auto;
+}
+
+.admin-team-status {
+  justify-self: start;
+  padding: 4px 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.admin-team-status--published {
+  background: #e5f5eb;
+  color: #17683b;
+}
+
+.admin-team-status--draft {
+  background: #fff3d8;
+  color: #87530b;
+}
+
+.admin-team-status--archived {
+  background: #eceff3;
+  color: #536171;
 }
 
 .admin-table__row--downloads {

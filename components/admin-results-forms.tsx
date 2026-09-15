@@ -158,6 +158,15 @@ export function AdminResultsForms({
     resultImageRegistered: boolean;
   }>) => {
     setSubmissionProgress((current) => ({ ...current, ...change }));
+    if (change.fileSelected) {
+      // ファイル選択後は、次の必須操作を視覚的にもキーボード操作でも明確にします。
+      setHighlightedAction("complete");
+      window.requestAnimationFrame(() => {
+        setHighlightedAction("read");
+        document.getElementById("workflow-action-read")?.focus({ preventScroll: true });
+      });
+      return;
+    }
     if (change.previewReady) returnToProgress("import");
     if (change.matchesImported) returnToProgress("recalculate");
   }, [returnToProgress]);

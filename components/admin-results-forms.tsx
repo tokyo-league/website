@@ -33,6 +33,7 @@ type DivisionOption = {
   competitionName: string;
   divisionName: string;
   label: string;
+  publicResultPath: string;
   resultImagePath: string;
   unplayedMatchPointsAdjustedAt: string;
   description: string;
@@ -137,6 +138,7 @@ export function AdminResultsForms({
     resultImageRegistered: false,
   });
   const [highlightedAction, setHighlightedAction] = useState<WorkflowAction>("file");
+  const [showSubmissionCompletion, setShowSubmissionCompletion] = useState(false);
   const returnToProgress = useCallback((action: WorkflowAction) => {
     setHighlightedAction("complete");
     window.requestAnimationFrame(() => setHighlightedAction(action));
@@ -199,6 +201,7 @@ export function AdminResultsForms({
       resultImageRegistered: false,
     });
     setHighlightedAction("file");
+    setShowSubmissionCompletion(false);
   }, [selectedDivisionId]);
 
   useEffect(() => {
@@ -222,6 +225,16 @@ export function AdminResultsForms({
     }
   }, [generatedImageState.status, returnToProgress]);
 
+  useEffect(() => {
+    const isComplete = submissionProgress.fileSelected
+      && submissionProgress.previewReady
+      && submissionProgress.matchesImported
+      && submissionProgress.standingsRecalculated
+      && submissionProgress.standingsSaved
+      && submissionProgress.resultImageRegistered;
+    if (isImportWizard && isComplete) setShowSubmissionCompletion(true);
+  }, [isImportWizard, submissionProgress]);
+
   if (!selectedDivision) {
     return (
       <article className="admin-card admin-selected-league" id="league-selector">
@@ -242,6 +255,25 @@ export function AdminResultsForms({
           <button type="button" className="button button--ghost" onClick={() => setToast(initialState)}>
             閉じる
           </button>
+        </div>
+      ) : null}
+
+      {showSubmissionCompletion ? (
+        <div className="admin-completion-modal" role="dialog" aria-modal="true" aria-labelledby="submission-complete-title">
+          <div className="admin-completion-modal__backdrop" />
+          <section className="admin-completion-modal__content">
+            <span className="admin-completion-modal__icon" aria-hidden="true">✓</span>
+            <p className="section-kicker">Submission complete</p>
+            <h3 id="submission-complete-title">入稿が完了しました</h3>
+            <p>試合結果、順位表、星取表の結果画像を更新しました。最後に公開ページで表示を確認してください。</p>
+            <div className="admin-completion-modal__next">
+              <span>最後にすること</span>
+              <strong>公開ページで結果を確認する</strong>
+              <small>更新した結果ページを別タブで開きます。表示内容を確認できたら入稿完了です。</small>
+              <a href={selectedDivision.publicResultPath} target="_blank" rel="noreferrer" className="button">公開ページを別タブで開く</a>
+            </div>
+            <button type="button" className="button button--ghost" onClick={() => setShowSubmissionCompletion(false)}>この画面にとどまる</button>
+          </section>
         </div>
       ) : null}
 
@@ -725,8 +757,8 @@ function SubmissionNavigator({
         ))}
       </ol>
       {!canEditScores ? <p className="admin-inline-message">過去大会は試合入力・再計算を行わず、結果画像の登録のみを行います。</p> : null}
-      {progress.matchesImported ? <p className="admin-next-notice">試合結果を反映しました。<strong>次は「順位表を再計算」</strong>です。</p> : null}
-      {progress.standingsRecalculated ? <p className="admin-next-notice">順位表を再計算しました。<strong>次は「順位表をまとめて保存」</strong>です。</p> : null}
+      {progress.matchesImported && !progress.standingsRecalculated ? <p className="admin-next-notice">試合結果を反映しました。<strong>次は「順位表を再計算」</strong>です。</p> : null}
+      {progress.standingsRecalculated && !progress.standingsSaved ? <p className="admin-next-notice">順位表を再計算しました。<strong>次は「順位表をまとめて保存」</strong>です。</p> : null}
       {readyForImage && !progress.resultImageRegistered ? <p className="admin-next-notice">順位表を保存したら、<strong>星取表を結果画像に登録</strong>して公開用画像も更新します。</p> : null}
       {hasExistingMatches && !progress.matchesImported ? <p className="admin-inline-message">すでに登録済みの試合があります。Excelの反映では同じ対戦カードを更新し、Excelにない試合は残ります。</p> : null}
       {hasResultImage && !progress.resultImageRegistered ? <p className="admin-inline-message">現在の結果画像は、星取表を登録するまでそのまま保持されます。</p> : null}

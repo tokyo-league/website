@@ -2,6 +2,7 @@ import { AdminLayoutShell } from "@/components/admin-layout-shell";
 import { AdminResultsForms } from "@/components/admin-results-forms";
 import Link from "next/link";
 import { getAdminScope } from "@/lib/admin-access";
+import { getCompetitionCategorySlug } from "@/lib/competition-category";
 import { prisma } from "@/lib/prisma";
 import { e2eMockCompetition, isE2ETestMode } from "@/lib/test-mode";
 
@@ -20,6 +21,8 @@ export async function ResultsManagementPage({ mode }: { mode: "manager" | "impor
             name: e2eMockCompetition.name,
             edition: e2eMockCompetition.edition,
             season: e2eMockCompetition.season,
+            slug: e2eMockCompetition.slug,
+            competitionType: e2eMockCompetition.competitionType,
           },
         })),
         buildE2ETeamOptions(),
@@ -121,6 +124,11 @@ export async function ResultsManagementPage({ mode }: { mode: "manager" | "impor
           competitionName: division.competition.name,
           divisionName: division.name,
           label: `${division.competition.season.label} / ${division.competition.name} / ${division.name}`,
+          publicResultPath: getPublicResultPath(
+            division.competition.competitionType,
+            division.competition.slug,
+            division.slug,
+          ),
           resultImagePath: division.resultImagePath ?? "",
           unplayedMatchPointsAdjustedAt:
             "unplayedMatchPointsAdjustedAt" in division && division.unplayedMatchPointsAdjustedAt
@@ -159,6 +167,11 @@ export async function ResultsManagementPage({ mode }: { mode: "manager" | "impor
       />
     </AdminLayoutShell>
   );
+}
+
+function getPublicResultPath(competitionType: Parameters<typeof getCompetitionCategorySlug>[0], competitionSlug: string, divisionSlug: string) {
+  const categorySlug = getCompetitionCategorySlug(competitionType);
+  return categorySlug ? `/competitions/${categorySlug}/${competitionSlug}/${divisionSlug}` : "";
 }
 
 function buildE2ETeamOptions() {

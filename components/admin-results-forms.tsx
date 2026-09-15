@@ -328,7 +328,6 @@ export function AdminResultsForms({
         divisionLabel={selectedDivision.label}
         canEditScores={canEditScores}
         hasExistingMatches={selectedDivision.matches.length > 0}
-        hasExistingStandings={selectedDivision.standings.length > 0}
         hasResultImage={Boolean(selectedDivision.resultImagePath)}
         progress={submissionProgress}
         onStepSelect={goToWorkflowAction}
@@ -703,7 +702,6 @@ function SubmissionNavigator({
   divisionLabel,
   canEditScores,
   hasExistingMatches,
-  hasExistingStandings,
   hasResultImage,
   progress,
   onStepSelect,
@@ -711,7 +709,6 @@ function SubmissionNavigator({
   divisionLabel: string;
   canEditScores: boolean;
   hasExistingMatches: boolean;
-  hasExistingStandings: boolean;
   hasResultImage: boolean;
   progress: {
     fileSelected: boolean;
@@ -733,7 +730,7 @@ function SubmissionNavigator({
     { label: "星取表を結果画像に登録", detail: "公開用の結果画像を更新", href: "#result-image-entry", action: "image" as const, complete: progress.resultImageRegistered, current: progress.standingsSaved && !progress.resultImageRegistered },
   ];
   const nextStep = steps.find((step) => step.current) ?? steps.find((step) => !step.complete);
-  const readyForImage = progress.standingsSaved || (hasExistingStandings && !progress.matchesImported);
+  const readyForImage = progress.standingsSaved;
 
   return (
     <article className="admin-card admin-submission-navigator" id="submission-navigator" aria-labelledby="submission-navigator-title">

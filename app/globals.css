@@ -1923,6 +1923,10 @@ button {
   border-radius: 50%;
 }
 
+.team-card__identity:only-child {
+  grid-row: 1 / -1;
+}
+
 .team-card__number {
   position: absolute;
   top: 20px;
@@ -1994,6 +1998,9 @@ button {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
   margin-top: auto;
+}
+
+.team-card__profile + .team-card__uniforms {
   padding-top: 24px;
 }
 
@@ -2003,7 +2010,7 @@ button {
   align-content: start;
 }
 
-.team-card__uniforms span {
+.team-card__uniforms > div > span {
   color: var(--text);
   font-size: 13px;
   line-height: 1.5;
@@ -2014,6 +2021,20 @@ button {
   color: var(--muted);
   font: 700 10px var(--condensed);
   letter-spacing: 0.1em;
+}
+
+.team-card__swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-block: 2px;
+}
+
+.team-card__swatches > span {
+  width: 26px;
+  height: 26px;
+  border: 1px solid rgba(31, 31, 27, 0.24);
+  border-radius: 50%;
 }
 
 .home-team-logo-grid {
@@ -4765,8 +4786,7 @@ button {
     padding-left: 16px;
   }
 
-  .admin-uniform-colors__grid,
-  .team-card__uniforms {
+  .admin-uniform-colors__grid {
     grid-template-columns: 1fr;
   }
 

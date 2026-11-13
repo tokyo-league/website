@@ -7,6 +7,9 @@ import { siteAssets } from "@/lib/site-data";
 import { getTeamInitial, isDisplayableTeamLogo } from "@/lib/team-logo";
 import { sortTeamsByName } from "@/lib/team-sort";
 import { createPageMetadata } from "@/lib/site-seo";
+import { getUniformSwatches } from "@/lib/team-uniform-colors";
+
+const importedTeamProfile = "過去大会結果取り込み用の仮登録チームです。";
 
 export const dynamic = "force-dynamic";
 export const metadata = createPageMetadata({
@@ -73,6 +76,10 @@ export default async function TeamsPage() {
             <div className="team-grid">
               {teams.map((team, index) => {
                 const hasTeamLogo = isDisplayableTeamLogo(team.logoPath);
+                const profile = team.profile?.trim();
+                const showProfile = Boolean(profile && profile !== importedTeamProfile);
+                const homeUniform = team.homeUniformColor?.trim();
+                const awayUniform = team.awayUniformColor?.trim();
 
                 return (
                   <article key={team.id} className="team-card">
@@ -92,15 +99,17 @@ export default async function TeamsPage() {
                       <p>{team.region || "東京都内"}</p>
                       <h2>{team.name}</h2>
                     </div>
-                    <div className="team-card__body">
-                      {team.profile ? <p className="team-card__profile">{team.profile}</p> : null}
-                      {team.homeUniformColor || team.awayUniformColor ? (
-                        <div className="team-card__uniforms" aria-label="ユニフォームの色">
-                          {team.homeUniformColor ? <UniformDescription label="ホーム" description={team.homeUniformColor} /> : null}
-                          {team.awayUniformColor ? <UniformDescription label="アウェイ" description={team.awayUniformColor} /> : null}
-                        </div>
-                      ) : null}
-                    </div>
+                    {showProfile || homeUniform || awayUniform ? (
+                      <div className="team-card__body">
+                        {showProfile ? <p className="team-card__profile">{profile}</p> : null}
+                        {homeUniform || awayUniform ? (
+                          <div className="team-card__uniforms" role="group" aria-label="ユニフォームの色">
+                            {homeUniform ? <UniformDescription label="ホーム" description={homeUniform} /> : null}
+                            {awayUniform ? <UniformDescription label="アウェイ" description={awayUniform} /> : null}
+                          </div>
+                        ) : null}
+                      </div>
+                    ) : null}
                   </article>
                 );
               })}
@@ -114,10 +123,19 @@ export default async function TeamsPage() {
 }
 
 function UniformDescription({ label, description }: { label: string; description: string }) {
+  const colors = getUniformSwatches(description);
+
   return (
     <div>
       <small>{label}</small>
-      <span>{description}</span>
+      {colors.length > 0 ? (
+        <div className="team-card__swatches" aria-hidden="true">
+          {colors.map((color) => <span key={color} style={{ backgroundColor: color }} />)}
+        </div>
+      ) : null}
+      <span className={/^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(description) ? "visually-hidden" : undefined}>
+        {description}
+      </span>
     </div>
   );
 }

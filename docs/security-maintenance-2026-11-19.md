@@ -24,6 +24,7 @@
 | nanoid | 3.3.11 | 3.3.20 |
 | source-map-js | 1.2.1 | 1.2.3 |
 | esbuild | 0.27.4 | 0.28.2 |
+| Playwright Test | 1.59.1 | 1.65.1 |
 
 間接依存はlockfileを更新。Next.js 15がPostCSSを旧版に固定するため、Next.js配下に限定したoverrideで同じ8系の修正版を指定した。Next.jsはメジャーを維持してセキュリティリリースへ更新した。
 
@@ -42,6 +43,11 @@ SheetJSは公式の案内に従って0.20.3を使用。供給網チェックで�
 - E2Eの古い見出し・ラベルを現行UIへ同期。総会/納会は保存済み設定を読むため、初期文言の完全一致から値の存在確認へ変更した。
 - `.xls` / `.xlsx` の日本語チーム名・日本語形式の試合日・得点・未消化行・更新判定の回帰テストを追加。
 - GitHubのOAuth認証にworkflowスコープがないため、CIへの監査ステップ追加はpush時に拒否された。ワークフロー変更を除外し、`npm run security:audit` は手動実行用として追加した。
+- GitHub Actionsの `ubuntu-latest` がUbuntu 26.04へ移行しており、旧Playwright 1.59.1ではブラウザーを導入できなかった。Ubuntu 26.04対応の安定版1.65.1へ更新した。
+
+## デプロイ確認
+
+アプリ更新コミット `210717c` をmainへpushし、GitHub DeploymentのProduction環境で `success`、Vercelステータスも `success` を確認した。デプロイURLへのHTTPアクセスはVercelのSSO保護へリダイレクトされるため、このURLから認証なしの画面内容確認は行っていない。
 
 ## 参照
 
@@ -51,3 +57,4 @@ SheetJSは公式の案内に従って0.20.3を使用。供給網チェックで�
 - [Node.js 2026年11月セキュリティリリース](https://nodejs.org/en/blog/vulnerability/november-2026-security-releases)
 - [Vercelの責任分界](https://vercel.com/docs/security/shared-responsibility)
 - [VercelのNode.jsセキュリティ情報](https://vercel.com/kb/bulletin/node-js-security-advisory)
+- [Playwrightの公式対応環境](https://playwright.dev/docs/intro)

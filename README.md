@@ -25,6 +25,7 @@
 - `npm run security:baseline`: CSP、CSPレポートログ秘匿、private routeヘッダー、レート制限、本番env検査、E2E本番無効化の静的確認
 - `npm run security:secrets`: env、納品証跡、秘密鍵、実トークンらしき値の混入確認
 - `npm run security:supply-chain`: lockfile、依存取得元、integrity、root install hookの確認
+- `npm run security:audit`: npmの最新脆弱性情報で全依存を監査（low以上で失敗）
 - `npm run security:prod-services`: 本番DB/Blob疎通確認
 - `npm run production:readiness`: 本番URL・Production env・公開/管理/ヘッダー/DB/Blobの切替前確認
 - `npm run delivery:manual-checks`: 本番手動確認メモのテンプレート生成・完了チェック

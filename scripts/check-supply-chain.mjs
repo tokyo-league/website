@@ -3,6 +3,13 @@ import fs from "node:fs";
 const checks = [];
 const packageJson = readJson("package.json");
 const packageLock = readJson("package-lock.json");
+// SheetJS no longer publishes fixes to npm. Allow only this official release,
+// with its exact version and digest; other external sources remain rejected.
+const sheetJsRelease = {
+  url: "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
+  version: "0.20.3",
+  integrity: "sha512-oLDq3jw7AcLqKWH2AhCpVTZl8mf6X2YReP+Neh0SJUzV/BdZYjth94tG5toiMB1PPrYtxOCfaoUCkvtuH+3AJA==",
+};
 
 checkLockfile();
 checkRootInstallScripts();
@@ -10,6 +17,7 @@ checkDependencySpecs();
 checkLockfileRootDependencies();
 checkLockfileResolvedSources();
 checkLockfileIntegrity();
+checkSheetJsRelease();
 
 console.log("Tokyo League supply chain check");
 console.log("");
@@ -57,13 +65,14 @@ function checkDependencySpecs() {
     ...(packageJson?.optionalDependencies ?? {}),
   };
   const forbidden = Object.entries(dependencies)
+    .filter(([name, spec]) => !(name === "xlsx" && spec === sheetJsRelease.url))
     .filter(([, spec]) => /^(?:git(?:hub)?:|https?:|file:|link:|workspace:)/i.test(String(spec)))
     .map(([name, spec]) => `${name}@${spec}`);
 
   pushCheck({
     label: "dependency spec sources",
     ok: forbidden.length === 0,
-    success: "直接依存はregistry semver指定のみ",
+    success: "直接依存はregistry semver、または固定済みの公式SheetJS配布のみ",
     failure: `非registry/ローカル依存があります: ${forbidden.join(", ")}`,
   });
 }
@@ -100,7 +109,8 @@ function checkLockfileResolvedSources() {
       continue;
     }
 
-    if (!entry.resolved.startsWith("https://registry.npmjs.org/")) {
+    const isOfficialSheetJs = packagePath === "node_modules/xlsx" && entry.resolved === sheetJsRelease.url;
+    if (!entry.resolved.startsWith("https://registry.npmjs.org/") && !isOfficialSheetJs) {
       forbidden.push(`${packagePath || "(root)"} -> ${entry.resolved}`);
     }
   }
@@ -108,7 +118,7 @@ function checkLockfileResolvedSources() {
   pushCheck({
     label: "lockfile resolved sources",
     ok: forbidden.length === 0,
-    success: "lockfile resolved は npm registry のみ",
+    success: "lockfile resolved は npm registry、または固定済みの公式SheetJS配布のみ",
     failure: `非npm registryのresolvedがあります: ${forbidden.slice(0, 10).join(", ")}`,
   });
 }
@@ -132,6 +142,19 @@ function checkLockfileIntegrity() {
     ok: missing.length === 0,
     success: "resolved付きpackageはintegrityあり",
     failure: `integrity欠落: ${missing.slice(0, 10).join(", ")}`,
+  });
+}
+
+function checkSheetJsRelease() {
+  const entry = packageLock?.packages?.["node_modules/xlsx"];
+  pushCheck({
+    label: "SheetJS official release",
+    ok: packageJson?.dependencies?.xlsx === sheetJsRelease.url
+      && entry?.resolved === sheetJsRelease.url
+      && entry?.version === sheetJsRelease.version
+      && entry?.integrity === sheetJsRelease.integrity,
+    success: "公式CDNの修正版0.20.3をURL・バージョン・SHA-512で固定",
+    failure: "SheetJSの取得元・バージョン・integrityが確認済みの公式配布と一致しません。",
   });
 }
 

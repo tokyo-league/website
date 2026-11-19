@@ -2,6 +2,9 @@
   "name": "tokyo-league",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "24.x"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
@@ -32,6 +35,7 @@
     "security:admin-actions": "node ./scripts/check-admin-action-security.mjs",
     "security:secrets": "node ./scripts/check-secret-hygiene.mjs",
     "security:supply-chain": "node ./scripts/check-supply-chain.mjs",
+    "security:audit": "npm audit --audit-level=low",
     "security:headers": "node ./scripts/check-security-headers.mjs",
     "security:prod-env": "node ./scripts/check-production-env.mjs",
     "security:prod-services": "node ./scripts/check-production-services.mjs",
@@ -44,17 +48,22 @@
     "prisma:seed-board": "node ./scripts/run-with-env.mjs node ./scripts/seed-board-members.mjs"
   },
   "dependencies": {
-    "@auth/prisma-adapter": "2.11.1",
+    "@auth/prisma-adapter": "2.11.3",
     "@prisma/client": "^6.6.0",
     "@vercel/blob": "^2.3.3",
-    "image-size": "^2.0.2",
-    "next": "15.2.8",
-    "next-auth": "5.0.0-beta.30",
+    "image-size": "^2.1.0",
+    "next": "15.5.29",
+    "next-auth": "5.0.0-beta.32",
     "prisma": "^6.6.0",
-    "react": "19.0.0",
-    "react-dom": "19.0.0",
+    "react": "19.0.9",
+    "react-dom": "19.0.9",
     "read-excel-file": "^9.2.0",
-    "xlsx": "^0.18.5"
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+  },
+  "overrides": {
+    "next": {
+      "postcss": "8.5.33"
+    }
   },
   "devDependencies": {
     "@playwright/test": "^1.59.1",

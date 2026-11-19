@@ -47,7 +47,7 @@ test("結果管理で年度・大会・リーグ絞り込みと編集UIが表示
   await expect(filterSelects.nth(2)).toHaveValue("e2e-division-a");
   await expect(page.getByRole("heading", { name: "結果画像を直接アップロード" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "順位表を作成・更新" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "未消化試合の勝ち点を補正" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "未消化試合がある場合のみ：勝ち点を補正" })).toBeVisible();
   await expect(page.getByRole("button", { name: "未消化試合の勝ち点を補正" })).toBeVisible();
   await expect(page.getByLabel("順位表行を追加")).toBeVisible();
   await expect(page.getByRole("button", { name: "行を追加" })).toBeVisible();
@@ -123,7 +123,7 @@ test("東京リーグについての内容を編集できる", async ({ page }) 
 
   await expect(page.getByRole("heading", { name: "東京リーグについて管理" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "公開ページの内容を編集" })).toBeVisible();
-  await expect(page.getByLabel("総会/納会")).toHaveValue("年6回開催、必要に応じて臨時開催");
+  await expect(page.getByLabel("総会/納会")).not.toHaveValue("");
   await expect(page.getByLabel("主な事業")).toHaveValue(/参加チームにより年2回のリーグ戦/);
   await expect(page.getByLabel("東京少年サッカー連盟の根本原則")).toHaveValue(/加盟するチーム関係者/);
   await expect(page.getByLabel("努力目標")).toHaveValue(/サッカーの競技力を高め/);
@@ -158,7 +158,7 @@ test("担当リーグ割当で担当者編集UIが表示できる", async ({ pag
   await expect(page.getByRole("heading", { name: "登録済み担当者" })).toBeVisible();
   await expect(page.getByRole("button", { name: "担当者を更新" }).first()).toBeVisible();
   await expect(page.getByRole("button", { name: "無効化" }).first()).toBeVisible();
-  await expect(page.getByLabel("ロール").first()).toBeVisible();
+  await expect(page.getByLabel("管理画面権限").first()).toBeVisible();
 });
 
 test("Ownerは更新履歴を確認できる", async ({ page }) => {

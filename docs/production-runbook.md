@@ -7,6 +7,7 @@
 ## 前提
 
 - GitHub `main` ブランチがVercel本番デプロイ対象である
+- Node.jsは `package.json` の `engines.node: 24.x` を使用する。VercelのパッチバージョンはVercelが管理する。ローカルは `.nvmrc` の修正版、CIはNode.js 24系を使用する
 - PostgreSQLはNeonを想定する
 - ファイル保存はVercel Blobを想定する
 - 管理画面ログインはGoogle OIDC + NextAuthを使う
@@ -55,9 +56,12 @@ npm run security:secrets
 
 ```bash
 npm run security:supply-chain
+npm run security:audit
 ```
 
-このコマンドは `package-lock.json`、直接依存の取得元、lockfileのresolved URL、integrity、root install hookを確認します。
+`security:supply-chain` は `package-lock.json`、直接依存の取得元、lockfileのresolved URL、integrity、root install hookを確認します。SheetJSのみ、npmで修正版が配布されていないため公式CDNの0.20.3をURL・バージョン・SHA-512固定で許可します。`security:audit` は開発用を含む全依存をnpmの最新脆弱性情報で監査し、low以上の検出で失敗します。監査は更新時・デプロイ前に手動実行してください。
+
+nginxなどの配信基盤はVercelの管理範囲であり、このリポジトリでnginxパッケージを更新する構成ではありません。アプリの修正を反映するときは `main` へのpush後にVercelのデプロイ成功を確認してください。Node.jsの修正やランタイム保護にも再デプロイが必要になる場合があります（[Vercelの責任分界](https://vercel.com/docs/security/shared-responsibility)、[Node.jsセキュリティ情報](https://vercel.com/kb/bulletin/node-js-security-advisory)）。
 
 ## 初回デプロイ手順
 
